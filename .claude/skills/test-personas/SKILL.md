@@ -1,0 +1,428 @@
+---
+name: test-personas
+description: Internal test harness for plugin maintainers. End users should not invoke this. Runs synthetic personas through critical journeys against the plugin and produces LLM-judge findings reports. Trigger words "/test-personas", "run the test harness", "test the plugin end-to-end", "run the test personas".
+---
+
+# /test-personas — maintainer-only end-to-end test orchestrator
+
+**Audience:** plugin maintainers only. Do NOT invoke if you are an end user running a real job search — this clobbers `userdata/` from a test snapshot.
+
+## What this skill does
+
+For each `(persona × journey)` pairing requested, runs five phases:
+
+1. **Snapshot reset** — `rsync` a clean snapshot into `userdata/`.
+2. **Schema validation** — verify the snapshot matches current plugin expectations.
+3. **Conversation loop** — orchestrate two sub-agents (plugin-under-test + user-simulator) until termination.
+4. **Judge** — four sub-agents, one per rubric (groundedness, coherence, conformance, tone), each seeing only its own rubric. Lint is not judged at all: Phase 3.5's scripts decide it.
+5. **Aggregate** — write a `SUMMARY.md` across all journeys in this run.
+
+## Argument parsing
+
+Parse the user's invocation message for these forms (no native flag support in skills — match free-text):
+
+- `/test-personas` (no args) → the release-gate sweep: `cold-start`, `active-loop`, `edge-recovery`. (`sweep-smoke` is excluded from the default sweep — run it by name.)
+- `--journey <name>` or `journey: <name>` → run only the named journey. Valid names: `cold-start`, `active-loop`, `edge-recovery`, `sweep-smoke`.
+- `--persona <name>` or `persona: <name>` → run only journeys whose `journey_fit` includes that persona. Valid names: `maya`, `diego`, `contrarian`.
+- `--skip-judge` or `skip judge` → run conversation loops but skip Phase 4 (transcripts only).
+
+If both `--journey` and `--persona` are specified, intersect them — only the named journey AND only if the named persona is its assigned persona. If they don't match, error with a clear message.
+
+If `--persona <name>` is given alone and its `journey_fit` is empty (currently true for `diego`), stop with a clear message rather than silently running zero journeys or erroring vaguely: name the persona, state that it has no assigned journey in the current set, and list which personas ARE currently reachable (`maya`, `contrarian`).
+
+If the user's message is ambiguous, ask one clarifying question (Rule A) and stop.
+
+## Phase 0: Setup before any journey runs
+
+1. Resolve the run date: `RUN_DATE=$(date +%Y-%m-%d)` via Bash.
+2. Create the run output directory:
+   ```bash
+   mkdir -p userdata/test-runs/$RUN_DATE
+   ```
+3. Read all four rubric files into memory (Read tool). Each is judged by its own sub-agent call in Phase 4 — never bundled:
+   - `.claude/skills/test-personas/rubrics/groundedness.md`
+   - `.claude/skills/test-personas/rubrics/coherence.md`
+   - `.claude/skills/test-personas/rubrics/conformance.md`
+   - `.claude/skills/test-personas/rubrics/tone.md`
+4. Read `plugin/memory.md` — the reverse-chronological log of patterns surfaced in past runs. Passed to the judge as context (not as a checklist).
+5. Read the simulator prompt: `.claude/skills/test-personas/simulator-prompt.md`.
+6. Read the judge prompt: `.claude/skills/test-personas/judge-prompt.md`.
+
+## Phase 1: Snapshot reset (per journey)
+
+Before each journey, reset `userdata/` to the journey's declared snapshot.
+
+1. Read the journey file `.claude/skills/test-personas/journeys/<journey>.md`. Extract `snapshot:` from frontmatter.
+2. **Confirmation prompt before clobbering:** show the user what will happen and ask permission once per run (not per journey within a run):
+
+   > "Each journey will reset `userdata/` from its declared snapshot under `tests/snapshots/`. Existing userdata content will be lost (test-run outputs are preserved between journeys). Continue?"
+
+   If user declines, abort the entire run cleanly (do not partially execute).
+
+3. Run rsync via Bash, excluding the test-runs directory so prior journeys' outputs survive:
+   ```bash
+   rsync -a --delete --exclude=test-runs/ --exclude=examples/ tests/snapshots/<snapshot>/ userdata/
+   ```
+   (Note the trailing slash on the source — copies the contents, not the directory itself. The `--exclude=test-runs/` flag protects `userdata/test-runs/` from being removed between journeys in the same run. The `--exclude=examples/` flag protects the committed `userdata/examples/` reference content in the source workspace — without it, the rsync `--delete` clobbers Maya and Diego example fixtures. End-user workspaces don't have `examples/` so this exclude is a no-op there.)
+
+   Special case for the `empty` snapshot: the `--delete` flag plus a near-empty source effectively empties `userdata/`. The `.gitkeep` in `userdata/` should remain. Verify after rsync.
+
+   Every snapshot must carry its own root `.gitkeep`, because `--delete` removes any file the source lacks — and `userdata/.gitkeep` is tracked, so a snapshot missing it silently deletes a tracked file on every run. All five snapshots carry one as of 2026-08-04. After the rsync, confirm `git status` reports no deletion under `userdata/`.
+
+## Phase 2: Schema validation (per journey)
+
+Before invoking sub-agents, check the snapshot's contents match what the journey's first skill expects to read. This catches drift between plugin schema updates and snapshot staleness.
+
+For each journey, the validation checks vary. Use this rule of thumb:
+
+- **cold-start** (snapshot: `empty`) — no validation needed; the journey starts by writing files, not reading them.
+- **active-loop** (snapshot: `maya-active`) — check `userdata/profile.md` exists and contains sections `## Companies of interest` and `## Proof Points` (note the capitalization — match what's actually in the snapshot). Check `userdata/strategy.md` has frontmatter keys `target_offer_date` and `weekly_targets`. Check `userdata/companies/` has at least one subdirectory.
+- **edge-recovery** (snapshot: `contrarian-messy`) — check that at least 2 directories exist in `userdata/companies/` (proves the dedup test setup landed correctly).
+- **sweep-smoke** (snapshot: `empty`) — no validation needed; same reasoning as cold-start.
+
+If any check fails, write a clear error and stop the journey:
+
+> "Snapshot `<name>` failed schema validation: <which check failed>. Update the snapshot manually before re-running."
+
+Do not silently proceed; do not modify the snapshot from this skill.
+
+## Phase 3: Conversation loop (per journey)
+
+This is the heart of the harness.
+
+### Setup for the loop
+
+1. Read the journey file. Extract `persona`, `snapshot`, `max_turns`, the `Opening message`, the `Mid-journey instructions`, the `Termination` conditions, and the `Spec criteria`.
+2. Read the persona file `.claude/skills/test-personas/personas/<persona>.md`.
+3. **Read the SKILL.md of every skill the journey will invoke.** Parse the journey's `Opening message` (the first slash command) and the `Mid-journey instructions` section for `/job-offer:<name>` references. For each unique skill, Read `plugin/skills/<name>/SKILL.md` into memory. These are inlined verbatim into the plugin-under-test prompt each turn — the 2026-05-27 smoke test showed sub-agents improvise the question order when given only a path reference.
+4. Create the transcript file path: `TRANSCRIPT=userdata/test-runs/$RUN_DATE/$persona-$journey.md`.
+5. Initialize the transcript with a header:
+
+   ```bash
+   cat > "$TRANSCRIPT" <<'EOF'
+   # Transcript — <persona>-<journey>
+
+   **Date:** <RUN_DATE>
+   **Snapshot:** <snapshot>
+   **Max turns:** <max_turns>
+
+   ---
+   EOF
+   ```
+
+### The loop itself
+
+Initialize: `LATEST_USER_MESSAGE` is the journey's `Opening message` (e.g. `/job-offer:setup`).
+
+Loop until termination:
+
+1. **Append the user turn to the transcript.** Write `## Turn N — USER\n\n<LATEST_USER_MESSAGE>\n\n` to the transcript file using the Read+Edit pattern or by re-reading and Writing.
+2. **Dispatch the plugin-under-test agent** via the Agent tool:
+   - `subagent_type: general-purpose`
+   - `description: "Plugin turn N for <persona>-<journey>"`
+   - `prompt:` constructed as follows (see template below)
+   - Wait for the agent's reply. Capture its assistant message as `LATEST_PLUGIN_OUTPUT`.
+3. **Append the assistant turn to the transcript.** Write `## Turn N — ASSISTANT\n\n<LATEST_PLUGIN_OUTPUT>\n\n`.
+4. **Check termination conditions** from the journey file's `Termination` section. If satisfied, exit the loop.
+5. **Check max_turns.** If reached, exit with a note in the transcript: `## Loop ended: max_turns reached`.
+6. **Dispatch the user-simulator agent** via the Agent tool:
+   - `subagent_type: general-purpose`
+   - `description: "Simulator turn N for <persona>-<journey>"`
+   - `prompt:` constructed as follows (see template below)
+   - Capture its reply as the next `LATEST_USER_MESSAGE`.
+7. Continue.
+
+### Plugin-under-test prompt template
+
+The plugin agent is a fresh sub-agent each turn. It needs the relevant skill's SKILL.md inlined verbatim + the full transcript-so-far + the latest user message to behave coherently. Send:
+
+```
+You are running the job-offer Claude Code plugin as a fresh Claude Code session. Plugin files at `/path/to/workspace/plugin/`. The user is sending you messages in a real conversation.
+
+This is turn N of a multi-turn conversation. Take ONE step per turn — typically asking the next question or making the next file write. Wait for the user's reply between steps; do not bundle multiple actions or questions into one message.
+
+**Faithfully execute the relevant skill's SKILL.md, inlined below.** Quoted prompts in a SKILL.md are examples of what a step should get at and roughly how it should sound, not strings to recite — write the copy yourself, in the register `TONE.md` sets. What you must NOT improvise is the question order, what each step asks, or anything a step is explicitly told not to do. (Until 2026-08-23 this line said to use the wording verbatim; the locks were removed from the skills because a locked example outranks the rule it breaks, and that is how the specs came to teach the leaks the corpus keeps recording.) The SKILL.md content below IS the skill — sub-agents do not inherit the parent's plugin context (confirmed 2026-06-07), so the inlined SKILL.md is the canonical operating manual; do not attempt to invoke `/job-offer:<skill>` as a slash command from sub-agent context.
+
+**Anti-leak rule:** Never output internal labels in user-facing copy — no "Q1:", "Q5:", "Q7:" prefixes, no "Step 3 of N", no markdown headers labelling the step. The user sees plain chat prose. Internal numbering is for YOUR reasoning, not the user's screen.
+
+**State guardrails (added 2026-06-07 after 4-journey empirical comparison):** When the SKILL.md instructs you to read `userdata/` files (profile.md, strategy.md, journal.md, companies/*/meta.md, outputs/, stories/, cv.*, etc.), you MUST actually read them with the Read tool. Do NOT synthesize plausible-looking content from context.
+
+Specifically:
+
+- If the SKILL.md says "read every meta.md in `userdata/companies/`", run the reads — do not list companies, statuses, URLs, dates, or interviewers that aren't in the files you read.
+- Use the canonical field names defined in the SKILL.md and `plugin/schemas/meta.md.schema.md` (e.g. `position:` not `role:`).
+- Never invent companies, dates, people, debrief filenames, journal entries, or events. Every concrete fact in your output must trace to either (a) a file you actually read, or (b) a user message in the transcript.
+- When the state is sparse or messy (empty profile sections, missing fields, duplicate folders), surface the gap explicitly — do not paper over it with fabricated content.
+
+**Corpus is off-limits (added 2026-08-10).** `tests/judge-calibration/runs/` and `userdata/test-runs/` hold transcripts of PAST runs, full of company names, position titles and live job-posting URLs. Never read them, and never let anything from them reach your output. A skill that discovers roles must discover them for real this run; a role lifted from an old transcript looks identical to a real find, so the harness silently loses the ability to tell discovery from recall. If you catch yourself about to reuse a URL or a listing you saw in one of those files, stop and search instead.
+
+Empirical basis (2026-08-10 cold-start run): `/job-search` returned a Klarna posting whose URL and exact position title both appear verbatim in `tests/judge-calibration/runs/2026-07-11/maya-cold-start.md`, committed to the repo a few days earlier. It may have been a genuine live hit — ATS UUIDs are stable per posting, and the two other roles that run filed were not in the corpus — but that is the problem: the output alone cannot distinguish the two.
+
+Empirical basis (2026-06-07 4-journey run): sub-agents with this guardrail behaved reliably (active-loop, edge-recovery — both PASS). Sub-agents without it fabricated plausible content (cold-start /today rendered "(url not captured)" instead of reading meta.md `link:` fields).
+
+**Verbatim-quote rule (added 2026-06-11 after scoring-turn drift was flagged in testing):** When your turn comments on, scores, or summarises content presented in an earlier transcript turn, you MUST paste the prior-turn content verbatim before commenting on it. Do not paraphrase, condense, or rewrite the content under any framing — even if the rewrite seems clearer or more concise.
+
+Specifically:
+
+- If you are scoring multiple-choice options the user picked, copy each option's exact text from the question turn (the transcript above) before writing the ✓/✗ commentary. Quote the option, then comment on it — never write a fresh version of the option in your own words.
+- If you are summarising a finding, decision, or fact the user (or an earlier assistant turn) provided, quote it verbatim with quotation marks before commenting on it.
+- Numbers, percentages, names, and product details from prior turns are especially prone to drift — never substitute them with similar-sounding values. "8 points" is not "18%". "three deals lost" is not "two enterprise deals". "permissions overhaul on paid Slack workspaces" is not "enterprise admin features".
+
+Empirical basis (2026-06-11, from the now-retired `case-practice` journeys' end-to-end runs): both judge runs independently flagged Turn 8 scoring re-writing option texts from Turn 6. The most egregious example, from the retired `case-practice-above` journey's run: Q7 option B was posed as "Ship the second-ranked item (a permissions overhaul, RICE 180) instead of the top-ranked Slack integration (RICE 240), because the enterprise sales team has lost three deals this quarter to permissions gaps and the integration's 'reach' estimate counted every Figma user rather than the ~12% on paid Slack workspaces" but was scored against an entirely different invented text ("Push back: the RICE 'reach' for enterprise admin features is wrongly scoped — it counts admins, not the dollar-weighted accounts they gate. Re-score with revenue-at-risk; the admin feature likely jumps. Also flag to the team that we just lost two enterprise deals citing this gap."). An in-prompt reminder alone ("quote the option text faithfully") was not sufficient — this rule needs to be structural.
+
+Do not break character as a Claude Code instance. Do not say "I am a sub-agent" or "this is a test". Just respond as the plugin would.
+
+--- RELEVANT SKILL.md (your operating manual) ---
+
+<paste full contents of the SKILL.md for the most-recently-invoked skill. Track which slash command was last sent by the simulator and inline that skill's SKILL.md here. When the journey hands off to a new skill mid-flow, swap the inlined SKILL.md to match.>
+
+--- TRANSCRIPT SO FAR ---
+
+<paste full transcript file contents here>
+
+--- LATEST USER MESSAGE ---
+
+<paste LATEST_USER_MESSAGE here>
+```
+
+### User-simulator prompt template
+
+Send the simulator agent:
+
+```
+<paste full contents of simulator-prompt.md here>
+
+--- PERSONA ---
+
+<paste full contents of personas/<persona>.md here>
+
+--- JOURNEY ---
+
+<paste full contents of journeys/<journey>.md here>
+
+--- TRANSCRIPT SO FAR ---
+
+<paste full transcript file contents here>
+
+--- LATEST FROM PLUGIN ---
+
+<paste LATEST_PLUGIN_OUTPUT here>
+```
+
+The simulator replies with exactly the next user message — nothing else.
+
+### Termination detection
+
+After each plugin turn, check the journey's `Termination` section for satisfied conditions. Common patterns:
+
+- Sentinel phrase match: search `LATEST_PLUGIN_OUTPUT` for the journey's named sentinels (e.g. `## Heads-up`, `Saved as`, `Let's wrap`).
+- File presence: e.g. `interview-prep-*.md` exists in the relevant company directory after `/interview-prep`.
+- Acknowledgement: the simulator's next reply matches a brief acknowledgement pattern (e.g. `^(ok|thanks|got it|sounds good)`).
+
+Each journey defines its own termination — use the journey file as truth.
+
+### Loop safety
+
+- Hard cap on turns: respect `max_turns` from journey frontmatter.
+- Empty plugin reply: if `LATEST_PLUGIN_OUTPUT` is empty or whitespace-only, exit with a note.
+- Empty simulator reply: if the simulator returns empty, exit with a note (simulator hit its termination cue).
+
+## Phase 3.5: Deterministic checks (schema + transcript lint)
+
+After the conversation loop terminates and BEFORE dispatching the judge, run both deterministic checkers. Between them they own every rule that a script can decide, so the judge never has to. Nothing here is a judgement call, and nothing here goes back to the judge for a second opinion.
+
+Two scripts, two blocks:
+
+- `scripts/validate_userdata.py` — schema drift in the files the run wrote. Catches drift the transcript hides, e.g. a sub-agent inventing field names (`role:` vs `position:`) that propagate silently into downstream skills. Rules defined in `plugin/schemas/*.schema.md`.
+- `scripts/lint_transcript.py` — structural violations in the transcript itself: bare fenced blocks used as chat summaries, references to skills or files that don't resolve, banned internal jargon in user-facing copy, prior-state prompts on a first run, and cadence numbers that don't trace to the user's own plan.
+
+### Validation logic
+
+Run both via Bash, from the repo root:
+
+    python3 scripts/validate_userdata.py userdata/
+    python3 scripts/lint_transcript.py userdata/test-runs/$RUN_DATE/$persona-$journey.md --userdata userdata/
+
+`lint_transcript.py` resolves the starting snapshot from the transcript's own `**Snapshot:**` header; pass `--userdata userdata/` so the cadence rule can check numbers against the `strategy.md` the run produced. Without it that rule reports `NOT CHECKED` rather than passing silently.
+
+Capture both stdouts verbatim. Exit 0 means clean (`No schema drift found.` / `No lint findings.`); exit 1 means findings, one line each. Do NOT re-derive, paraphrase, filter or re-judge any line — paste each script's output into its block as-is. A `NOT CHECKED:` line is information for the reader, not a finding; pass it through too.
+
+### Output
+
+Compose two markdown blocks:
+
+```
+--- SCHEMA VALIDATION ---
+
+<validate_userdata.py stdout, verbatim>
+
+--- LINT FINDINGS ---
+
+<lint_transcript.py stdout, verbatim>
+```
+
+An empty or near-empty `userdata/` tree (e.g. a cold-start journey that never reached `/job-search`) is not a special case — the schema script has nothing to flag and reports `No schema drift found.` like any other clean run.
+
+Both blocks go into the assembled findings file in Phase 4. They are NOT sent to the rubric judges — those rules are already decided, and showing them to a judge only invites re-litigation and double-counting.
+
+## Phase 4: Judge (per journey, unless --skip-judge)
+
+After the conversation loop terminates AND the Phase 3.5 deterministic checks have run, dispatch one judge call per rubric.
+
+### 4a. Four calls, one per rubric
+
+Dispatch all four via the Agent tool. They are independent — run them concurrently, in a single message with four tool uses.
+
+For each of `groundedness`, `coherence`, `conformance`, `tone`:
+
+- `subagent_type: general-purpose`
+- `description: "Judge <rubric> for <persona>-<journey>"`
+- `prompt:` is `judge-prompt.md` contents, followed by the labelled input blocks it specifies:
+  - `--- TRANSCRIPT ---` the full transcript file contents
+  - `--- RUBRIC: <NAME> ---` that one rubric file (read in Phase 0). For `conformance` only, append the journey file's own `Spec criteria` section verbatim.
+  - `--- MEMORY (context, not checklist) ---` `plugin/memory.md` contents
+  - `--- METADATA ---` `journey`, `persona`, `snapshot`, `date`
+
+Each call returns a `## <Rubric name>` section with `### Findings` and `### Verdict`. Never send a judge more than one rubric, and never send it the deterministic blocks.
+
+### 4b. Confirmation re-run on FAIL, gating rubrics only
+
+If `groundedness` or `conformance` returns FAIL, dispatch that ONE rubric a second time — fresh sub-agent, no shared context, identical inputs.
+
+- Both FAIL → the rubric's verdict is `FAIL (confirmed)`.
+- They disagree → `FAIL (one-of-two)`, and append `_Note: judge calls disagreed — re-run manually if FAIL is unexpected._` to that rubric's section.
+
+Never re-run on PASS: the cost only buys insurance against false reds. Never re-run `coherence` or `tone` — they don't gate, so a second opinion buys nothing.
+
+### 4c. Assemble the findings file
+
+Write `userdata/test-runs/$RUN_DATE/$persona-$journey.judge.md`:
+
+```markdown
+# Findings — <persona>-<journey>
+
+**Run date:** <date>
+**Snapshot:** <snapshot>
+
+## Lint
+
+<SCHEMA VALIDATION stdout, verbatim>
+
+<LINT FINDINGS stdout, verbatim>
+
+## Groundedness
+## Coherence
+## Conformance
+## Tone
+
+<each rubric's returned section, verbatim, in that order>
+
+## Verdict
+
+    Lint:          PASS | FAIL (<n>)
+    Groundedness:  PASS | FAIL (<n>)
+    Coherence:     PASS | FAIL (<n>)
+    Conformance:   PASS | FAIL (<n>)
+    Tone:          PASS | FAIL (<n>)
+
+    Gate: Lint AND Groundedness AND Conformance
+
+**Overall: PASS** *or* **Overall: FAIL**
+```
+
+The `## Verdict` section goes last, after all the evidence — both within each rubric's own output and in the assembled file.
+
+- `Lint` is PASS when both deterministic blocks are clean, FAIL otherwise. `NOT CHECKED:` lines never affect it.
+- `Overall` is PASS only when Lint, Groundedness and Conformance all PASS. Coherence and Tone report a verdict and are never in the gate — coherence because it has not calibrated yet, tone permanently. Do not fold them in "because they failed too".
+- If a rubric call returned no parseable `### Verdict`, mark that rubric `ERROR` and the overall `ERROR`. Phase 5's SUMMARY row shows `ERROR`.
+
+### Promotion rule
+
+Coherence enters the gate only once it has calibrated: human agreement >= 0.9 over >= 10 adjudicated runs. Until then it reports and does not block. Moving it is a one-line change to the gate above — do not make that change casually, and do not make it because a run "obviously" should have failed on coherence.
+
+## Phase 5: Aggregate (once per run)
+
+After all journeys in the requested run have finished:
+
+1. Read each `.judge.md` file in `userdata/test-runs/$RUN_DATE/`.
+2. For each judge file: parse the `## Verdict` block.
+   - Extract the overall verdict from the `**Overall: <verdict>**` line.
+   - Extract the five per-rubric verdicts (Lint, Groundedness, Coherence, Conformance, Tone).
+   - If the `## Verdict` header is missing entirely → mark the row as `ERROR — see raw judge file` and continue to the next journey. Do not silently swallow malformed output.
+3. Write `userdata/test-runs/$RUN_DATE/SUMMARY.md`. Gating rubrics come first, then the two advisory ones — the column order is the reading order:
+
+```markdown
+# Test run — <RUN_DATE>
+
+| Journey | Overall | Lint | Ground. | Conform. | Coher.* | Tone* |
+|---|---|---|---|---|---|---|
+| <journey1> | PASS | PASS | PASS | PASS | PASS | FAIL |
+| <journey2> | FAIL (confirmed) | PASS | FAIL | PASS | PASS | PASS |
+| <journey3> | ERROR — see raw judge file | — | — | — | — | — |
+
+\* advisory — reported, never in the gate.
+
+See per-journey `.judge.md` files for details.
+
+## Files in this run
+
+- <persona1>-<journey1>.md (transcript)
+- <persona1>-<journey1>.judge.md (findings)
+- ...
+```
+
+Verdict column comes second so red rows are eye-grabbing at the left edge of the table.
+
+4. **Candidate-entry nudge for memory.md.** If any journey verdict is FAIL or FAIL (confirmed), append a `## Candidate memory entries` block at the bottom of `SUMMARY.md`:
+
+```markdown
+## Candidate memory entries
+
+Patterns worth promoting into `plugin/memory.md` if they reflect a real lesson rather than a one-off:
+
+- **<RUN_DATE>** — <one-line headline derived from the top hard violation or required-spec FAIL>
+  - Journey: <journey-name>
+  - Surfaced in: this test run
+  - Watch for: <one-line pattern description from the finding>
+```
+
+One bullet per failing journey. The maintainer reviews and manually promotes worthwhile candidates by editing `plugin/memory.md` directly. No auto-write to memory.md from this skill.
+
+5. Print a brief plain-prose summary to chat (Rule B — no fenced summary):
+
+> Test run complete — <N> journeys, results in `userdata/test-runs/<RUN_DATE>/`.
+>
+> Verdicts: <P passes, F fails, E errors>. Open `SUMMARY.md` for the per-journey table, or read individual `.judge.md` files for findings.
+
+## End-of-run nudge
+
+After the run summary, suggest the natural next action based on the verdicts:
+
+- If any FAIL or FAIL (confirmed): "Open `SUMMARY.md` and the per-journey `.judge.md` files. Resolve failing journeys before tagging the next release. Review the `## Candidate memory entries` block — promote any worth keeping into `plugin/memory.md`."
+- If any FAIL (one-of-two): "Open `SUMMARY.md`. Judge disagreed on at least one journey — re-run the harness manually to confirm the FAIL is real before treating it as a release blocker."
+- If any ERROR rows: "Open `SUMMARY.md`. A judge run was malformed — inspect the raw judge file and re-run the journey."
+- If the gate passed but Coherence or Tone failed: "Gate is green — safe to tag. Coherence/Tone flagged something; they're advisory, so read them when you have time rather than before the release."
+- If all PASS (no failures, no errors): "Clean run — all five verdicts PASS. Safe to tag the next release."
+
+(This nudge follows the recommended-flow convention but is harness-specific since `/test-personas` is maintainer-only and not in the main user flow.)
+
+## Cost note for maintainer
+
+A full release-gate run (3 journeys × ~15-25 turns × 2 sub-agent calls per turn + 3 judge calls) is roughly 90-150 sub-agent invocations. On Claude Max this counts against weekly quota. Use `--journey <name>` for single-journey runs when iterating on a specific skill. Deterministic coverage (schemas, golden set, snapshot conformance) lives in `tests/` and runs free in CI — do not add journeys to cover things a script can check.
+
+## Known limitations and verifications needed
+
+Gaps surfaced by the 2026-05-27 smoke test and the 2026-06-04 verification run. They don't block use but should inform v0.3.x iteration. Ordered by criticality.
+
+- **Slash-command discoverability in sub-agents — confirmed NO (2026-06-07).** The plugin-under-test agent does NOT inherit the parent's installed plugins. The inline-SKILL.md fallback IS the canonical runtime mechanism. Prompt template updated to drop the "you may invoke directly" line. Resolved.
+- **Anti-leak rule — confirmed working (2026-06-07).** The fresh cold-start run completed 19 plugin turns with zero `Q\d+:` leaks. Resolved.
+- **Full 30-turn cold-start completion — confirmed (2026-06-07).** Journey terminated naturally at turn 19 (Heads-up printed + simulator acked). All four skills exercised. Resolved.
+- **Dashboard skill in sub-agent context — confirmed graceful degradation (2026-06-07).** Sub-agent acknowledged the constraint in plain prose rather than crashing or hanging. Resolved.
+- **Two other journeys untested end-to-end.** Active-loop, edge-recovery have only been validated as journey files + spec criteria. Cold-start now passes mechanism-wise; running the other two would widen coverage.
+- **Sub-agent fidelity drift.** Even with the full SKILL.md inlined + anti-leak rule + step-at-a-time discipline, the 2026-06-07 cold-start run showed sub-agents inventing field names (`role:` vs `position:`), skipping documented tail steps (/setup automation prompt), and failing to read downstream files (/today not reading meta.md `link:`). The conformance judge catches these; Phase 3.5 also runs `scripts/validate_userdata.py` over the files the run wrote and surfaces schema drift — including this exact `role:`/`position:` pattern — into the Lint verdict, independent of the transcript and of any judge.
+- **SendMessage continuity is not assumed.** Each plugin turn currently re-dispatches a fresh sub-agent with the SKILL.md + growing transcript inlined. If a stateful agent-continuation mechanism becomes available, switching to a continuous sub-agent session would cut cost ~5x and improve coherence. The fresh-per-turn design is the documented tradeoff but is the riskiest cost driver. Not blocking; deferred to v0.4.
+- **Journey set cut 8 → 3 + smoke (2026-08-07).** `cold-start-cv` retired. The `profile.md` schema check in `scripts/validate_userdata.py` replaces only one of its twelve spec criteria, and only partly (frontmatter keys present, `## Positioning` heading present — not YAML type-matching or content). The other eleven are conversational and now have ZERO coverage of any kind: CV auto-detection, the single-line facts confirmation, multi-select-with-evidence for target titles/industries, and "nothing invented to fill a field." Manual check 4 in `manual-checklist.md` covers this path by hand until a deterministic or journey replacement exists. `reflection` retired — this is a KNOWN GAP someone still needs to close, not a completed move: what's actually lost is `/today`'s non-first-run update prompt, the Monday-plus-prior-week reflection date gate, the founder-outreach line matching `weekly_targets`, heads-up risk quality, and the entire `career-coach` hand-off — `career-coach` now has ZERO journey coverage. The snapshot is kept as a starting fixture for whoever closes this. Both `case-practice` journeys retired (`below` could not reach its target branch — see plugin/memory.md 2026-06-11; single-skill drills are the wrong size for a journey). `sweep-smoke` kept but excluded from the default sweep until its first run validates it. As a result, `personas/diego.md` now has `journey_fit: []` — no surviving journey uses `persona: diego`. This is intentional, not rot: the `diego-reflection` snapshot and the `diego` persona file are both retained deliberately, for the deterministic snapshot-conformance tests (`tests/test_snapshots_conform.py`, now shipped) and for future single-turn checks. Do not delete either just because the list is empty. `empty-with-cv` is likewise now an orphaned snapshot — no journey references it since `cold-start-cv` retired — and is retained deliberately for the same reason: don't delete it as rot.
+
+## Voice for this skill's own output
+
+This skill's own chat messages follow `plugin/TONE.md` (plain prose, no fenced summaries, one ask per message, no preambles). The sub-agents' outputs are captured in transcripts and judged — they follow their own prompts.

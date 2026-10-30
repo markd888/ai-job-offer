@@ -1,0 +1,38 @@
+{
+  "run": "2026-06-07/maya-cold-start",
+  "labeller": null,
+  "verdicts": {
+    "lint": {
+      "judge": "FAIL",
+      "human": null,
+      "note": null
+    },
+    "groundedness": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    },
+    "coherence": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    },
+    "conformance": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    },
+    "tone": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    }
+  },
+  "overall": {
+    "judge": "FAIL"
+  },
+  "findings": [],
+  "notes": "Turn 1 - no CV mentioned previously, coherence violation. Either suggest to drop a CV or skip the question and ask the first one fomr the list.\n\nTurn 12 - \"no GM or business-owner roles\" - this is not relevant for a PM, coherence/groundedness violation.\n\nTurn 14 - \"Vague dates make `/today`'s countdown noisy.\" - no mentioning of today before, violation of the coherence rubric.\n\nTurn 15 – \"files written...\" at the top is the UX/TOV violation, no value at the top, tech details must be skipped always until super critical.\n\n> You're set up. Wrote:\n> - `userdata/profile.md` — identity, target role, salary, hard filters\n> - `userdata/strategy.md` — headline goal + derived weekly targets (8 apps/wk, 8 outreach/wk, 4 active interview threads floor) based on your 12-week timeline. Edit these in `userdata/strategy.md` if they feel off — or ask `job-offer:career-coach` to help you set anti-goals and checkpoints.\n> - `userdata/journal.md` — empty (append daily notes here)\n> - `CLAUDE.md` — workspace root, loads your profile into every Claude Code session\n\nToo many noise bullets here (claude, journal) – always keep only the most valuable info, trim the rest. No tech details, things to remember for later, etc.\n\n_Note: plugin sub-agent skipped the 2-step automation offer + the final closing nudge prescribed by setup/SKILL.md._\n\nWhat is this? Seems like a violation too – no nudge. \n\nTurn 19 - Pipeline should be about overall stats/health, not the whole list of positions.",
+  "blind": null,
+  "_tone_replay": "tone judge verdict replayed 2026-08-23 against rubrics/tone.md as edited that day (full-enumeration rule + two new worked examples). The .judge.md files in runs/ still carry the earlier reading — this field is the current one."
+}

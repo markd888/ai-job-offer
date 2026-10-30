@@ -1,0 +1,66 @@
+{
+  "run": "2026-08-23/maya-cold-start",
+  "labeller": null,
+  "verdicts": {
+    "lint": {
+      "judge": "FAIL",
+      "human": null,
+      "note": null
+    },
+    "groundedness": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "coherence": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "conformance": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "tone": {
+      "judge": "FAIL",
+      "human": null,
+      "note": null
+    }
+  },
+  "overall": {
+    "judge": "FAIL"
+  },
+  "findings": [
+    {
+      "rubric": "tone",
+      "turn": 17,
+      "summary": "\"I've set all four to be re-checked on future sweeps.\" — 'future sweeps' is the plugin's internal name for its recheck pass",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 19,
+      "summary": "\"drop the link to me here and I'll score and file it\" — 'score and file' is internal pipeline vocabulary",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 20,
+      "summary": "\"Four roles are still sitting in `new`\" — the raw internal state value, backticked in chat",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "lint",
+      "turn": 20,
+      "summary": "/today named the two files it had just written (the brief path and applications.md)",
+      "human": null,
+      "note": null
+    }
+  ],
+  "notes": "First run after the 2026-08-23 product fixes. The question this run answers: did the voice problem that dominated every earlier run actually get fixed, or did it just move? Nine tone findings, of which three are the internal-vocabulary family that used to dominate — down from a corpus where it was nearly every finding.\n\nConformance and coherence flipped to PASS here for the first time. Lint's two findings are one turn and one cause, and the spec rule forbidding it landed after this run.",
+  "blind": null
+}

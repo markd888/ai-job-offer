@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grade the judge</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --ink: #16181d; --muted: #626873;
+    --line: #d9dde3; --accent: #2b6cb0; --pass: #1a7f4b; --fail: #b3261e;
+    --warn: #8a6100; --chip: #eef1f5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+  header { padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+           display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+  header h1 { font-size: 16px; margin: 0; }
+  header .hint { color: var(--muted); font-size: 12.5px; }
+  #layout { display: grid; grid-template-columns: 280px minmax(420px, 1fr) minmax(360px, 1fr);
+            gap: 12px; padding: 12px; align-items: start; }
+  @media (max-width: 1100px) { #layout { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .panel h2 { font-size: 13px; margin: 0 0 8px; text-transform: uppercase;
+              letter-spacing: .04em; color: var(--muted); }
+  #dropzone { border: 2px dashed var(--line); border-radius: 8px; padding: 20px; text-align: center;
+              color: var(--muted); background: var(--panel); margin: 12px; }
+  #dropzone.over { border-color: var(--accent); color: var(--accent); }
+  button { font: inherit; padding: 3px 10px; border: 1px solid var(--line); background: #fff;
+           border-radius: 5px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.pass.active { background: var(--pass); border-color: var(--pass); }
+  button.fail.active { background: var(--fail); border-color: var(--fail); }
+  .runcard { margin-bottom: 12px; }
+  .runcard > h3 { margin: 0 0 2px; font-size: 15px; }
+  .runmeta { color: var(--muted); font-size: 12.5px; margin-bottom: 10px; }
+  table.verdicts { width: 100%; border-collapse: collapse; }
+  table.verdicts td { padding: 5px 4px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  table.verdicts tr:last-child td { border-bottom: 0; }
+  td.rname { font-weight: 600; white-space: nowrap; }
+  td.rname .tag { font-weight: 400; color: var(--muted); font-size: 11.5px; display: block; }
+  .judgecall { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+  td.why { font-size: 12.5px; color: var(--muted); padding: 0 4px 8px 4px;
+           border-bottom: 1px solid var(--line); line-height: 1.45; }
+  .v-PASS { color: var(--pass); font-weight: 600; }
+  .v-FAIL { color: var(--fail); font-weight: 600; }
+  .agree-yes { color: var(--pass); } .agree-no { color: var(--fail); font-weight: 600; }
+  details.findings { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+  details.findings summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
+  .finding { border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin: 8px 0; }
+  .finding .txt { margin-bottom: 6px; }
+  .finding .ctrls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .chip { background: var(--chip); border-radius: 10px; padding: 1px 7px; font-size: 11.5px;
+          color: var(--muted); }
+  .turnlink { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0;
+              text-decoration: underline; font-size: 12.5px; }
+  .blindgate { background: #fffdf3; border: 1px solid #e6d9a8; border-radius: 6px; padding: 10px;
+               margin-bottom: 10px; }
+  textarea.runnotes { width: 100%; min-height: 70px; font-family: inherit; font-size: 13px;
+                      padding: 6px; border: 1px solid var(--line); border-radius: 4px; }
+  .blindgate textarea { width: 100%; min-height: 90px; font-family: ui-monospace, monospace;
+                        font-size: 12.5px; padding: 6px; border: 1px solid var(--line);
+                        border-radius: 4px; }
+  pre.ctx { white-space: pre-wrap; word-wrap: break-word; margin: 0; max-height: 72vh;
+            overflow: auto; }
+  pre.ctx mark { background: #ffe9a8; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .readout div { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
+  .readout .k { color: var(--muted); }
+  .note { width: 100%; padding: 4px 6px; border: 1px solid var(--line); border-radius: 4px;
+          margin-top: 6px; font: inherit; font-size: 12.5px; }
+  .empty { color: var(--muted); font-style: italic; }
+  .warn { color: var(--warn); }
+  .sidebar-run { display: block; width: 100%; text-align: left; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Grade the judge</h1>
+  <span class="hint">Rubric-first: read five verdicts, set your own, open findings only where you disagree. Nothing leaves this tab; progress is checkpointed to localStorage.</span>
+</header>
+
+<div id="dropzone">
+  Drop the <code>runs/</code> folder here (and optionally <code>.claude/skills/test-personas/rubrics/</code>).
+  <div style="margin-top:8px">
+    <input type="file" id="picker" webkitdirectory directory multiple>
+  </div>
+  <div style="margin-top:6px;font-size:12.5px">Use the folder picker or drag-and-drop — a flat file picker loses directory names, and four runs share the filename <code>maya-cold-start.judge.md</code>.</div>
+</div>
+
+<div id="layout" hidden>
+  <div class="panel" id="sidebar"></div>
+  <div id="runs"></div>
+  <div class="panel" id="context"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------------------------------------------------------------- constants
+  var RUBRICS = ["lint", "groundedness", "coherence", "conformance", "tone"];
+  var GATING = ["lint", "groundedness", "conformance"];
+  var LABEL = { lint: "Lint", groundedness: "Groundedness", coherence: "Coherence",
+                conformance: "Conformance", tone: "Tone" };
+  var TAG = { lint: "script, not judge", groundedness: "gating, zero-tolerance",
+              coherence: "advisory, holistic", conformance: "gating, zero-tolerance",
+              tone: "advisory, holistic" };
+  var RUBRIC_FILE = { groundedness: "groundedness.md", coherence: "coherence.md",
+                      conformance: "conformance.md", tone: "tone.md" };
+  var STORAGE_PREFIX = "grade-judge/v2/";
+
+  // ------------------------------------------------------------------ parsing
+  // Judge files are markdown assembled from four independent sub-agent calls,
+  // so formatting drifts between runs. Parse structurally and forgivingly: a
+  // section that fails to yield a verdict reports null rather than guessing,
+  // because a guessed verdict is indistinguishable from a real one once it is
+  // in a label file.
+
+  function splitSections(text) {
+    var out = {}, current = null, buf = [];
+    text.split(/\r?\n/).forEach(function (line) {
+      var m = /^##\s+(.+?)\s*$/.exec(line);
+      if (m) {
+        if (current) out[current] = buf.join("\n");
+        current = m[1].toLowerCase().trim();
+        buf = [];
+      } else if (current) {
+        buf.push(line);
+      }
+    });
+    if (current) out[current] = buf.join("\n");
+    return out;
+  }
+
+  function subSection(body, name) {
+    var re = new RegExp("^###\\s+" + name + "\\s*$", "im");
+    var m = re.exec(body || "");
+    if (!m) return null;
+    var rest = body.slice(m.index + m[0].length);
+    var next = /^###\s+/m.exec(rest);
+    return (next ? rest.slice(0, next.index) : rest).trim();
+  }
+
+  function verdictFrom(body) {
+    if (body == null) return null;
+    var m = /\*\*(PASS|FAIL)\*\*/.exec(body);
+    return m ? m[1] : null;
+  }
+
+  // A finding is a top-level "- **" bullet. Continuation lines are folded in so
+  // a wrapped bullet stays one finding.
+  function findingsFrom(body) {
+    if (!body) return [];
+    if (/^\s*No findings\.?\s*$/im.test(body)) return [];
+    var out = [], cur = null;
+    body.split(/\r?\n/).forEach(function (line) {
+      if (/^\s*-\s+\*\*/.test(line)) {
+        if (cur) out.push(cur);
+        cur = line.replace(/^\s*-\s+/, "").trim();
+      } else if (cur && line.trim()) {
+        cur += " " + line.trim();
+      }
+    });
+    if (cur) out.push(cur);
+    return out.map(function (t, i) {
+      var turn = null;
+      var m = /turn\s+(\d+)/i.exec(t);
+      if (m) turn = parseInt(m[1], 10);
+      return { idx: i, text: t.replace(/\*\*/g, ""), turn: turn };
+    });
+  }
+
+  function parseJudgeFile(text) {
+    var secs = splitSections(text);
+    var run = { rubrics: {}, overallJudge: null, meta: {}, notes: [] };
+
+    var dm = /^\*\*Run date:\*\*\s*(.+)$/m.exec(text);
+    var sm = /^\*\*Snapshot:\*\*\s*(.+)$/m.exec(text);
+    if (dm) run.meta.date = dm[1].trim();
+    if (sm) run.meta.snapshot = sm[1].trim();
+
+    RUBRICS.forEach(function (r) {
+      var body = secs[r];
+      if (body == null) {
+        run.rubrics[r] = { present: false, verdict: null, findings: [], evidence: null };
+        return;
+      }
+      if (r === "lint") {
+        // Deterministic script output, not a judged section: every "turn N:"
+        // line is a finding, and the verdict follows from whether any exist.
+        var lines = body.split(/\r?\n/).map(function (l) { return l.trim(); });
+        var hits = lines.filter(function (l) { return /^turn\s+\d+:/.test(l); });
+        var skipped = lines.filter(function (l) { return /^NOT CHECKED:/.test(l); });
+        run.rubrics.lint = {
+          present: true,
+          verdict: hits.length ? "FAIL" : "PASS",
+          findings: hits.map(function (t, i) {
+            var m = /^turn\s+(\d+):/.exec(t);
+            return { idx: i, text: t, turn: m ? parseInt(m[1], 10) : null };
+          }),
+          evidence: null,
+          skipped: skipped
+        };
+        return;
+      }
+      var f = subSection(body, "Findings");
+      var v = subSection(body, "Verdict");
+      var bullets = findingsFrom(f != null ? f : body);
+      // Conformance is the odd one out: its bullets are per-criterion
+      // assessments, not violations, and judges have written them three
+      // different ways (every criterion listed; failures only; verdict stated
+      // mid-sentence). Counting bullets there would count PASSes as findings —
+      // which is how a zero-tolerance rubric ended up showing PASS alongside
+      // "13 findings". Only FAIL bullets are findings; the rest stay available
+      // as `criteria` for the drill-down.
+      var findings = r === "conformance"
+        ? bullets.filter(function (b) { return /\bFAIL\b/.test(b.text); })
+        : bullets;
+      run.rubrics[r] = {
+        present: true,
+        verdict: verdictFrom(v != null ? v : body),
+        verdictText: v || "",
+        findings: findings,
+        criteria: r === "conformance" ? bullets : null,
+        evidence: subSection(body, "Evidence")
+      };
+    });
+
+    var ov = secs["verdict"];
+    if (ov) {
+      var om = /\*\*Overall:\s*(PASS|FAIL[^*]*)\*\*/i.exec(ov);
+      if (om) run.overallJudge = om[1].trim();
+    }
+
+    RUBRICS.forEach(function (r) {
+      if (!run.rubrics[r].present) run.notes.push("no `## " + LABEL[r] + "` section");
+      else if (run.rubrics[r].verdict === null) run.notes.push(LABEL[r] + ": no parseable verdict");
+    });
+    return run;
+  }
+
+  function parseTranscript(text) {
+    var turns = [], re = /^##\s+Turn\s+(\d+)\s+—\s+(USER|ASSISTANT)\s*$/gim, m, marks = [];
+    while ((m = re.exec(text)) !== null) marks.push({ n: +m[1], role: m[2], at: m.index, end: re.lastIndex });
+    marks.forEach(function (mk, i) {
+      turns.push({ n: mk.n, role: mk.role,
+                   body: text.slice(mk.end, i + 1 < marks.length ? marks[i + 1].at : text.length).trim() });
+    });
+    return turns;
+  }
+
+  // -------------------------------------------------------------------- state
+  var runs = [];        // {key, id, judge, transcript, human:{}, findingLabels:{}, blind, revealed}
+  var rubricTexts = {};
+  var context = { runKey: null, tab: "transcript", rubric: null, scrollTurn: null };
+
+  function emptyHuman() {
+    var h = {}; RUBRICS.forEach(function (r) { h[r] = null; }); return h;
+  }
+
+  // Lint is not a judgement, so it is not labelled — it enters the gate as a
+  // fact, taken from the script's own verdict. Only the two judged gating
+  // rubrics need a human call.
+  var JUDGED_GATING = GATING.filter(function (r) { return r !== "lint"; });
+  // Rubrics a human actually grades. Lint is excluded: it is script output.
+  var GRADED = RUBRICS.filter(function (r) { return r !== "lint"; });
+
+  function derivedOverall(human, lintVerdict) {
+    if (!lintVerdict) return null;
+    for (var i = 0; i < JUDGED_GATING.length; i++) if (!human[JUDGED_GATING[i]]) return null;
+    return (lintVerdict === "PASS" &&
+            JUDGED_GATING.every(function (r) { return human[r] === "PASS"; })) ? "PASS" : "FAIL";
+  }
+
+  function passish(v) { return typeof v === "string" && v.indexOf("PASS") === 0; }
+
+  function selfContradiction(run) {
+    var j = run.judge;
+    if (!j.overallJudge) return false;
+    for (var i = 0; i < GATING.length; i++) if (!j.rubrics[GATING[i]].verdict) return false;
+    var impliedPass = GATING.every(function (r) { return j.rubrics[r].verdict === "PASS"; });
+    return passish(j.overallJudge) !== impliedPass;
+  }
+
+  // ------------------------------------------------------------------ storage
+  function saveRun(run) {
+    try {
+      localStorage.setItem(STORAGE_PREFIX + run.key, JSON.stringify({
+        human: run.human, findingLabels: run.findingLabels,
+        blind: run.blind, revealed: run.revealed, blindDraft: run.blindDraft,
+        verdictNotes: run.verdictNotes, runNotes: run.runNotes
+      }));
+    } catch (e) { /* private mode / quota — labelling still works in-tab */ }
+  }
+  function loadRun(run) {
+    try {
+      var raw = localStorage.getItem(STORAGE_PREFIX + run.key);
+      if (!raw) return;
+      var d = JSON.parse(raw);
+      if (d.human) RUBRICS.forEach(function (r) {
+        if (d.human[r] === "PASS" || d.human[r] === "FAIL") run.human[r] = d.human[r];
+      });
+      run.findingLabels = d.findingLabels || {};
+      run.blind = d.blind || null;
+      run.revealed = !!d.revealed;
+      run.blindDraft = d.blindDraft || "";
+      run.verdictNotes = d.verdictNotes || {};
+      run.runNotes = d.runNotes || "";
+    } catch (e) { /* corrupt entry — start this run clean rather than throwing */ }
+  }
+
+  // ------------------------------------------------------------------ ingest
+  function stemOf(name) { return name.replace(/\.judge\.md$/i, "").replace(/\.md$/i, ""); }
+
+  function classify(path, name) {
+    if (/^TEMPLATE\.json$/i.test(name)) return null;
+    if (/\.judge\.md$/i.test(name)) return "judge";
+    if (/^SUMMARY\.md$/i.test(name)) return null;
+    for (var r in RUBRIC_FILE) if (RUBRIC_FILE[r] === name) return "rubric:" + r;
+    if (/\.md$/i.test(name)) return "transcript";
+    return null;
+  }
+
+  function keyFor(path, name) {
+    var parts = path.split("/").filter(Boolean);
+    var dir = parts.length > 1 ? parts[parts.length - 2] : "";
+    return (dir ? dir + "/" : "") + stemOf(name);
+  }
+
+  function ingest(path, name, text) {
+    var kind = classify(path, name);
+    if (!kind) return;
+    if (kind.indexOf("rubric:") === 0) { rubricTexts[kind.slice(7)] = text; return; }
+    var key = keyFor(path, name);
+    var run = runs.filter(function (r) { return r.key === key; })[0];
+    if (!run) {
+      run = { key: key, id: key, judge: null, transcript: null, human: emptyHuman(),
+              findingLabels: {}, verdictNotes: {}, runNotes: "", blind: null, revealed: false };
+      runs.push(run);
+    }
+    if (kind === "judge") run.judge = parseJudgeFile(text);
+    else run.transcript = parseTranscript(text);
+  }
+
+  function finalizeIngest() {
+    runs = runs.filter(function (r) { return r.judge; });
+    runs.sort(function (a, b) { return a.key < b.key ? -1 : a.key > b.key ? 1 : 0; });
+    runs.forEach(loadRun);
+    if (runs.length) {
+      document.getElementById("dropzone").hidden = true;
+      document.getElementById("layout").hidden = false;
+      context.runKey = context.runKey || runs[0].key;
+    }
+    renderAll();
+  }
+
+  // ------------------------------------------------------------------- render
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    attrs = attrs || {};
+    Object.keys(attrs).forEach(function (k) {
+      if (k === "text") n.textContent = attrs[k];
+      else if (k === "html") n.innerHTML = attrs[k];
+      else if (k.indexOf("on") === 0) n.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) n.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) { if (c) n.appendChild(c); });
+    return n;
+  }
+
+  // Every click re-renders the run card from scratch, which resets each
+  // <details> to closed — so labelling a finding slammed shut the section you
+  // were reading it in. Open/closed state lives here instead of in the DOM, and
+  // is restored on rebuild. Keyed by run + rubric + slot so nested folds (the
+  // claim table, the full criterion list) keep their own state.
+  var openDetails = {};
+
+  function detailsEl(key, attrs, kids) {
+    var d = el("details", attrs, kids);
+    if (openDetails[key]) d.setAttribute("open", "");
+    d.addEventListener("toggle", function () {
+      if (d.open) openDetails[key] = true; else delete openDetails[key];
+    });
+    return d;
+  }
+
+  function pfButton(run, rubric, choice) {
+    return el("button", {
+      class: (choice === "PASS" ? "pass" : "fail") + (run.human[rubric] === choice ? " active" : ""),
+      type: "button", text: choice,
+      onclick: function () {
+        run.human[rubric] = run.human[rubric] === choice ? null : choice;
+        saveRun(run); renderAll();
+      }
+    });
+  }
+
+  function findingKey(rubric, idx) { return rubric + ":" + idx; }
+
+  function findingCard(run, rubric, f) {
+    var k = findingKey(rubric, f.idx);
+    var cur = (run.findingLabels[k] || {}).human || null;
+    var ctrls = el("div", { class: "ctrls" });
+    ["agree", "disagree", "borderline"].forEach(function (c) {
+      ctrls.appendChild(el("button", {
+        class: cur === c ? "active" : "", type: "button", text: c,
+        onclick: function () {
+          run.findingLabels[k] = run.findingLabels[k] || {};
+          run.findingLabels[k].human = cur === c ? null : c;
+          saveRun(run); renderAll();
+        }
+      }));
+    });
+    if (f.turn !== null && run.transcript) {
+      ctrls.appendChild(el("button", {
+        class: "turnlink", type: "button", text: "turn " + f.turn + " →",
+        onclick: function () {
+          context.runKey = run.key; context.tab = "transcript"; context.scrollTurn = f.turn;
+          renderAll();
+        }
+      }));
+    }
+    var note = el("input", { class: "note", type: "text", placeholder: "note (optional)",
+                             value: (run.findingLabels[k] || {}).note || "" });
+    note.addEventListener("change", function () {
+      run.findingLabels[k] = run.findingLabels[k] || {};
+      run.findingLabels[k].note = note.value || null;
+      saveRun(run);
+    });
+    return el("div", { class: "finding" }, [
+      el("div", { class: "txt", text: f.text }), ctrls, note
+    ]);
+  }
+
+  function reasonFor(run, rubric) {
+    if (rubric === "lint") {
+      var n = run.judge.rubrics.lint.findings.length;
+      var sk = (run.judge.rubrics.lint.skipped || []).length;
+      return (n ? n + " rule violation" + (n === 1 ? "" : "s") + " found by the scripts"
+                : "no rule violations found by the scripts")
+             + (sk ? " · " + sk + " rule(s) could not be checked" : "");
+    }
+    var t = run.judge.rubrics[rubric].verdictText || "";
+    // Strip the leading "**PASS** — " / "**FAIL** — " so only the reason shows.
+    t = t.replace(/^\s*\*\*(PASS|FAIL)[^*]*\*\*\s*(—|-|:)?\s*/i, "").trim();
+    return t ? t.replace(/\s+/g, " ") : null;
+  }
+
+  function verdictRow(run, rubric) {
+    var jr = run.judge.rubrics[rubric];
+    var judgeV = jr.verdict;
+    var humanV = run.human[rubric];
+    var agreeCell = el("td", {});
+    if (humanV && judgeV) {
+      var same = humanV === judgeV;
+      agreeCell.appendChild(el("span", {
+        class: same ? "agree-yes" : "agree-no", text: same ? "✓" : "✗ disagree"
+      }));
+    }
+    var btns = rubric === "lint"
+      ? el("td", { class: "judgecall", text: "not graded — a fact, not a reading" })
+      : el("td", {}, [pfButton(run, rubric, "PASS"), pfButton(run, rubric, "FAIL")]);
+    var judgeCell = el("td", { class: "judgecall" });
+    if (!jr.present) judgeCell.appendChild(el("span", { class: "warn", text: "section missing" }));
+    else if (judgeV === null) judgeCell.appendChild(el("span", { class: "warn", text: "unparseable" }));
+    else {
+      judgeCell.appendChild(el("span", { class: "v-" + judgeV, text: judgeV }));
+      if (jr.findings.length) judgeCell.appendChild(document.createTextNode(" · " + jr.findings.length));
+    }
+    return el("tr", {}, [
+      el("td", { class: "rname" }, [
+        document.createTextNode(LABEL[rubric]),
+        el("span", { class: "tag", text: TAG[rubric] })
+      ]),
+      judgeCell, btns, agreeCell
+    ]);
+  }
+
+  function blindGate(run) {
+    var box = el("div", { class: "blindgate" });
+    box.appendChild(el("div", { text: "Blind pass — write your own findings BEFORE seeing the judge's. This is the only source of recall data, and the only mechanism that finds rules nobody thought to write." }));
+    var ta = el("textarea", { placeholder: "e.g. turn 20 — invents Lendable's location from a fetch that failed" });
+    ta.value = run.blindDraft || "";
+    // Checkpoint every keystroke. A blind pass is unrepeatable — once you have
+    // read the judge's findings you cannot un-read them — so losing the draft
+    // to a reload or a stray click destroys the only recall data that run will
+    // ever produce.
+    ta.addEventListener("input", function () { run.blindDraft = ta.value; saveRun(run); });
+    box.appendChild(ta);
+    var row = el("div", { style: "margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" });
+    row.appendChild(el("button", {
+      type: "button", text: "Reveal judge findings",
+      onclick: function () {
+        var lines = ta.value.split(/\r?\n/).filter(function (l) { return l.trim(); });
+        run.blind = { human_found: lines.length, judge_matched: null, notes: ta.value || null };
+        run.revealed = true; saveRun(run); renderAll();
+      }
+    }));
+    row.appendChild(el("button", {
+      type: "button", text: "Skip blind pass",
+      onclick: function () { run.blind = null; run.revealed = true; saveRun(run); renderAll(); }
+    }));
+    box.appendChild(row);
+    return box;
+  }
+
+  function blindSummary(run) {
+    if (!run.blind) return null;
+    var wrap = el("div", { class: "blindgate" });
+    wrap.appendChild(el("div", { text: "Your blind-pass findings — diff these against the judge's below:" }));
+    // These MUST be visible after reveal. Comparing your list against the
+    // judge's IS the blind pass; storing the notes and not showing them makes
+    // the exercise unfinishable.
+    var notes = el("textarea", {});
+    notes.value = run.blind.notes || run.blindDraft || "";
+    notes.addEventListener("change", function () {
+      run.blind.notes = notes.value;
+      saveRun(run);
+    });
+    wrap.appendChild(notes);
+
+    // Line count seeds this, but it is NOT the recall denominator. Notes are
+    // written as a user and routinely include product observations no rubric
+    // asks the judge to find; counting those blames the judge for misses that
+    // were never in its remit. Keep the notes, set the number by hand.
+    wrap.appendChild(el("div", { style: "margin-top:8px",
+      text: "Of these, how many are things a rubric actually asks the judge to catch?" }));
+    var foundInp = el("input", { class: "note", type: "number", min: "0",
+                                 value: String(run.blind.human_found) });
+    foundInp.addEventListener("change", function () {
+      run.blind.human_found = Math.max(0, parseInt(foundInp.value, 10) || 0);
+      if (run.blind.judge_matched !== null && run.blind.judge_matched > run.blind.human_found) {
+        run.blind.judge_matched = run.blind.human_found;
+      }
+      saveRun(run); renderAll();
+    });
+    wrap.appendChild(foundInp);
+    wrap.appendChild(el("div", { style: "margin-top:8px",
+      text: "And how many of those did the judge also find?" }));
+    var inp = el("input", { class: "note", type: "number", min: "0",
+                            max: String(run.blind.human_found),
+                            value: run.blind.judge_matched === null ? "" : String(run.blind.judge_matched) });
+    inp.addEventListener("change", function () {
+      var v = inp.value === "" ? null : Math.max(0, Math.min(run.blind.human_found, parseInt(inp.value, 10) || 0));
+      run.blind.judge_matched = v; saveRun(run); renderAll();
+    });
+    wrap.appendChild(inp);
+    return wrap;
+  }
+
+  function runCard(run) {
+    var card = el("div", { class: "panel runcard" });
+    card.appendChild(el("h3", { text: run.id }));
+    var meta = [];
+    if (run.judge.meta.date) meta.push(run.judge.meta.date);
+    if (run.judge.meta.snapshot) meta.push("snapshot: " + run.judge.meta.snapshot);
+    if (!run.transcript) meta.push("no transcript loaded");
+    card.appendChild(el("div", { class: "runmeta", text: meta.join("  ·  ") }));
+
+    if (run.judge.notes.length) {
+      card.appendChild(el("div", { class: "runmeta warn",
+        text: "parser: " + run.judge.notes.join("; ") }));
+    }
+    if (selfContradiction(run)) {
+      card.appendChild(el("div", { class: "runmeta warn",
+        text: "judge self-contradiction: its stated Overall (" + run.judge.overallJudge +
+              ") disagrees with its own gating verdicts. A defect in the judge's output, not something to fix in your labelling." }));
+    }
+
+    if (!run.revealed) {
+      card.appendChild(blindGate(run));
+      return card;
+    }
+
+    var tbl = el("table", { class: "verdicts" });
+    RUBRICS.forEach(function (r) {
+      tbl.appendChild(verdictRow(run, r));
+      // The judge's own one-sentence reasoning. This is the thing you are
+      // actually grading — a verdict with no reasoning shown forces you to
+      // re-derive it from the transcript, which is the slow path the whole
+      // rubric-first workflow exists to avoid.
+      var why = reasonFor(run, r);
+      var cell = el("td", { class: "why", colspan: "4" });
+      if (why) cell.appendChild(el("div", { text: why }));
+      // A note against the VERDICT, not against one finding. When you disagree
+      // with a rubric, the reason is the whole point of the label — without it
+      // the disagreement is a number nobody can act on later.
+      if (r !== "lint") {
+        var ni = el("input", { class: "note", type: "text",
+          placeholder: run.human[r] && run.human[r] !== run.judge.rubrics[r].verdict
+            ? "why you disagreed — this is what turns into a worked example"
+            : "note (optional)",
+          value: (run.verdictNotes || {})[r] || "" });
+        ni.addEventListener("change", function () {
+          run.verdictNotes = run.verdictNotes || {};
+          run.verdictNotes[r] = ni.value || null;
+          saveRun(run);
+        });
+        cell.appendChild(ni);
+      }
+      tbl.appendChild(el("tr", {}, [cell]));
+    });
+    card.appendChild(tbl);
+
+    var d = derivedOverall(run.human, run.judge.rubrics.lint.verdict);
+    card.appendChild(el("div", { class: "runmeta", style: "margin-top:8px",
+      text: "Derived overall: " + (d || "—") + "   (judge stated: " + (run.judge.overallJudge || "—") + ")"
+            + "   Gate: " + GATING.map(function (g) { return LABEL[g]; }).join(" AND ") }));
+
+    var bs = blindSummary(run);
+    if (bs) card.appendChild(bs);
+
+    // Free-text notes for the run as a whole. Always present — the blind-pass
+    // box only exists on runs you blind-passed, which left every skipped run
+    // with nowhere to write anything down.
+    var nbox = el("div", { style: "margin-top:10px" });
+    nbox.appendChild(el("div", { class: "runmeta", style: "margin-bottom:4px",
+      text: "Notes on this run" }));
+    var nta = el("textarea", { class: "runnotes",
+      placeholder: "anything worth remembering about this run — product observations, harness problems, why a verdict was hard to call" });
+    nta.value = run.runNotes || "";
+    nta.addEventListener("input", function () { run.runNotes = nta.value; saveRun(run); });
+    nbox.appendChild(nta);
+    card.appendChild(nbox);
+
+    RUBRICS.forEach(function (r) {
+      var jr = run.judge.rubrics[r];
+      if (!jr.findings.length) return;
+      var det = detailsEl(run.key + "/" + r, { class: "findings" });
+      det.appendChild(el("summary", { text: LABEL[r] + " — " + jr.findings.length +
+        " finding" + (jr.findings.length === 1 ? "" : "s") +
+        (run.human[r] && run.human[r] !== jr.verdict ? "  (you disagreed — worth opening)" : "") }));
+      jr.findings.forEach(function (f) { det.appendChild(findingCard(run, r, f)); });
+      if (r === "conformance" && jr.criteria && jr.criteria.length > jr.findings.length) {
+        var all = detailsEl(run.key + "/" + r + "/criteria", {},
+          [el("summary", { text: "all " + jr.criteria.length +
+          " criterion assessments (incl. PASS / NOT EXERCISED)" })]);
+        jr.criteria.forEach(function (c) {
+          all.appendChild(el("div", { class: "finding txt", text: c.text }));
+        });
+        det.appendChild(all);
+      }
+      if (r === "groundedness" && jr.evidence) {
+        det.appendChild(detailsEl(run.key + "/" + r + "/evidence", {}, [
+          el("summary", { text: "claim table" }),
+          el("pre", { class: "ctx mono", text: jr.evidence })
+        ]));
+      }
+      card.appendChild(det);
+    });
+
+    card.appendChild(el("div", { style: "margin-top:10px" }, [
+      el("button", { type: "button", text: "Download label JSON",
+                     onclick: function () { downloadJSON(run); } })
+    ]));
+    return card;
+  }
+
+  // ------------------------------------------------------------------ context
+  function contextPane() {
+    var pane = document.getElementById("context");
+    pane.innerHTML = "";
+    pane.appendChild(el("h2", { text: "Context" }));
+    var run = runs.filter(function (r) { return r.key === context.runKey; })[0] || runs[0];
+    if (!run) return;
+
+    var tabs = el("div", { class: "tabs" });
+    tabs.appendChild(el("button", { class: context.tab === "transcript" ? "active" : "",
+      type: "button", text: "Transcript",
+      onclick: function () { context.tab = "transcript"; renderAll(); } }));
+    tabs.appendChild(el("button", { class: context.tab === "rubric" ? "active" : "",
+      type: "button", text: "Rubric",
+      onclick: function () { context.tab = "rubric"; renderAll(); } }));
+    pane.appendChild(tabs);
+    pane.appendChild(el("div", { class: "runmeta", text: run.id }));
+
+    if (context.tab === "transcript") {
+      if (!run.transcript) {
+        pane.appendChild(el("div", { class: "empty",
+          text: "No transcript loaded for this run — drop the runs/ folder, not just the judge files." }));
+        return;
+      }
+      var pre = el("pre", { class: "ctx mono" });
+      run.transcript.forEach(function (t) {
+        var head = "## Turn " + t.n + " — " + t.role + "\n";
+        if (context.scrollTurn === t.n && t.role === "ASSISTANT") {
+          var mk = el("mark", { text: head + t.body + "\n\n" });
+          mk.id = "scrolltarget";
+          pre.appendChild(mk);
+        } else {
+          pre.appendChild(document.createTextNode(head + t.body + "\n\n"));
+        }
+      });
+      pane.appendChild(pre);
+      if (context.scrollTurn !== null) {
+        var tgt = document.getElementById("scrolltarget");
+        if (tgt) tgt.scrollIntoView({ block: "center" });
+        context.scrollTurn = null;
+      }
+      return;
+    }
+
+    var picker = el("div", { class: "tabs" });
+    RUBRICS.forEach(function (r) {
+      picker.appendChild(el("button", { class: context.rubric === r ? "active" : "",
+        type: "button", text: LABEL[r],
+        onclick: function () { context.rubric = r; renderAll(); } }));
+    });
+    pane.appendChild(picker);
+    var r = context.rubric;
+    if (!r) { pane.appendChild(el("div", { class: "empty", text: "Pick a rubric." })); return; }
+    if (r === "lint") {
+      pane.appendChild(el("div", { class: "empty", text:
+        "Lint has no rubric file. It is decided by scripts/validate_userdata.py and scripts/lint_transcript.py, and the judge only transcribes them. Disagreeing here grades the RULE, not a model — the fix is a change to the script." }));
+      return;
+    }
+    if (!rubricTexts[r]) {
+      pane.appendChild(el("div", { class: "empty",
+        text: "Not loaded — drop .claude/skills/test-personas/rubrics/" + RUBRIC_FILE[r] + " (or the whole folder)." }));
+      return;
+    }
+    pane.appendChild(el("pre", { class: "ctx mono", text: rubricTexts[r] }));
+  }
+
+  // ----------------------------------------------------------------- readout
+  function stats() {
+    var s = { per: {}, overall: { hits: 0, n: 0 }, contradictions: [], findings: {},
+              blindFound: 0, blindMatched: 0, labelled: 0 };
+    RUBRICS.forEach(function (r) { s.per[r] = { hits: 0, n: 0, excluded: 0 };
+                                   s.findings[r] = { agree: 0, disagree: 0, borderline: 0 }; });
+    runs.forEach(function (run) {
+      var complete = GRADED.every(function (r) { return run.human[r]; });
+      if (complete) s.labelled++;
+      RUBRICS.forEach(function (r) {
+        var h = run.human[r], j = run.judge.rubrics[r].verdict;
+        if (!h) return;
+        if (j === null) { s.per[r].excluded++; return; }
+        s.per[r].n++; if (h === j) s.per[r].hits++;
+      });
+      var d = derivedOverall(run.human, run.judge.rubrics.lint.verdict);
+      if (d && run.judge.overallJudge) {
+        s.overall.n++; if (passish(run.judge.overallJudge) === (d === "PASS")) s.overall.hits++;
+      }
+      if (selfContradiction(run)) s.contradictions.push(run.id);
+      Object.keys(run.findingLabels).forEach(function (k) {
+        var rub = k.split(":")[0], v = (run.findingLabels[k] || {}).human;
+        if (v && s.findings[rub]) s.findings[rub][v]++;
+      });
+      if (run.blind && run.blind.judge_matched !== null) {
+        s.blindFound += run.blind.human_found; s.blindMatched += run.blind.judge_matched;
+      }
+    });
+    return s;
+  }
+
+  function sidebar() {
+    var side = document.getElementById("sidebar");
+    side.innerHTML = "";
+    side.appendChild(el("h2", { text: "Runs" }));
+    runs.forEach(function (run) {
+      var done = GRADED.filter(function (r) { return run.human[r]; }).length;
+      side.appendChild(el("button", {
+        class: "sidebar-run" + (context.runKey === run.key ? " active" : ""),
+        type: "button", text: run.id + "  (" + done + "/" + GRADED.length + ")",
+        onclick: function () { context.runKey = run.key; renderAll(); }
+      }));
+    });
+
+    var s = stats();
+    side.appendChild(el("h2", { text: "Readout", style: "margin-top:14px" }));
+    var ro = el("div", { class: "readout" });
+    function row(k, v) { ro.appendChild(el("div", {}, [el("span", { class: "k", text: k }),
+                                                      el("span", { text: v })])); }
+    row("runs fully labelled", s.labelled + "/" + runs.length);
+    RUBRICS.forEach(function (r) {
+      var p = s.per[r];
+      var txt = p.n ? (p.hits / p.n).toFixed(2) + " (" + p.hits + "/" + p.n + ")" : "n/a";
+      if (p.excluded) txt += "  [" + p.excluded + " excl]";
+      row(LABEL[r], txt);
+    });
+    row("overall", s.overall.n ? s.overall.hits + "/" + s.overall.n : "n/a");
+    if (s.contradictions.length) row("self-contradiction", String(s.contradictions.length));
+    if (s.blindFound) row("recall", (s.blindMatched / s.blindFound).toFixed(2) +
+                                    " (" + s.blindMatched + "/" + s.blindFound + ")");
+    var coh = s.per.coherence;
+    row("coherence promotion", (coh.n >= 10 && coh.hits / coh.n >= 0.9)
+        ? "ELIGIBLE" : "not yet (" + coh.hits + "/" + coh.n + " of 10 @ .90)");
+    side.appendChild(ro);
+
+    // A visible way to add folders after the first load, for when drag-and-drop
+    // is fiddly. Same ingest path.
+    side.appendChild(el("h2", { text: "Add files", style: "margin-top:14px" }));
+    var more = el("input", { type: "file", webkitdirectory: "", directory: "", multiple: "" });
+    more.addEventListener("change", function (ev) {
+      var out = [];
+      Array.prototype.forEach.call(ev.target.files, function (f) {
+        out.push({ file: f, name: f.name, path: f.webkitRelativePath || f.name });
+      });
+      readFiles(out);
+    });
+    side.appendChild(more);
+    side.appendChild(el("div", { class: "runmeta",
+      text: Object.keys(rubricTexts).length + "/4 rubric files loaded" }));
+
+    side.appendChild(el("div", { style: "margin-top:12px;display:flex;gap:6px;flex-wrap:wrap" }, [
+      // One file, not one per run: browsers block multiple sequential
+      // downloads, so "download all" silently delivered only the first.
+      el("button", { type: "button", text: "Download all (one file)",
+                     onclick: function () {
+                       var labelled = runs.filter(function (r) {
+                         return GRADED.some(function (x) { return r.human[x]; });
+                       });
+                       downloadBlob("grade-judge-labels.json",
+                                    labelled.map(exportObject));
+                     } }),
+      el("button", { type: "button", text: "Copy all as JSON",
+                     onclick: function () {
+                       var all = runs.map(exportObject);
+                       navigator.clipboard.writeText(JSON.stringify(all, null, 2));
+                     } })
+    ]));
+  }
+
+  // ------------------------------------------------------------------ export
+  function exportObject(run) {
+    var v = {};
+    RUBRICS.forEach(function (r) {
+      v[r] = { judge: run.judge.rubrics[r].verdict, human: run.human[r],
+               note: (run.verdictNotes || {})[r] || null };
+    });
+    var findings = [];
+    RUBRICS.forEach(function (r) {
+      run.judge.rubrics[r].findings.forEach(function (f) {
+        var lab = run.findingLabels[findingKey(r, f.idx)] || {};
+        if (!lab.human && !lab.note) return;
+        findings.push({ rubric: r, turn: f.turn, summary: f.text,
+                        human: lab.human || null, note: lab.note || null });
+      });
+    });
+    var blind = null;
+    if (run.blind && run.blind.judge_matched !== null) {
+      blind = { human_found: run.blind.human_found, judge_matched: run.blind.judge_matched };
+    }
+    return { run: run.id, labeller: null, verdicts: v,
+             overall: { judge: run.judge.overallJudge }, findings: findings,
+             notes: run.runNotes || null, blind: blind };
+  }
+
+  function downloadBlob(filename, obj) {
+    var blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 0);
+  }
+
+  function downloadJSON(run) {
+    downloadBlob(run.id.replace(/\//g, "-") + ".json", exportObject(run));
+  }
+
+  // ------------------------------------------------------------------ wiring
+  function renderAll() {
+    sidebar();
+    var host = document.getElementById("runs");
+    host.innerHTML = "";
+    var run = runs.filter(function (r) { return r.key === context.runKey; })[0];
+    if (run) host.appendChild(runCard(run));
+    contextPane();
+  }
+
+  function readFiles(entries) {
+    var pending = entries.length;
+    if (!pending) return;
+    entries.forEach(function (e) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        ingest(e.path, e.name, String(reader.result));
+        if (--pending === 0) finalizeIngest();
+      };
+      reader.onerror = function () { if (--pending === 0) finalizeIngest(); };
+      reader.readAsText(e.file);
+    });
+  }
+
+  // Everything below touches the DOM. Guarded so the parser above can be
+  // required from node by tests/test_grade_judge.py — there is no JS test
+  // runner in this repo, and an untested parser is how the old tool shipped
+  // a blind-pass leak.
+  var HAS_DOM = typeof document !== "undefined";
+  if (HAS_DOM) {
+
+  document.getElementById("picker").addEventListener("change", function (ev) {
+    var out = [];
+    Array.prototype.forEach.call(ev.target.files, function (f) {
+      out.push({ file: f, name: f.name, path: f.webkitRelativePath || f.name });
+    });
+    readFiles(out);
+  });
+
+  var dz = document.getElementById("dropzone");
+  // Listen on the document, not the dropzone: the dropzone is hidden once runs
+  // load, and a hidden element cannot receive drops — so dropping a second
+  // folder (the rubrics) silently did nothing.
+  document.addEventListener("dragover", function (e) { e.preventDefault(); dz.classList.add("over"); });
+  document.addEventListener("dragleave", function () { dz.classList.remove("over"); });
+  document.addEventListener("drop", function (e) {
+    e.preventDefault(); dz.classList.remove("over");
+    var items = e.dataTransfer.items, out = [], pending = 0, done = false;
+    function finish() { if (done && pending === 0) readFiles(out); }
+    function walk(entry, prefix) {
+      if (entry.isFile) {
+        pending++;
+        entry.file(function (f) {
+          out.push({ file: f, name: entry.name, path: prefix + entry.name });
+          pending--; finish();
+        }, function () { pending--; finish(); });
+      } else if (entry.isDirectory) {
+        pending++;
+        var rd = entry.createReader();
+        (function readMore() {
+          rd.readEntries(function (batch) {
+            if (!batch.length) { pending--; finish(); return; }
+            batch.forEach(function (c) { walk(c, prefix + entry.name + "/"); });
+            readMore();
+          }, function () { pending--; finish(); });
+        })();
+      }
+    }
+    for (var i = 0; i < items.length; i++) {
+      var entry = items[i].webkitGetAsEntry && items[i].webkitGetAsEntry();
+      if (entry) walk(entry, "");
+    }
+    done = true; finish();
+  });
+
+  }  // end HAS_DOM
+
+  // Exposed for the headless parser test (tests/test_grade_judge.py). Browsers
+  // ignore it; node uses it to run the parser over the real corpus.
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = { parseJudgeFile: parseJudgeFile, parseTranscript: parseTranscript,
+                       derivedOverall: derivedOverall, RUBRICS: RUBRICS, GATING: GATING };
+  }
+})();
+</script>
+</body>
+</html>

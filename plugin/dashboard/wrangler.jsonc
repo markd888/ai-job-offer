@@ -1,0 +1,16 @@
+// Read-only cloud copy of the dashboard. Build with scripts/build_cloud.sh, which
+// fills .cloud/ with the SPA and the data snapshot, then `npx wrangler deploy`.
+// Access to job-search-dashboard.<subdomain>.workers.dev is gated by Cloudflare Access.
+{
+  "name": "job-search-dashboard",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": ".cloud",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "run": "2026-08-23b/maya-cold-start",
+  "labeller": null,
+  "verdicts": {
+    "lint": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "groundedness": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    },
+    "coherence": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    },
+    "conformance": {
+      "judge": "PASS",
+      "human": "PASS",
+      "note": null
+    },
+    "tone": {
+      "judge": "FAIL",
+      "human": "PASS",
+      "note": null
+    }
+  },
+  "overall": {
+    "judge": "FAIL"
+  },
+  "findings": [
+    {
+      "rubric": "groundedness",
+      "turn": 18,
+      "summary": "turn 18: \"Paddle, Plum and Tide — three more roles scoring as high as Lendable, all still undecided\" — the count is not grounded in turn 15's table, which lists two Plum roles and two Tide roles alongside one Paddle role, so the three named companies hold five undecided roles, not three.",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "groundedness",
+      "turn": 18,
+      "summary": "turn 18: \"three more roles scoring as high as Lendable\" — no score or tier was surfaced for any role anywhere in the run, and this comparative claim restates turn 15's own ranking inaccurately, where the sweep told the user \"Lendable's cards role is the best thing in the sweep.\"",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "coherence",
+      "turn": 12,
+      "summary": "turn 12: \"One thing before we're done — want your daily brief to run automatically each day, or would you rather kick it off yourself?\" — Rule 1: the daily brief has not been mentioned once in the preceding eleven turns and is never described, so the user is asked to make a scheduling decision about an artefact she cannot picture; turn 13's \"All yours to run, then.\" closes the thread without ever naming the command that runs it, leaving her holding a commitment with no mechanism (she has to guess `/job-offer:today` unaided at turn 18).",
+      "human": "borderline",
+      "note": null
+    },
+    {
+      "rubric": "coherence",
+      "turn": 15,
+      "summary": "turn 15: \"| Company | Role | Why it fits | Link |\" against the rows \"right level, wrong country\", \"savings fintech, Berlin relocation\" and \"credit fintech, Spain-remote only\" — Rule 4: a column promising why each role fits, inside a list introduced as \"Found 8 roles worth a look\", contains three entries whose stated content is why the role does not fit, so the user cannot tell whether these are recommendations or exclusions.",
+      "human": "borderline",
+      "note": null
+    },
+    {
+      "rubric": "coherence",
+      "turn": 15,
+      "summary": "turns 15 and 17: turn 15 — \"Two pages wouldn't open, so I've filed them unscored rather than guess: - Deel … - Houseful …\"; turn 17 — \"Deel and Houseful are still sitting there without a score, since neither page would open for me — paste either link back and I'll have another go.\" — Rule 3: the same status and the same remedy land twice two turns apart with nothing added, and turn 18's heads-up repeats the closing clause verbatim a third time (\"paste either link back and I'll have another go\").",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "coherence",
+      "turn": 15,
+      "summary": "turns 15 and 16: turn 15 — \"Open `/job-offer:dashboard` to sort through these — or just tell me here which ones you want to go after.\"; turn 16 — \"You can do this in the dashboard too, if you'd rather click than type.\" — Rule 3: the click-or-type choice is offered again in the immediately following turn, after the user has already answered it by typing, which reads as not having noticed her answer.",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "coherence",
+      "turn": 15,
+      "summary": "turns 15 and 18: turn 15 — \"On your four: Lendable's cards role is the best thing in the sweep.\"; turn 18 — \"Paddle, Plum and Tide — three more roles scoring as high as Lendable, all still undecided → pick or drop them before Monday.\" — Rule 4: the sweep named Lendable the single best result and the user acted on that in turn 16, then the brief silently asserts three roles score as high, reversing the basis of a decision she has already made without acknowledging the change.",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 7,
+      "summary": "turn 7: \"If you want to do it now, paste one to three sentences on what you're best at and I'll shape it into a paragraph. Otherwise say skip and we'll keep moving.\" — Restates the fork the sentence above it already gave (\"Two ways to do it: write it now, or skip\"), so the one long question in setup is long because of repetition, not substance.",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 12,
+      "summary": "turn 12: \"Tell me if those numbers feel off and I'll redo them.\\n\\nOne thing before we're done — want your daily brief to run automatically each day, or would you rather kick it off yourself?\" — Rule A violation: two unrelated decisions (whether the weekly cadence is right, and whether the brief runs itself) bundled into one message, and the user's reply has to answer both.",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 15,
+      "summary": "turn 15: \"| Tide | Lead Product Manager, Banking Payments | right level, wrong country |\" — The column is headed \"Why it fits\" but three rows carry reasons the role does *not* fit (\"wrong country\", \"Berlin relocation\", \"Spain-remote only\"), forcing the user to re-read a table built to be skimmed.",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 15,
+      "summary": "turn 15: \"Say the word and I'll file them.\\n\\nOpen `/job-offer:dashboard` to sort through these — or just tell me here which ones you want to go after.\" — Rule A violation again: a yes/no on filing the two excluded roles is stacked under a separate ask about which of the eight to pursue, and the first ask is dropped by the user and never picked back up by the assistant.",
+      "human": "agree",
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 18,
+      "summary": "turn 18: \"Deel and Houseful — filed without a score because neither page would open → paste either link back and I'll have another go.\" — Near-verbatim repeat of turn 17's \"Deel and Houseful are still sitting there without a score, since neither page would open for me — paste either link back and I'll have another go\", the third time in four turns the user is told the same thing.",
+      "human": "agree",
+      "note": null
+    }
+  ],
+  "notes": null,
+  "blind": null
+}

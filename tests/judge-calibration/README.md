@@ -1,0 +1,275 @@
+# Judge calibration
+
+Frozen corpus of harness runs (`runs/`, scrubbed) + human labels (`labels/`) +
+`stats.py`. Purpose: know the judge's error rate so a FAIL means something, and
+replay a rubric edit in minutes instead of a full journey sweep.
+
+## Where this sits in standard practice
+
+The usual sequence for building an LLM judge is:
+
+    error analysis → failure taxonomy → rubric → validate against human labels
+
+A human reads a sample of traces unaided, open-codes what went wrong, those
+codes are clustered into a taxonomy, and the rubric is written *from* the
+taxonomy. Validation comes last.
+
+**We did it backwards.** The rubrics were written first, from intuition and
+from defects we already knew about, and ground truth was collected afterwards.
+Two consequences worth stating plainly, because they limit what these numbers
+can support:
+
+- The rubrics may not cover the failure modes that actually dominate. Nothing
+  here has tested that, because no unaided read preceded them.
+- Most of the corpus is spoiled for error analysis. Once you have read a
+  judge's findings for a run, you cannot produce an independent list for it.
+  Going forward, error analysis happens on new runs, before judging.
+
+Standard names for the pieces here, so this is referenceable outside the repo:
+
+| here | standard term |
+|---|---|
+| rubric | rubric / annotation guideline |
+| blind pass | error analysis (open coding) |
+| `runs/` + `labels/` | annotated evaluation set |
+| verdict agreement | accuracy over run verdicts |
+| held-out runs | validation set |
+
+**Known limitation:** with one annotator there is no inter-annotator agreement,
+so "human label" means one person's judgement, not a consensus. Normal for a
+small team; not the textbook form. Don't present it as one.
+
+## What you are labelling
+
+Five verdicts per run. That is the whole job.
+
+    Lint:          PASS          scripts, no judge involved
+    Groundedness:  FAIL  (3)     gating, zero-tolerance
+    Coherence:     PASS          advisory, holistic
+    Conformance:   FAIL  (1)     gating, zero-tolerance
+    Tone:          PASS          advisory, holistic
+
+    Gate: Lint AND Groundedness AND Conformance  →  Overall
+
+Read the five, set your own five, and open a rubric's findings only when you
+disagree with its verdict. This is the mainstream shape in judge calibration —
+binary rather than scaled, one judge per dimension — and it is why the corpus
+now yields ~40 comparisons instead of the old hard tier's two findings across
+eleven runs, which could never reach the minimum sample size to gate on.
+
+Three things that change how you read a row:
+
+- **Lint is not a judge.** It comes from `scripts/validate_userdata.py` and
+  `scripts/lint_transcript.py`, and the judge only transcribes them. Marking it
+  FAIL when the judge said PASS grades the *rule*; the fix is a change to the
+  script, not a worked example.
+- **Zero-tolerance vs holistic.** Groundedness and conformance fail on one
+  finding. Coherence and tone are a judgement about the whole transcript —
+  findings can and do sit alongside a PASS, and that is correct, not sloppy.
+  (`2026-08-07` tone is exactly this case.)
+- **Never set an overall verdict.** There is no control for it. Overall is
+  derived: PASS iff your lint, groundedness and conformance are all PASS.
+  Coherence and tone never enter the gate.
+
+## Labelling with the tool (primary path)
+
+Open `grade-judge.html` in a browser. No build step, no server, no network;
+everything stays in the tab and is checkpointed to `localStorage`.
+
+1. Drop the `runs/` folder onto the dropzone (and optionally
+   `.claude/skills/test-personas/rubrics/` to read rubric text alongside).
+   **Use the folder picker or drag-and-drop, not "Choose files"** — a flat
+   picker discards directory names, and four runs share the filename
+   `maya-cold-start.judge.md`.
+2. Each run starts behind a **blind pass**: write your own findings before
+   seeing the judge's, then reveal. Skip it if you only care about precision.
+   The blind pass is the only source of recall data, and the only mechanism
+   that has ever produced a *new rubric rule* — both restructures of this
+   harness came out of one.
+3. Set PASS/FAIL on each of the five rows. The judge's call sits next to yours,
+   read-only, with its finding count.
+4. Findings are collapsed under each rubric. Open one when you disagree.
+   Groundedness carries its claim table; conformance carries every criterion
+   assessment behind a second fold, since most of its bullets are PASSes rather
+   than violations.
+5. Export with "Download label JSON" per run, or "Download all" from the
+   sidebar. Move the files into `labels/`.
+
+The sidebar mirrors `stats.py` live. Label there, cross-check with the script.
+
+## Labelling by hand (fallback)
+
+Copy `labels/TEMPLATE.json` to `labels/<date>-<persona>-<journey>.json` and fill
+`verdicts.<rubric>.human` for each of the five. Leave `overall.human` null —
+`stats.py` exits 2 if you set it, because a hand-set overall silently competes
+with the derivation. Findings are optional; add entries only where you drilled in.
+
+A `null` judge verdict is missing data, not a FAIL. Adjudicate the human side
+anyway; both `stats.py` and the tool report it as an excluded run rather than
+coercing it.
+
+## Reading the numbers
+
+    python3 tests/judge-calibration/stats.py tests/judge-calibration/labels/
+    python3 tests/judge-calibration/stats.py tests/judge-calibration/labels/ --gate
+
+The main table is a confusion matrix over run verdicts, positive class = FAIL
+("the judge flagged this run"):
+
+    precision   of the runs it FAILED, how many deserved it     → over-firing
+    recall      of the runs that deserved FAIL, how many it got → missing
+    accuracy    how often you agreed at all                     → both, blended
+
+Read direction before magnitude. Two rubrics can sit at identical accuracy and
+be failing in opposite ways — in the first real labelling pass, groundedness
+and coherence were both 0.86, one missing and one over-firing.
+
+The practical reading:
+
+    low precision  →  you can't trust a FAIL
+    low recall     →  you can't trust a PASS
+
+Verdict-level recall saturates. It only catches a miss large enough to flip the
+verdict, so on a zero-tolerance rubric, finding 1 of 5 problems still scores as
+a hit. Partial misses appear only in blind recall.
+
+Finding precision appears only where you drilled in. Bars: agreement >= 0.9 per rubric with >= 5
+adjudicated runs, precision >= 0.9 per rubric with >= 5 adjudicated findings,
+recall >= 0.8 when any blind data exists. Thin rubrics report but never gate.
+
+`stats.py` also prints whether **coherence** now clears the promotion bar
+(agreement >= 0.9 over >= 10 adjudicated runs). Clearing it makes coherence
+*eligible* for the gate; promoting it is a deliberate one-line change in
+`test-personas/SKILL.md`, never automatic and never because a single run
+obviously should have failed on it.
+
+### The honest limitation
+
+Every run in the corpus currently comes back **FAIL overall**, and no run has
+ever passed the gate. Per-rubric pass rates:
+
+    Lint          3/8      Conformance   2/8   (gating)
+    Groundedness  3/8      Tone          6/8   (advisory)
+    Coherence     3/8
+
+Three consequences, in increasing order of how much they should bother you.
+
+Overall agreement carries almost no signal — a judge that said FAIL to
+everything scores 8/8. Never quote it as evidence the judge works.
+
+**The gate has never been observed to fire green.** Each gating rubric has
+passed on its own, but never all three on the same run, so the PASS path is an
+untested code path in the most important place. Nothing here demonstrates these
+rubrics *can* clear a good run.
+
+**Verdict-level labelling cannot detect over-firing while everything fails.**
+If a judge invents a finding, a zero-tolerance rubric still returns FAIL, you
+tick "agree", and the fabricated reasoning survives untouched. The periodic
+drill-down into a rubric you *agree* with is therefore not optional on this
+corpus — it is the only thing standing between you and a judge that is right
+for entirely invented reasons.
+
+Conformance at 2/8 deserves the hardest look. Two of its failures are legitimate
+(runs that terminated early, so required criteria were never reached — scored as
+FAIL by design, not a product defect). Whether the remaining five are real or the
+rubric is simply too strict is exactly what labelling decides.
+
+Verdict agreement is also not *reasoning* agreement. A FAIL can be right for
+the wrong reason — three tone findings where two are real and one is invented
+still yields a correct FAIL you would tick and move past. Periodically open a
+rubric you agree with and check the findings underneath. Cheap insurance, not a
+routine.
+
+## You are grading the judge, not the product
+
+The only question at each row is: **given this rubric and this transcript, was
+this verdict correct?** Not "would I ship this?". They come apart in three
+places, all of them easy to get wrong:
+
+- **A defect already fixed in current code.** The frozen transcript still
+  contains it, so the judge was right to flag it. Label agree. The corpus is a
+  historical record, not a status report.
+- **A truncated harness run.** `2026-06-04` stopped at turn 9, so conformance
+  failed 15 required criteria. That is a broken *test run*, not a product
+  defect — but the rule was applied correctly to what the judge was given.
+  Agree.
+- **A real product problem filed under the wrong rubric.** This one inverts:
+  the observation is useful and the judge was still wrong to put it there.
+  Disagree, and move the observation to the product backlog so it isn't lost.
+
+What stays in scope: if you disagree because the *criterion* is ambiguous or
+badly written, that is a rubric bug, and the rubric is part of the judge. So
+"conformance is too strict" is a legitimate labelling outcome. "The product
+fails a lot" is not.
+
+## Negative controls (`controls/`)
+
+Every transcript in `runs/` is a run with real defects, so a judge that failed
+everything would score perfectly. `controls/` holds hand-repaired transcripts
+that are supposed to **PASS** on named rubrics.
+
+    tone-clean.md                 tone
+    tone-groundedness-clean.md    tone + groundedness
+
+They are synthetic and say so in their headers, which a test enforces — if one
+ever drifts into `runs/` or gets read as a real run, its numbers become
+fiction. Each also names which rubrics it does *not* control for, so a PASS
+isn't over-read as "this transcript is clean".
+
+**Re-run them after every rubric change.** They are the only thing that
+distinguishes "correctly strict" from "fails everything".
+
+They earned their place immediately. Tightening `tone.md` after the first
+calibration pass took it from 2 FAILs to 7 FAILs out of 7 — agreement rose from
+0.43 to 0.86, but with zero true negatives there was no way to tell a fixed
+rubric from a broken one. The controls still passed, which settled it.
+
+## Product observations go to a backlog, not into a run note
+
+A labelling pass turns up two kinds of thing: disagreements with the judge, and
+observations about the product that no rubric asks about. The first belongs in
+the label. The second used to go in the run's `notes` field, where `stats.py`
+does not read it, no test touches it, and nobody sees it again.
+
+That is not hypothetical. "Too many CTAs in one paragraph, always lead with one"
+sat in `2026-06-07/maya-active-loop`'s run note for eleven weeks and was still
+reproducing in `2026-08-23b`. A Playwright fetch-fallback request sat in
+`2026-08-10`'s for two weeks and reproduced the same way.
+
+So: write the observation wherever you actually track open work, naming the run
+it came from so the evidence is one file away. Keep the run note for things that
+explain *this run's labels* — why a verdict was hard, what the transcript was
+doing that the rubric did not anticipate.
+
+## Acting on a disagreement
+
+- Ambiguous criterion → rewrite the criterion. That is a spec bug, not a judge bug.
+- Mechanically checkable → move it into `scripts/lint_transcript.py` or
+  `scripts/validate_userdata.py`; it leaves the judged pool permanently.
+- Genuinely subjective judge error → add it to that rubric's
+  `## Worked examples` section. Pick borderline cases, never obvious ones. Every
+  rubric is required by test to carry that section, because without it labelling
+  produces a number and nothing changes.
+
+## Replaying after a rubric edit
+
+Re-run the judge for the edited rubric only, over the transcripts in `runs/`
+(judge-prompt + that one rubric + transcript; no conversation loop, no
+simulator). One rubric edit costs ~8 cheap single-dimension calls, which is the
+main reason the judge is split per rubric.
+
+## Corpus notes
+
+- Eight transcripts carry restructured judge files. Six more
+  (`diego-reflection` ×3, `maya-case-practice` ×2, `maya-cold-start-cv`) are
+  from retired journeys and were deliberately **not** re-judged; their judge
+  files are still the old four-tier hard/soft/spec/critique format. The tool and
+  `test_grade_judge.py` both skip them by format. Don't label them.
+- The two `2026-06-07-beta4-verify/` files have zero assistant turns — they are
+  verification reports, not transcripts, and cannot be judged at all.
+- `2026-06-07/diego-reflection`'s old FAIL was a runner metadata error, not a
+  plugin bug (see `plugin/memory.md`, 2026-06-07).
+- Judges format the conformance section three different ways. Verdicts are
+  comparable across runs; conformance finding **counts** are not — the tool
+  counts only bullets containing FAIL, which is why a "13 findings" PASS was a
+  parser bug rather than a judge one.

@@ -1,0 +1,364 @@
+/* Design tokens for the dashboard. Mantine sets data-mantine-color-scheme on
+   <html>, so every token flips with the light/dark toggle. Components read
+   these through the classes below or var(--jst-*) in inline styles. */
+
+:root[data-mantine-color-scheme="light"] {
+  --jst-bg: #f4f5f7;
+  --jst-surface: #ffffff;
+  --jst-subtle: #f8f9fb;
+  --jst-track: #eef0f3;
+  --jst-border: #e3e6eb;
+  --jst-border-strong: #c9ced6;
+  --jst-divider: #eef0f3;
+  --jst-ink: #12151c;
+  --jst-ink-2: #3a4352;
+  --jst-muted: #5b6270;
+  --jst-box: #9aa1ac;
+  --jst-on-ink: #ffffff;
+  --jst-hover: #e9ebef;
+  --jst-accent: #2447d6;
+  --jst-ok: #12805c;
+  --jst-on-ok: #ffffff;
+  --jst-ok-bg: #f1f7f4;
+  --jst-ok-chip-bg: #e8f4ee;
+  --jst-ok-fg: #0e6b4c;
+  --jst-warn-fg: #8a4b00;
+  --jst-warn-bg: #fff1db;
+  --jst-danger-fg: #b42318;
+  --jst-danger-bg: #fdecea;
+  --jst-neutral-bar: #c3c8d0;
+  --jst-chip-bg: #ebeef3;
+  --jst-link: #2447d6;
+  --jst-link-hover: #1a34a3;
+  --jst-status-offer: #7a3fd1;
+  --jst-status-new: #c27803;
+  --jst-status-to-apply: #d0601a;
+  --jst-status-applied: #2447d6;
+  --jst-status-rejected: #9aa1ac;
+  --jst-status-not-interested: #c3c8d0;
+}
+
+:root[data-mantine-color-scheme="dark"] {
+  --jst-bg: #0e1015;
+  --jst-surface: #161920;
+  --jst-subtle: #1b1f27;
+  --jst-track: #232833;
+  --jst-border: #262b35;
+  --jst-border-strong: #3a404c;
+  --jst-divider: #20242d;
+  --jst-ink: #eceef2;
+  --jst-ink-2: #c4c9d3;
+  --jst-muted: #9aa2b1;
+  --jst-box: #5c6370;
+  --jst-on-ink: #0e1015;
+  --jst-hover: #1f232c;
+  --jst-accent: #3d63f5;
+  --jst-ok: #3fbf8a;
+  --jst-on-ok: #0e1015;
+  --jst-ok-bg: #13261e;
+  --jst-ok-chip-bg: #13261e;
+  --jst-ok-fg: #6fd9a8;
+  --jst-warn-fg: #f5b961;
+  --jst-warn-bg: #3a2a12;
+  --jst-danger-fg: #ff8a80;
+  --jst-danger-bg: #3a1a1a;
+  --jst-neutral-bar: #3a404c;
+  --jst-chip-bg: #262b35;
+  --jst-link: #8fa6ff;
+  --jst-link-hover: #b3c2ff;
+  --jst-status-offer: #b48cff;
+  --jst-status-new: #e5a33a;
+  --jst-status-to-apply: #f08a4b;
+  --jst-status-applied: #7c95ff;
+  --jst-status-rejected: #6b7280;
+  --jst-status-not-interested: #4b5260;
+}
+
+body {
+  background: var(--jst-bg);
+  color: var(--jst-ink);
+}
+
+.jst-num {
+  font-family: var(--mantine-font-family-monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.jst-eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--jst-muted);
+}
+
+.jst-card {
+  background: var(--jst-surface);
+  border: 1px solid var(--jst-border);
+  border-radius: 14px;
+}
+
+.jst-h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.jst-h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.jst-muted {
+  color: var(--jst-muted);
+}
+
+.jst-link {
+  color: var(--jst-link);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.jst-link:hover {
+  color: var(--jst-link-hover);
+  text-decoration: underline;
+}
+
+/* Tier badge */
+.jst-tier {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font: 600 12px/1 var(--mantine-font-family-monospace);
+  flex: none;
+}
+.jst-tier-P0 { background: var(--jst-danger-bg); color: var(--jst-danger-fg); }
+.jst-tier-P1 { background: var(--jst-warn-bg); color: var(--jst-warn-fg); }
+.jst-tier-P2,
+.jst-tier-P3 { background: var(--jst-chip-bg); color: var(--jst-ink-2); }
+.jst-tier-none {
+  background: transparent;
+  color: var(--jst-muted);
+  border: 1px dashed var(--jst-border-strong);
+}
+
+.jst-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.jst-count {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 10px;
+  background: var(--jst-track);
+  color: var(--jst-ink-2);
+  font: 500 12px/1 var(--mantine-font-family-monospace);
+}
+
+/* Pipeline stage tabs */
+.jst-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--jst-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.jst-tab:hover { color: var(--jst-ink); }
+.jst-tab[aria-selected="true"] { color: var(--jst-ink); border-bottom-color: var(--jst-ink); }
+
+/* Tier filter chips */
+.jst-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--jst-border);
+  border-radius: 16px;
+  background: var(--jst-surface);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--jst-ink-2);
+  cursor: pointer;
+}
+.jst-chip:hover { border-color: var(--jst-border-strong); }
+.jst-chip[aria-pressed="true"],
+.jst-chip[aria-pressed="true"]:hover {
+  background: var(--jst-ink);
+  border-color: var(--jst-ink);
+  color: var(--jst-on-ink);
+}
+
+.jst-btn {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--jst-border-strong);
+  border-radius: 10px;
+  background: var(--jst-surface);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--jst-ink);
+  cursor: pointer;
+}
+.jst-btn:hover { background: var(--jst-subtle); }
+
+/* Pipeline rows */
+.jst-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 150px 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  border-top: 1px solid var(--jst-divider);
+  min-height: 64px;
+  cursor: pointer;
+}
+.jst-row:hover { background: var(--jst-subtle); }
+.jst-row-head {
+  min-height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--jst-muted);
+  cursor: default;
+}
+.jst-row-head:hover { background: transparent; }
+.jst-row:focus-visible { outline: 2px solid var(--jst-accent); outline-offset: -2px; }
+
+.jst-co {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--jst-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jst-role {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--jst-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jst-age { font-size: 13px; color: var(--jst-muted); }
+.jst-age-stale { color: var(--jst-warn-fg); }
+
+.jst-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  margin-left: 8px;
+  border-radius: 5px;
+  background: var(--jst-warn-bg);
+  color: var(--jst-warn-fg);
+  font-size: 11px;
+  font-weight: 600;
+  vertical-align: 2px;
+}
+.jst-tag-neutral { background: var(--jst-track); color: var(--jst-ink-2); }
+
+/* Today's focus checklist */
+.jst-task {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 20px;
+  border: 0;
+  border-top: 1px solid var(--jst-divider);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: var(--jst-ink);
+  cursor: pointer;
+}
+.jst-task:hover { background: var(--jst-subtle); }
+.jst-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border: 1.5px solid var(--jst-box);
+  border-radius: 6px;
+  flex: none;
+  color: transparent;
+}
+.jst-task[aria-pressed="true"] .jst-box {
+  background: var(--jst-ok);
+  border-color: var(--jst-ok);
+  color: var(--jst-on-ok);
+}
+.jst-task[aria-pressed="true"] .jst-task-text {
+  text-decoration: line-through;
+  color: var(--jst-muted);
+}
+.jst-task-text { font-size: 15px; line-height: 1.45; }
+.jst-task-text p { margin: 0; }
+
+.jst-when {
+  font: 500 12px/1.3 var(--mantine-font-family-monospace);
+  color: var(--jst-muted);
+}
+
+.jst-tick { width: 18px; height: 6px; border-radius: 3px; background: var(--jst-ink); }
+.jst-tick-off { background: var(--jst-border-strong); }
+
+.jst-bar-track {
+  border-radius: 5px;
+  background: var(--jst-track);
+  overflow: hidden;
+}
+.jst-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--jst-accent);
+}
+
+/* Brief markdown inside heads-up cards */
+.jst-note {
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--jst-subtle);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.jst-note p { margin: 0; }
+
+.jst-search { width: 260px; }
+
+@media (max-width: 760px) {
+  .jst-search { width: 100%; }
+  .jst-row { grid-template-columns: 52px minmax(0, 1fr) 52px; padding: 8px 16px; }
+  .jst-col-status { display: none; }
+}

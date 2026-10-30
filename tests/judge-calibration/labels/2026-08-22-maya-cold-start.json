@@ -1,0 +1,78 @@
+{
+  "run": "2026-08-22/maya-cold-start",
+  "labeller": null,
+  "verdicts": {
+    "lint": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": "Verdict agrees, reasoning does not. The one reported finding is a false positive — 'BNPL rewards tier:' at turn 11 is a bold label in a proof-point bullet, not the frontmatter key. Meanwhile turn 19 leaks 'filed with status `new`' and 'scored against your tier rubric' and neither fires, because both patterns are colon-anchored. The run really does leak internals, so FAIL is right; the rule found none of the real ones."
+    },
+    "groundedness": {
+      "judge": "PASS",
+      "human": "PASS",
+      "note": "First PASS in the corpus, and the first true negative available on this rubric. Nothing in the blind pass touched groundedness: the sweep's 11 roles were fetched live, and turn 23's table reproduces turn 20's filings without drift."
+    },
+    "coherence": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    },
+    "conformance": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    },
+    "tone": {
+      "judge": "FAIL",
+      "human": "FAIL",
+      "note": null
+    }
+  },
+  "overall": {
+    "judge": "FAIL"
+  },
+  "findings": [
+    {
+      "rubric": "lint",
+      "turn": 11,
+      "summary": "'tier:' in user-facing text: '- **BNPL rewards tier:** Took it from concept to launch…'",
+      "human": "disagree",
+      "note": "False positive. The bold label 'rewards tier:' is ordinary English inside a proof point, not the meta.md key. The rule needs to distinguish a frontmatter key from a word followed by a colon."
+    },
+    {
+      "rubric": "tone",
+      "turn": 19,
+      "summary": "'seen-ledger', 'exclusion set' and 'recheck watchlist' — the plugin narrating its own internals",
+      "human": "agree",
+      "note": "Matched independently in the blind pass. Called a hard violation there: file names and internal vocabulary, plus an explanation of how the skill works that the user did not ask for."
+    },
+    {
+      "rubric": "tone",
+      "turn": 21,
+      "summary": "'Tip: you can also click the company row in the dashboard and add this note directly — same data underneath.'",
+      "human": "agree",
+      "note": "Matched independently in the blind pass, as part of the broader file-names-exposed pattern in that turn (cv.md, the apply skill name)."
+    },
+    {
+      "rubric": "coherence",
+      "turn": 20,
+      "summary": "'Zilch is the standout and the only 15 out of 15 on the page' — a scale the user has never been shown",
+      "human": "borderline",
+      "note": "Right turn, different finding. The blind pass flagged tier-1 / tier-2 arriving with no prior context in the same message; the judge did not. The 15-out-of-15 point is fair, but it caught the smaller of the two cold terms in that turn."
+    },
+    {
+      "rubric": "conformance",
+      "turn": 17,
+      "summary": "Criterion 1 (end-of-run nudge) scored PASS on /setup's career-coach positioning offer",
+      "human": "borderline",
+      "note": "PASS is correct against the spec as written — the career-coach offer is in setup/SKILL.md. The blind pass says the next step should be /job-search, and that career-coach belongs later, surfaced from /today. So the criterion is satisfied by copy that points the user the wrong way: a spec bug, not a judge error."
+    }
+  ],
+  "notes": "First uncontaminated blind pass in the corpus — every other run had been discussed before it was labelled.\n\nDominant pattern: internal detail exposed to the user, seven times across turns 1, 16, 17, 19, 21, 22 and (partly) 20. The judge reported two of them. Tone's 2026-08-22 tightening fixed the verdict but not the enumeration: it now fails the run, while still surfacing a sample of a systematic problem rather than the whole of it.\n\nAlso surfaced, and not covered by any rubric — filed to the backlog rather than counted here: mis-levelled example roles at turn 7 (Director of Product offered as a Senior-PM example); turn 20's run summary too long to skim and formatted as a list where a table belongs; the 'Say go' gate at turn 19, which is the same shape as the 'Ready?' gate removed from /setup on 2026-08-22, reappearing in /job-search.\n\nThree further notes change the spec rather than grading it, so they are not disagreements with the judge: dropping the option lists at turns 14-15 would invert three required criteria in cold-start.md; retargeting /setup's closing nudge means editing setup/SKILL.md and criterion 1 together; and turn 23's pipeline state is specified as a full per-company table in today/SKILL.md, so replacing it with high-level metrics is a rewrite, not a fix.",
+  "blind": {
+    "human_found": 11,
+    "judge_matched": 2
+  },
+  "_tone_replay": "tone judge verdict replayed 2026-08-23 against rubrics/tone.md as edited that day (full-enumeration rule + two new worked examples). The .judge.md files in runs/ still carry the earlier reading — this field is the current one.",
+  "_blind_after_fixes": "Re-measured 2026-08-23 after the lint.file-path rule and the tone full-enumeration rule landed: 7 of the same 11 now caught (turn 1 by lint.file-path; turns 10, 16 CLAUDE.md, 17, 19, 21, 22 by tone), up from 2. Still missed: the LinkedIn ask at turn 5, the 'Comma-separated.' filler at turn 8, 'Profile, strategy, and journal are written' at turn 16, and tier-1/tier-2 arriving cold at turn 20 (tone flagged that turn for the 15-out-of-15 scale instead). blind.judge_matched stays at 2 — it records the original unaided comparison and must not be edited to look better."
+}
