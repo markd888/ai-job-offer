@@ -157,8 +157,8 @@ When skills or agents DRAFT content for the user (positioning paragraphs, proof 
 - **No filler phrases.** "I wanted to reach out", "As you may know", "I am writing to express" — banned.
 
 Where the plugin ships a `/setup`-style skill with a positioning-drafting step,
-see its "Drafting tone rules" (Step 4 in job-offer) for the full version with
-examples. A single-skill plugin with no such step has no fuller version to point
+see its positioning-drafting rules (in job-offer, `references/setup-positioning-drafting.md`,
+read by `/setup` Step 4) for the full version with examples. A single-skill plugin with no such step has no fuller version to point
 to — the rules above are the whole of it.
 
 ## Briefs, heads-up, and bullet content
@@ -235,7 +235,7 @@ Before committing a SKILL.md edit (or asking Claude to commit one), check agains
 ### Soft checks (worth flagging, not always blockers)
 
 - **End-of-run nudge missing.** Skill closes without a context-aware next-step nudge. Where the plugin ships `references/recommended-flow.md`, derive the nudge from it. A single-skill plugin has no flow to order — its closing line points outward instead. Add one either way, unless there's a deliberate reason not to.
-- **Smoke test section missing.** Every skill in a plugin that ships worked examples should end with a smoke-test section against one — in job-offer, `## Smoke test against the Maya example`.
+- **Smoke test section missing.** Every skill in a plugin that ships worked examples should end with a smoke-test section against one — in job-offer, `## Smoke test against the Maya example`, or a `## Smoke test` pointer to a reference file when the skill keeps its worked example out of the always-loaded text.
 - **SKILL.md > 500 lines.** Not a bug, but a signal — does the skill do too much? Could a reference file or sibling skill split it cleanly?
 - **Frontmatter `description:` is generic.** It should contain the trigger phrases a user would actually type ("/foo", "do X for me").
 

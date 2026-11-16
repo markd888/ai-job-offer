@@ -9,30 +9,13 @@ Onboard the user onto job-offer by filling in `userdata/profile.md` and scaffold
 
 **Voice:** every prompt and message in this skill follows the plugin's tone-of-voice + low-effort-first guidelines in `${CLAUDE_PLUGIN_ROOT}/TONE.md`. `TONE.md` governs; the quoted lines below are examples of what a step should get at and roughly how it should sound, not strings to recite.
 
-The wording used to be locked — "use it verbatim, not paraphrased". That is why
-this file could teach a defect: a locked example outranks the rule it breaks, and
-every leak the corpus records at the confirm-a-write moment traces to one. What
-must not drift is the **order** of the steps, **what** each one asks, and the
-things each step is explicitly told not to do. The sentence itself is yours.
-
-If an example and `TONE.md` disagree, `TONE.md` wins and the example is a bug —
-fix it here rather than following it.
-
-**Interaction form is not wording, and it does not unlock.** A step that says
-"single-select via AskUserQuestion" gets a select; a step that says explicitly
-NOT to use one stays prose. Unlocking the sentence unlocked the shape too on the
-first run afterwards — geography came back as an open-ish prose question — so it
-is worth stating separately. Where `AskUserQuestion` is unavailable, prose that
-offers the same closed set of named choices is an acceptable substitute; an open
-question is not.
+What must not drift is the **order** of the steps, **what** each asks, and what each is told not to do; the sentence itself is yours. If an example and `TONE.md` disagree, `TONE.md` wins. **Interaction form does not unlock:** a step that says select gets a select (or, without `AskUserQuestion`, prose offering the same closed choices); a step that says prose stays prose.
 
 **Opening line** (after Step 0, fresh install only):
 
 > "OK, let's get you set up — nine quick steps, none of it locked in."
 
-Do NOT wait for a confirmation. Go straight into Step 1 in the same message. The
-user has already chosen to run this skill; asking "Ready?" spends one of their
-turns on a decision they have made, which `TONE.md` names as an anti-pattern.
+Don't wait for a confirmation — go straight into Step 1 in the same message.
 
 ## Mode detection
 
@@ -62,9 +45,7 @@ Ask one at a time. Use AskUserQuestion where a step has a clear, closed option
 set (Steps 2, 3, 4, 5); otherwise plain conversational ask. Steps 7 and 8 are
 deliberately NOT selects — see each step for why. Skipping is allowed on
 salary (Step 6), timeline (Step 7), hard filters (Step 8), and
-positioning (Step 4 option B) — see the "skipped placeholders" rule under File
-writes §1 for the exact YAML form to write, except timeline, whose skipped form
-(`target_offer_date: null` plus null cadence targets) is defined in File writes §2.
+positioning (Step 4 option B) — skipped forms are in `${CLAUDE_PLUGIN_ROOT}/references/setup-file-writes.md` (§1 for profile fields, §2 for timeline).
 
 Each step below shows an example prompt in quotes. Write your own in that
 register — one direct ask, no preamble, skip offered where the step is
@@ -81,8 +62,8 @@ just types more. **There is one flow, not two.**
    Follow `${CLAUDE_PLUGIN_ROOT}/references/cv-extraction.md` § "Finding the CV".
    State directory: `userdata/`. Scaffold files: `userdata/companies/.gitkeep`,
    `userdata/stories/.gitkeep`, `userdata/outputs/.gitkeep` (the same three
-   written in File writes §4 below — creating them here just means they already
-   exist by the time §4 runs). If a readable CV is found, say one line and move
+   written by the file-writes step later — creating them here just means they
+   already exist by then). If a readable CV is found, say one line and move
    on:
 
    > "Got your CV — I'll fill in what I can and you just correct me."
@@ -92,34 +73,7 @@ just types more. **There is one flow, not two.**
    the ordinary case; announcing it — "we'll do it the long way", "you just type
    more" — costs a turn and tells the user they made the worse choice.
 
-   **If `job-sweep/profile.md` exists**, read it first. It means the user already
-   ran the standalone `job-sweep` plugin, and it holds `target_titles`,
-   `target_industries` and `geography` — three of the answers below. Say one line:
-
-   > "Found your job-sweep profile — I'll carry those answers over so you don't repeat them."
-
-   Carry the values into Steps 2, 3 and 5 as the pre-filled defaults, and confirm
-   them there exactly as you would confirm CV-derived values — shown, never
-   auto-accepted. A sweep profile is a stronger source than a CV inference,
-   because the user already confirmed it once; it is still not a reason to skip
-   the confirmation.
-
-   Both a CV and a sweep profile may exist. The sweep profile wins for
-   `target_titles`, `target_industries` and `geography` — the user confirmed those
-   answers; the CV only implies them. The CV still supplies everything else.
-
-   **If `job-sweep/seen-roles.jsonl` also exists**, carry it over so the roles
-   the user already saw in `job-sweep` don't come back as `status: new` once
-   `/job-search` starts reading the full ledger. Create `userdata/outputs/` if it
-   doesn't exist yet, then:
-   - `userdata/outputs/seen-roles.jsonl` does not exist → copy the sweep ledger
-     to it verbatim.
-   - `userdata/outputs/seen-roles.jsonl` already exists → append only the lines
-     from the sweep ledger whose `strict_key` is not already present in it. Never
-     overwrite an existing line, never duplicate one.
-
-   Say one line: `"Also carried over your job-sweep history — already-seen roles
-   won't resurface as new."`
+   **If `job-sweep/profile.md` exists** (the user ran the standalone `job-sweep` plugin), read `${CLAUDE_PLUGIN_ROOT}/references/setup-job-sweep-import.md` and follow it: it carries `target_titles`, `target_industries`, `geography` and the seen-roles ledger over, confirmed rather than auto-accepted.
 
 1. **Facts** (`{{NAME}}`, `{{CITY}}`, `{{TIMEZONE}}`, `{{EMAIL}}`) — one confirmation.
 
@@ -146,20 +100,9 @@ just types more. **There is one flow, not two.**
 
    With no CV at all, this step is simply those three questions in that order.
 
-   **Timezone is derived, never asked.** Resolve `{{TIMEZONE}}` from the city the
-   user just gave, falling back to the system timezone when the city is
-   ambiguous. Do not print it, do not confirm it, do not offer an override.
-   "London, UK" settles the question; spending a turn asking the user to confirm
-   `Europe/London` hands them an IANA string to check and gets back the answer
-   they already gave. Nothing downstream breaks if it is wrong, and the user can
-   correct it in their profile.
+   **Timezone is derived, never asked** — from the city (system timezone if ambiguous); don't print or confirm it.
 
-   **LinkedIn is not asked at setup.** It was, and the ask could not answer the
-   question it invited — "why do you need this?" — because the thing it feeds
-   (outreach drafting) is several skills away and may never happen. An optional
-   field whose value the user cannot judge at the moment of asking is a field
-   that belongs later, at the point of use. Leave `linkedin_url:` empty; the
-   skill that drafts outreach asks for it when it actually needs it.
+   **LinkedIn is not asked at setup.** Leave `linkedin_url:` empty; the skill that needs it asks at the point of use.
 
 2. **Target titles** (`{{TARGET_TITLES}}`) — multi-select.
 
@@ -180,14 +123,7 @@ just types more. **There is one flow, not two.**
 
    > "What roles are you targeting? Anything from Senior PM up to Head of Product — list as many as you'd take."
 
-   **The examples must not out-rank the user.** The old wording offered "Director
-   of Product, Principal PM, Group PM, Staff PM" to everyone, which reads as a
-   suggestion that those are the roles to want. Half of them are a level or two
-   above a Senior PM and one is not an individual-contributor seat at all, so the
-   list either flatters or discourages depending on who is reading it, and it
-   anchors the answer either way. With no CV there is nothing to level off, so
-   name a range rather than a ladder. Where a CV or a sweep profile IS available,
-   the derived options are already level-matched and no examples are needed.
+   With no CV, name a range, not a ladder of titles — a list of example titles anchors the answer.
 
    Never auto-accept this step, even when every option came from the CV. A wrong
    target title propagates into every `/job-search` sweep and every
@@ -207,10 +143,7 @@ just types more. **There is one flow, not two.**
 
    > "What industries are you looking at? Fintech, healthcare, climate, enterprise SaaS — whatever fits."
 
-   Substitute as a YAML inline list, same form as Step 2. Never append a
-   formatting instruction like "Comma-separated." to either of these asks: the
-   user will type a list however they type it and you will parse it either way,
-   so the clause spends words telling them something they do not need to know.
+   Substitute as a YAML inline list, same form as Step 2. Never add "Comma-separated." to either ask.
 
 4. **Positioning** (`{{POSITIONING}}` + `{{PROOF_POINTS}}` + `{{MOAT}}`) — two paths. **The default order matters**: present them in the order below. A readable CV found at Step 0 bypasses this question entirely. Writing positioning by hand is 5-10 minutes of real reflection — don't force it during onboarding when the user has a faster path.
 
@@ -223,88 +156,11 @@ just types more. **There is one flow, not two.**
    - **A. Write it now** → **Mode A** (paste 1-3 sentences and walk the conversational draft).
    - **B. Skip for now** — print: *"Skipped — I'll ask again once you've seen a few roles."* Never name the `--refresh` flag to the user; it is a command they did not ask for and will not remember. Write `userdata/profile.md` with the three positioning sections empty under a `<!-- TODO: fill in via /job-offer:setup --refresh, or paste your CV at userdata/cv.md and re-run --refresh -->` comment. Onboarding finishes fast.
 
-   ### Mode A (paste-now)
+   **Mode A (paste-now):** ask for 1-3 sentences of self-positioning and draft one `## Positioning` paragraph. Proof points and moat are NOT asked — leave both empty under the TODO comment; `/today` asks later.
 
-   Ask the user to paste 1-3 sentences of self-positioning. Draft a one-paragraph
-   `## Positioning` from it and show it. That is the whole of Mode A: one ask,
-   one draft, done.
+   **Mode B (CV draft):** draft a positioning paragraph (≤4 sentences), 5-7 proof points and a one-sentence moat from the CV; show them; save only after the user edits or accepts. Discarded → the three sections empty under the TODO comment, never a literal `{{POSITIONING}}`.
 
-   **Proof points and moat are NOT asked here.** Leave both sections empty, under
-   the same TODO comment a skipped Step 4 writes. `/today` nudges for them later,
-   once the user has seen real roles and has a reason to care what their proof
-   points are.
-
-   The old Mode A ran three asks back to back — paste your positioning, now give
-   me three to five numbered wins, now tell me the rare thing you bring. Each
-   produced a draft, each draft closed with the same edit-this disclaimer, and
-   all of it landed inside a flow the user entered to get configured. Deep
-   reflective work belongs in an on-demand career-coach conversation, which is
-   `TONE.md`'s own rule; onboarding's job is to get the user to their first
-   sweep. A proof point written in minute four of setup, before the user has
-   seen a single job description, is also a worse proof point.
-
-   ### Mode B (CV draft)
-
-   Read the CV file. Draft a positioning paragraph (≤4 sentences) + 5-7 proof points (each ≤2 sentences) + a one-sentence moat candidate. Show to user. Ask them to edit / accept / discard. Never save without explicit user review.
-
-   If the user discards, write `userdata/profile.md` with the three positioning sections empty under the same `<!-- TODO: fill in via /job-offer:setup --refresh, or paste your CV at userdata/cv.md and re-run --refresh -->` comment used by Step 4 option B — never leave the literal `{{POSITIONING}}` placeholder unresolved.
-
-   ### Drafting tone rules (apply to BOTH Mode A and Mode B drafts)
-
-   The goal is positioning that reads as senior, specific, and unbluffed. Senior PMs don't recognise themselves in fluffy drafts and bin them.
-
-   **Voice — four core principles:**
-
-   - **Casual but professional.** No stiff openers, no corporate boilerplate.
-   - **Direct and short.** One idea per sentence. No padding. If a sentence runs longer than ~20 words, cut it.
-   - **Honest about gaps, then reframe — never oversell.** If the CV reveals a stretch claim, surface the nuance rather than paper over it.
-   - **Specific over general.** Concrete nouns beat abstract ones.
-
-   **The "Not X — Y" reframing pattern.** Sharpen positioning by explicitly naming the lazy framing the writer is NOT making, then anchoring the specific one. Shape: `Not "<generic claim>" — <specific past-tense fact>.` Use this pattern at least once in the drafted `## Positioning` if the CV implies a stretch claim the writer would want to disown.
-
-   **Proof point format.** Each bullet follows the shape: `**<Anchor>:** <specific work> → <specific outcome>. (<role>)`. The anchor is usually the company or product. The work is past-tense and concrete. The outcome carries the number when one exists. The role is in parentheses at the end. If a metric isn't in the CV, the bullet stays qualitative — don't invent the figure to make it land.
-
-   **Never invent the anchor.** The anchor is a fact, not a formatting slot. Use only
-   the employer or product the source actually attaches to that win — the CV in Mode
-   B, the user's own words in Mode A. If the source names a company for one win and
-   none for another, do NOT carry the first one across; a nearby anchor is not
-   evidence. Where no anchor is stated, either drop the `**<Anchor>:**` prefix and
-   lead with the work, or ask the user where it happened. Silently attributing a win
-   to the wrong employer is the kind of error a candidate gets caught on in an
-   interview.
-
-   **Phrases to BAN outright:**
-
-   - **Superlatives:** "rare", "deep", "elite", "world-class", "exceptional", "uniquely positioned", "best-in-class"
-   - **Abstract adjective stacks:** any 3-noun rhythm of capability claims (pick ONE, anchored to a specific outcome instead)
-   - **Clichés:** "move the needle", "drive impact", "compound", "10x", "north star", "first principles", "the metrics that actually [verb]"
-   - **LinkedIn closers:** "equally at home in X, Y, Z", "passionate about", "obsessed with", "thrives in ambiguity"
-   - **Present-tense capability framing:** "lets me", "allows me to", "able to" — replace with the past-tense outcome that demonstrates it
-   - **Filler phrases:** "I wanted to reach out", "As you may know", "I am writing to express", "I hope this email finds you well"
-   - **Formal/corporate language** generally
-
-   **Past tense for outcomes.** "Shipped X, lifted Y by Z%" beats "drives growth through experimentation".
-
-   **Write it as the user would say it, and never assign them a gender.** This is
-   the user's own positioning — it goes in their profile and feeds their outreach.
-   Keep the implied subject first-person: "Shipped the price-test framework",
-   "Own growth pricing at a Series B fintech". Do NOT slip into third person about
-   them ("Currently owns growth pricing", "a PM who reads her own data") — it reads
-   like a recruiter's write-up rather than the user's own words, and it invents a
-   pronoun. A CV states a name, never a gender. If a sentence seems to need a
-   pronoun for the user, rewrite it so it doesn't: drop the subject, or use "I".
-   Never use "he", "she", or a guessed honorific for the user anywhere in a draft.
-
-   **Don't invent numbers.** If a metric isn't in the CV, don't add one. Don't round up. Don't aggregate without checking the math.
-
-   **Don't overclaim involvement.** If the CV describes the writer's role on a project narrowly ("defined success criteria with a team", "supported the migration"), don't promote it to leadership framing ("led", "shipped end-to-end"). Use the writer's own scoping verbs.
-
-   When showing the draft to the user, append: *"Edit anything that doesn't sound like you — drafts are starting points, not finished copy."* Always let the user rewrite before save.
-
-   **Say it once per run, and only on the first draft you show.** Repeating the
-   same sentence verbatim under consecutive drafts turns a courtesy into
-   boilerplate — by the third time the user is skipping the line, which is the
-   opposite of what it is for.
+   **Before drafting in either mode, read `${CLAUDE_PLUGIN_ROOT}/references/setup-positioning-drafting.md`** — voice, the "Not X — Y" pattern, proof-point shape, banned phrases, first person with no pronoun for the user, no invented numbers or anchors, and the once-per-run edit line.
 
 5. **Geography** (`{{GEOGRAPHY_MODE}}` + `{{GEOGRAPHY_DETAIL}}`) — single-select via AskUserQuestion. Ask:
    > "Where are you looking?"
@@ -317,19 +173,13 @@ just types more. **There is one flow, not two.**
 6. **Salary band** (`{{SALARY_BAND}}`) — single open string. Skippable. Ask:
    > "What salary band are you aiming for? Whatever shape works — '£90-110K' or '$190-230K base + equity', or skip if you'd rather not anchor a number yet."
 
-   This is the one step that stays a free-text box. Generating bands from title
-   and city would mean inventing market data the plugin has no source for, and
-   anchoring a user's expectations wrongly is a worse failure than one text box.
-   No validation — accept whatever currency and phrasing the user gives.
+   Free text, no generated bands (no market data to back them), no validation.
 
 7. **Timeline** — plain ask, examples inside the sentence. Ask:
 
    > "When do you want to have signed? Roughly is fine — a couple of months, six months, or an actual date if you have one."
 
-   Do NOT render this as a five-option select. The answer space here is a single
-   continuous axis, and a user who knows their timeline should be able to say it
-   in three words rather than map it onto someone else's buckets. Examples
-   belong in the sentence; a list turns them into the only permitted answers.
+   Do NOT render this as a select — examples belong in the sentence.
 
    Parse whatever comes back into a concrete date:
 
@@ -356,13 +206,7 @@ just types more. **There is one flow, not two.**
 
    > "Last one. Any red flags — roles you'd skip on sight, whatever else is right about them? Relocation, five-day office, contract work, that kind of thing. Or skip."
 
-   Do NOT render this as a six-option multi-select. A checklist of generic red
-   flags invents nothing, but it does frame the answer: the user scans the six,
-   ticks the ones that ring true, and stops thinking. The real red flags are
-   usually the ones nobody would have put on a list — "no sales-led enterprise
-   B2B without a PLG angle", "nothing over eight direct reports" — and those
-   arrive when the question is open. Three examples in the sentence are enough to
-   show the shape of an answer.
+   Do NOT render this as a multi-select — the real red flags are the ones nobody would put on a list.
 
    Take whatever the user gives, verbatim, as a list. Do not normalise their
    wording into the old canned phrasings.
@@ -396,127 +240,13 @@ The senior-PM-default `tier_weights` + `tier_thresholds` get written into `profi
 
 If the user wants to tune the rubric, they edit `profile.md` directly. The re-run mode of `/setup` (where field-by-field keep/update/skip is offered) does NOT include the tier rubric either — same reason.
 
-## Re-run mode question loop
+## Re-run mode
 
-When `userdata/profile.md` exists, iterate fields in the same order as the fresh
-walk (Steps 1-8). The tier rubric is NOT offered — same reason it is not asked on
-a fresh install (see the note above). Step 0 does not apply — re-run never
-re-reads the CV, because the fields it would fill are already populated.
-
-Step 1 is ONE field here, not five. Show the whole facts line and take a single
-keep / update / skip on it, mirroring the fresh-install shape. On `update`, apply
-whichever value the user names and leave the others alone — never re-ask all five.
-
-**Step 4 is offered, and it is positioning only.** Show the current `##
-Positioning` paragraph and take one keep / update / skip on it like any other
-field. On `update`, run Mode A against the user's new sentences.
-
-Proof points and moat are NOT offered here, in either mode — `/setup` stopped
-asking for them on a fresh install too, and `/today` picks them up once the user
-has seen real roles. Skipping the whole of Step 4 was the actual behaviour until
-2026-08-24, when manual check 1 caught the loop running 1 → 2 → 3 → 5 → 6 → 7 →
-8; positioning is the one thing in a profile that people genuinely revise as a
-search progresses, so silently never offering it was the wrong half to drop.
-
-The rule below about freeform sections does not cover positioning: `##
-Positioning` is a documented section that this skill writes, not one of the
-user's own. That ambiguity is what produced the contradiction.
-
-For each field:
-
-1. Show the current value on one line, then ask:
-
-   > "Currently: `<value>`. Keep, update, or skip?"
-
-2. Read the answer as `keep`, `update`, or `skip` (skip means "leave as-is for now,
-   ask again next /setup").
-3. If `update`: prompt for the new value using the same conversational pattern —
-   and in the same register — as that step's fresh-install ask.
-
-Never overwrite a non-empty field with an empty answer in re-run mode. If the user updates a field but provides empty input, ask once more; if still empty, treat as `skip` and leave the current value.
-
-The user's freeform body sections (`## Tone of Voice`, `## What NOT to Frame As`, and any `##` section they added below the documented ones) are NEVER touched in re-run mode — they belong to the user. `## Positioning`, `## Proof Points` and `## Moat` are not in this set: they are sections this skill authors. Positioning is offered per the rule above; the other two are left alone because nothing asks for them here, not because they are the user's to guard.
+When `userdata/profile.md` exists, read `${CLAUDE_PLUGIN_ROOT}/references/setup-rerun.md` and follow its keep / update / skip loop instead of the fresh walk. Never wipe an answer, never touch the user's own body sections, never offer the tier rubric.
 
 ## File writes
 
-After all questions are answered, do these writes in order:
-
-### 1. `userdata/profile.md`
-
-Read the profile template, substitute every `{{PLACEHOLDER}}`, write to `userdata/profile.md`. Preserve all HTML comments and free-form prompt blocks (the `<!-- … -->` sections after each `##` header) verbatim. Substitute placeholders only.
-
-For skipped placeholders: write an empty YAML value, never the literal `{{NAME}}` string. Specifically:
-- `{{LINKEDIN_URL}}` is never asked at setup → always `linkedin_url:` (empty value parses as null). The field stays in the template; the skill that needs it fills it.
-- `{{SALARY_BAND}}` skipped → `salary_band: ""` (explicit empty string — keeps the quoted-string shape the template intends).
-- `{{HARD_FILTERS}}` skipped → `hard_filters: []`.
-- `{{TARGET_TITLES}}` cannot be skipped (required).
-- `{{GEOGRAPHY_DETAIL}}` skipped → `mode_detail:` (empty).
-- `{{POSITIONING}}`, `{{PROOF_POINTS}}`, `{{MOAT}}` skipped (Step 4 option B, or a Mode B draft the user discards) → all three sections written empty under the `<!-- TODO: fill in via /job-offer:setup --refresh, or paste your CV at userdata/cv.md and re-run --refresh -->` comment — never the literal `{{POSITIONING}}` placeholder string.
-
-Do NOT write `# unset` comments — they look like noise in the final file. An empty value is self-explanatory.
-
-### 2. `userdata/strategy.md` (only if file does not already exist)
-
-Read the strategy template. Populate:
-- `target_offer_date`: from Step 7. If Step 7 was skipped, leave as `null`.
-- `weekly_targets.*` + `pipeline_targets.*`: from the cadence-derivation table above. If Step 7 was skipped, leave all as `null` (`/today` skips them gracefully).
-- `checkpoints: []` (empty list — user adds later via `career-coach` or by hand).
-- `## Headline goal`: the auto-composed paragraph (from profile.md fields + target date). If Step 7 was skipped, omit the date clause and drop the countdown wording.
-- `## Anti-goals`: leave the section empty (the template's HTML comment prompts the user to fill in later).
-
-Write to `userdata/strategy.md`.
-
-If `userdata/strategy.md` already exists, skip this write. /setup never overwrites a user's existing strategy file.
-
-### 3. `userdata/journal.md` (only if file does not already exist)
-
-Write a minimal journal file:
-
-```markdown
-# Journal
-
-<!--
-  Free-form notes you write yourself. Date each entry as `## YYYY-MM-DD`.
-  Outreach to people is logged by /outreach in userdata/people/, and that is
-  what /today counts toward your weekly outreach target, not this file.
--->
-```
-
-### 4. Three `.gitkeep` files
-
-Create these empty files (only if the directory does not already contain a real file — never overwrite content):
-- `userdata/companies/.gitkeep`
-- `userdata/stories/.gitkeep`
-- `userdata/outputs/.gitkeep`
-
-### 5. `CLAUDE.md` at workspace root
-
-Read `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.template.md`. Resolve the single `{{INCLUDE: userdata/profile.md sections=positioning,proof_points,moat}}` marker by:
-
-1. Read the just-written `userdata/profile.md`.
-2. For each of `Positioning`, `Proof Points`, `Moat` (in that order):
-   - Find the `## <Section>` heading line in profile.md.
-   - Capture everything between that line and the next `## ` line (or EOF).
-   - Strip any HTML comment blocks (`<!-- … -->`, possibly multi-line) from the captured content — those are authoring helpers for profile.md, not content meant for CLAUDE.md.
-   - Trim leading and trailing blank lines from what's left.
-3. Build the replacement block. The `{{INCLUDE}}` marker sits BELOW a `## About me` heading in the template, so each section must be DEMOTED from `##` to `###` to nest correctly. For each captured section, emit:
-   - `### <Section>` (e.g. `### Positioning`)
-   - blank line
-   - the captured body
-   - blank line
-4. Replace the entire `{{INCLUDE: …}}` line (including its surrounding blank lines if any) with the concatenated block. The result is a clean `## About me` followed by three `###` subsections.
-
-Skip a section if its content (after comment-stripping and trimming) is empty — better to omit `### Moat` entirely than render an empty header.
-
-Write the result to `CLAUDE.md` at the workspace root (one level above `userdata/`). Overwrite any existing `CLAUDE.md` at the root only if it begins with the same `<!--` template-header comment as the template (signature of a previously generated file).
-
-If it doesn't, **do not ask** — leave the file alone, write nothing, and say
-nothing. The old behaviour asked `CLAUDE.md exists at workspace root and was not
-generated by job-offer. Overwrite (y/N)?`, which is three pieces of build
-detail (a filename, a workspace layout, a provenance check) and a shell prompt,
-handed to a user who has no way to weigh the answer. Not writing it is the safe
-branch and costs the user nothing they can perceive: their profile still exists,
-and every skill reads it from disk regardless. Take the safe branch silently.
+After the last answer, read `${CLAUDE_PLUGIN_ROOT}/references/setup-file-writes.md` and do its writes in order: `profile.md` from the template (skipped placeholders as empty values, never a literal `{{…}}`), `strategy.md` and `journal.md` only if absent, the three `.gitkeep` files, and the workspace-root `CLAUDE.md` (left alone, silently, if the user wrote their own).
 
 ## Closing offers
 
@@ -581,13 +311,6 @@ between a useful action and an empty one is not a choice worth presenting.
 - Never overwrites `userdata/profile.md`'s body sections in re-run mode (only frontmatter fields the user explicitly updates).
 - Never invents proof-point numbers. If the CV in Mode B doesn't have a metric for a bullet, surface it as a draft bullet without numbers and ask the user to fill in.
 
-## Smoke test against the Maya example
+## Smoke test
 
-Treat `userdata/examples/maya/` as a synthetic install root. Re-running /setup against it should:
-
-- Detect existing `profile.md` → enter re-run mode.
-- Show current values (Maya Patel, London UK, Europe/London, etc.) — each as `keep / update / skip`.
-- If user picks `keep` for all: only re-resolve workspace-root `CLAUDE.md`. No other files change. Profile body sections (Positioning, Proof Points, Moat, Tone of Voice, What NOT to Frame As) untouched.
-- The tier rubric in profile.md is unchanged (the values in Maya's file are the same as the template defaults).
-
-A fresh-install run (against an empty userdata/) should produce a profile.md whose frontmatter shape is identical to Maya's, only with the user's own answers in place of placeholders.
+Expected behaviour against Maya's example install, for debugging this skill: `${CLAUDE_PLUGIN_ROOT}/references/setup-smoke-test.md`. Not needed at run time.
