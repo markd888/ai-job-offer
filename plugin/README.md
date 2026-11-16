@@ -123,15 +123,17 @@ Each agent has its own project-scoped memory at `.claude/agent-memory/<agent>/`.
 
 A browser view of your pipeline that reads the same markdown files as every other skill — useful when you want to scan, not act.
 
-![job-offer dashboard — applications grouped by status, weekly stats, and the latest daily brief in one view (example data)](../docs/dashboard-preview.png)
+![job-offer dashboard on demo data](../docs/dashboard-demo.gif)
 
-_Video walkthrough:_ https://github.com/user-attachments/assets/e1b39e00-d600-4ef4-bd16-ccda8025c8c4
+_Full-quality video (20 s):_ [docs/dashboard-demo.mp4](../docs/dashboard-demo.mp4)
 
-Three panels:
+One page, laid out on a single grid:
 
-- **Left — Applications.** Accordion grouped by status in funnel order, each header showing the count for that status. Each row has tier badge (P0/P1/P2), company + position, status dropdown for inline change, and last-touched date. Click any row to open the company drawer.
-- **Right top — Pipeline & weekly stats.** A 4-stat bar (`Offer / Active / Applied / Days Left until target offer date`) plus a "This Week" panel tracking warm outreach + applications against your `strategy.md` targets. At-a-glance "am I tracking?" view.
-- **Right bottom — Today.** Renders the latest `userdata/outputs/daily-brief-*.md` inline — top 3 actions + heads-up section — so you don't have to flip files.
+- **Top — In interviews.** A card per role you're interviewing for: company, position, tier, the **next step** (click to edit it in place; dates in it feed "Coming up") and when you last touched it. Scroll sideways when there are more than fit.
+- **Middle left — Today's focus.** The Today section of the latest `userdata/outputs/daily-brief-*.md`, with checkboxes to tick items off for the day.
+- **Bottom left — Pipeline.** Every role by stage (Offer, Active, New, To apply, Applied, Rejected, Not interested — empty stages are hidden), with a tier filter (P0 / P1 / P2 / Unscored), search, an inline status dropdown and the last-touched date. Changing a status stamps its date (`date_applied`, `date_rejected`, …). Click a row to open the company drawer.
+- **Right column.** The **Funnel** (applied → HR screening → 2+ rounds → final → offer, with conversion from the previous stage), **This week** against your `strategy.md` targets (warm outreach, applications, feedback requests), **Coming up** (dated next steps, soonest first) and the brief's **Heads-up**.
+- **Light and dark themes**, toggled top right.
 
 **Company drawer** (opens on row click) has four tabs:
 
