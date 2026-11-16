@@ -41,6 +41,10 @@ These are commonly present and read by some skills; absence is allowed but flagg
 - **`next_event`** — free-form upcoming interview or call, written by `/today`. `/follow-up` skips `interviewing` roles that have one.
 - **`follow_ups`** — integer, follow-ups sent for this application (0–2). Written by `/follow-up` only after the user confirms one went out; thank-you notes don't count.
 - **`last_follow_up`** — date of the most recent follow-up. ISO 8601. Written by `/follow-up`; restarts the 10-day quiet clock.
+- **`date_rejected`** — date the role closed as `rejected`. ISO 8601. Written with the status change (by `/today`, `/follow-up`'s close-instead, or the dashboard dropdown); `/today`'s Decided table and 30-day roll-off read it.
+- **`rejection_stage`** — how far the application got before the rejection: `application` (no reply, or a rejection before any call — silence counts), `screening`, `interview` or `final`. Same scale as `max_stage`; the dashboard funnel takes the deeper of the two, and `/today`'s coach Trigger C and `career-coach` look for three rejections at one stage.
+- **`rejection_note`** — short quote or paraphrase of the reason given, if any. Quoted string. Read by the dashboard and `career-coach`.
+- **`date_not_interested`** — date the role closed as `not_interested`. ISO 8601. Written with the status change; read like `date_rejected`.
 - **`max_stage`** — deepest stage the application reached: `application`, `screening`, `interview` or `final`. Read by the dashboard funnel and process goal; absent means `screening` for `interviewing` roles.
 
 ## Forbidden keys (sub-agent drift signals)

@@ -956,24 +956,23 @@ def build_server(
     preferred_port: int,
     dist_dir: Path | None,
 ) -> tuple[TCPServer, int]:
-    """Bind a ThreadingHTTPServer on preferred_port or next free port if preferred is busy.
+    """Bind a ThreadingHTTPServer on exactly preferred_port.
 
-    If preferred_port is 0, the OS picks any free port (used in tests).
+    The dashboard always lives at one address (7890 by default), so a busy port
+    is an error, not a reason to drift to the next one: a second server on 7891
+    would hide the first. If preferred_port is 0, the OS picks any free port
+    (used in tests).
     """
     handler_cls = _make_handler(userdata_root, dist_dir)
-    if preferred_port == 0:
-        server = ThreadingHTTPServer(("127.0.0.1", 0), handler_cls)
-        return server, server.server_address[1]
-
-    last_err: OSError | None = None
-    for port in range(preferred_port, preferred_port + 10):
-        try:
-            server = ThreadingHTTPServer(("127.0.0.1", port), handler_cls)
-            return server, port
-        except OSError as e:
-            last_err = e
-            continue
-    raise RuntimeError(f"no free port in {preferred_port}-{preferred_port+9}") from last_err
+    try:
+        server = ThreadingHTTPServer(("127.0.0.1", preferred_port), handler_cls)
+    except OSError as e:
+        raise RuntimeError(
+            f"port {preferred_port} is already in use — if it's the dashboard, open "
+            f"http://localhost:{preferred_port}; otherwise see what holds it with "
+            f"`lsof -iTCP:{preferred_port} -sTCP:LISTEN`"
+        ) from e
+    return server, server.server_address[1]
 
 
 def main(argv: list[str] | None = None) -> int:

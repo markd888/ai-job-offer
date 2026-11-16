@@ -14,7 +14,7 @@ Senior PM, lead PM, or head of product running an active search. A different rol
 |---|---|---|
 | 1 | Setup | `/job-offer:setup` |
 | 2 | Discover & score | `/job-offer:job-search` · `/job-offer:evaluate-position <url>` |
-| 3 | Apply | `/job-offer:apply <Company>` |
+| 3 | Apply | `/job-offer:apply <Company>` · `/job-offer:ats-check <Company>` · `/job-offer:sent <Company>` · `/job-offer:follow-up` |
 | 4 | Interview | `/job-offer:story-builder` · `/job-offer:interview-prep <Company>` · `/job-offer:case-practice` · `job-offer:interviewer-simulator` · `/job-offer:interview-analysis` |
 | 5 | Decide | `/job-offer:evaluate-offer` |
 
@@ -27,7 +27,7 @@ Senior PM, lead PM, or head of product running an active search. A different rol
 | `/job-offer:dashboard` | When you want a visual scan of the pipeline. |
 | `/job-offer:integrations` | At setup, or after installing a new MCP server. |
 
-## Skills (13)
+## Skills (16)
 
 Reference
 
@@ -48,7 +48,10 @@ Daily and weekly
 | `/today` | Two-phase daily brief: catches fresh facts from Calendar/Gmail/Granola, then prints top 3 actions + pipeline + heads-up. | Starting your day. |
 | `/job-search` | Weekly sweep. Rechecks P0/P1 companies via ATS APIs, discovers new roles via scoped search. | Once a week, or any time you want fresh roles. |
 | `/evaluate-position <url-or-paste>` | Scores one posting, writes the company folder + 200-word research brief. | A single role landed in your inbox. |
-| `/apply <Company>` | Tailors your master CV for one role. Up to 5 clarifying questions, then a single-pass draft. | You've decided to apply. |
+| `/apply <Company>` | Tailors your master CV for one role. Up to 5 clarifying questions, then a single-pass draft, built to a one-page PDF and checked by `/ats-check`. | You've decided to apply. |
+| `/ats-check <Company>` | Reads the CV PDF the way an applicant tracking system does: pages, contacts, glyphs, section order, text fidelity, the posting's keyword coverage. Runs after every `/apply`. | You edited the CV by hand, or want the keyword check again. |
+| `/sent <Company>` | Records an application going out after your yes: status, date, channel, who referred you, and a frozen copy of what you sent. Starts the follow-up clock. | You just submitted an application. |
+| `/follow-up` | Lists applications quiet 10+ days, drafts a short follow-up or a thank-you from what you actually sent, and records replies from companies. Drafts only. | `/today` says follow-ups are due, a company went quiet, or a round just ended. |
 | `/dashboard` | Browser view of your pipeline; inline status changes + notes. | You want a visual scan instead of reading meta.md files. |
 | `/integrations` | Wires in Granola / Calendar / Gmail MCPs if installed. | Setting up, or after installing a new MCP server. |
 
@@ -91,5 +94,5 @@ Strategy and practice
 |---|---|
 | Day 1 | Drop a CV at `userdata/cv.md` if you have one, then `/setup`. Optionally `/integrations`. |
 | Day 1–2 | `/job-search` to seed the pipeline, or `/evaluate-position <url>` for one-off roles. |
-| Daily | `/today` every morning. |
+| Daily | `/today` every morning. When an application goes out, `/sent`; when `/today` flags a quiet one, `/follow-up`. |
 | Anytime | `job-offer:career-coach` when you're stuck or weighing something. |

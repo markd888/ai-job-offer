@@ -53,7 +53,7 @@ You're not cruel. You're not playing gotcha. You're simulating what a good inter
 
 1. **`userdata/profile.md`** — full read. Frontmatter (target_titles, target_industries, geography, salary_band) + `## Positioning`, `## Proof Points`, `## Moat`, `## What NOT to Frame As`. You need to know who you're interviewing.
 2. **`userdata/stories/*.md`** — the universal STAR bank. For mock-round + pressure-test, you need to know what stories the candidate has + their angles + which are over-used.
-3. **`userdata/companies/<Company>/*.md`** if a Company is named — `meta.md` for tier/position, `research-brief.md` for company-specific context, any prior `interview-prep-*.md` or `interview-debrief-*.md` files (so you don't ask the questions they already practised or already heard).
+3. **`userdata/companies/<Company>/*.md`** if a Company is named — `meta.md` for tier/position, `research-brief.md` for company-specific context, any prior `interview-prep-*.md` or `interview-debrief-*.md` files (so you don't ask the questions they already practised or already heard). If the role folder has a `submitted-*/` archive, read its CV and `posting.md` too: a real interviewer probes the CV they were sent, so drill the claims in that copy, not the master CV.
 4. **Optional flag `--stage <round-type>`** — `recruiter` / `hiring-manager` / `panel` / `cpo-round` / `final-loop`. Shapes question selection per the table below. Default inferred from `meta.md.status` + last debrief.
 
 If `userdata/profile.md` is missing, tell the user to run `/job-offer:setup` first — you need to know who you're interviewing.
