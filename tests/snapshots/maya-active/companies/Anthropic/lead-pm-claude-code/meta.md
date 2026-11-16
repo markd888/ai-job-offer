@@ -7,6 +7,7 @@ position: Lead PM, Claude Code
 link: https://example.com/anthropic-claude-code
 date_added: 2026-07-24
 date_applied: 2026-07-26
+channel: company-site
 ---
 
 # Anthropic — Lead PM, Claude Code

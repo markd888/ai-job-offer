@@ -354,6 +354,8 @@ Use `AskUserQuestion` with **Yes, reflect** / **Skip**:
 
 "It's the start of a new week. Want a 5-min reflection on last week? (y / skip)"
 
+Above the question, print the channel mix in one line when there is one to show. Run `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py" --userdata "$(pwd)/userdata"`; if at least one channel other than `unknown` has 5+ applications, write one plain sentence from its output — the biggest channel and the best-converting one, counts with their rates, e.g. `Channel mix so far: 12 careers-site applications, none reached a screen; 6 referrals, 3 did (50%).` Otherwise print nothing about channels. Never a rate the script didn't print. This line is the once-a-week channel mention; the daily brief doesn't repeat it.
+
 On **Yes, reflect** → invoke the `job-offer:career-coach` agent with mode hint `weekly-reflection`. The agent reads `journal.md` + `strategy.md`, runs 3-4 reflection prompts, and appends a `## Weekly reflection <YYYY-MM-DD>` block to `journal.md`. See `${CLAUDE_PLUGIN_ROOT}/agents/career-coach.md` for the mode's behaviour.
 On **Skip** → do not invoke career-coach.
 

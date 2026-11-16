@@ -293,6 +293,7 @@ _OPTIONAL_FIELDS = (
     "link",
     "date_added",
     "date_applied",
+    "channel",          # how the application went out (/sent) — funnel by channel
     "last_inbound",
     "monitoring",
     # Status-specific fields per the /today + /evaluate-position meta.md spec:
@@ -558,6 +559,7 @@ def _make_handler(
                 "companies": companies,
                 "strategy": read_strategy(userdata_root),
                 "weekly_progress": compute_weekly_progress(userdata_root, companies),
+                "funnel_by_channel": funnel.funnel_by_channel(companies),
                 "latest_brief": latest_brief(userdata_root),
                 "userdata_root": str(userdata_root.resolve()),
             }
@@ -713,16 +715,19 @@ def delete_note(md: str, index: int, expected_heading: str) -> str:
 # user's intuitive "this week" framing — a Monday morning shows a fresh week.
 
 
-def _load_people_module():
+def _load_script_module(name: str):
+    """Load plugin/scripts/<name>.py — the rules the skills' scripts use, so
+    the dashboard counts exactly what they count."""
     import importlib.util
-    path = Path(__file__).resolve().parent.parent / "scripts" / "people.py"
-    spec = importlib.util.spec_from_file_location("job_offer_people", path)
+    path = Path(__file__).resolve().parent.parent / "scripts" / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(f"job_offer_{name}", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
-people = _load_people_module()
+people = _load_script_module("people")
+funnel = _load_script_module("funnel")
 
 _JOURNAL_HEADING_RE = re.compile(r"^##\s+(.*?)\s*$")
 _JOURNAL_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})$")

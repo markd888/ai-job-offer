@@ -7,6 +7,7 @@ position: Lead PM, Growth
 link: https://example.com/stripe-jobs/lead-pm-growth
 date_added: 2026-06-26
 date_applied: 2026-06-28
+channel: company-site
 date_rejected: 2026-07-29
 rejection_stage: take-home
 rejection_note: "Strong work, going with a candidate with more direct payments experience."

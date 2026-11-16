@@ -7,6 +7,7 @@ position: Senior PM, Pricing & Risk
 link: https://example.com/marshmallow-jobs/senior-pm-pricing-risk
 date_added: 2026-05-08
 date_applied: 2026-05-13
+channel: company-site
 ---
 
 # Marshmallow

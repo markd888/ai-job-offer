@@ -133,7 +133,7 @@ One page, laid out on a single grid:
 - **Top — In interviews.** A card per role you're interviewing for: company, position, tier, the **next step** (click to edit it in place; dates in it feed "Coming up") and when you last touched it. Scroll sideways when there are more than fit.
 - **Middle left — Today's focus.** The Today section of the latest `userdata/outputs/daily-brief-*.md`, with checkboxes to tick items off for the day.
 - **Bottom left — Pipeline.** Every role by stage (Offer, Active, New, To apply, Applied, Rejected, Not interested — empty stages are hidden), with a tier filter (P0 / P1 / P2 / Unscored), search, an inline status dropdown and the last-touched date. Changing a status stamps its date (`date_applied`, `date_rejected`, …). Click a row to open the company drawer.
-- **Right column.** The **Funnel** (applied → HR screening → 2+ rounds → final → offer, with conversion from the previous stage), **This week** against your `strategy.md` targets (warm outreach, applications, feedback requests), **Coming up** (dated next steps, soonest first) and the brief's **Heads-up**.
+- **Right column.** The **Funnel** (applied → HR screening → 2+ rounds → final → offer, with conversion from the previous stage) and, once `/sent` has recorded channels, the same split **by channel** — referral, recruiter, careers site and so on, with rates shown from 5 applications per channel; **This week** against your `strategy.md` targets (warm outreach, applications, feedback requests), **Coming up** (dated next steps, soonest first) and the brief's **Heads-up**.
 - **Light and dark themes**, toggled top right.
 
 **Company drawer** (opens on row click) has four tabs:

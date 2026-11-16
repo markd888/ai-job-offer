@@ -35,7 +35,7 @@ These are commonly present and read by some skills; absence is allowed but flagg
 - **`source`** — discovery source. Examples: `discovery`, `recheck`, `user`, `evaluate-position`.
 - **`location`** — optional one-line location/remote flag.
 - **`date_applied`** — date the application went out. ISO 8601. Written by `/sent` (or the dashboard's status dropdown); read by `/today` and `/follow-up`, which counts the quiet days from it.
-- **`channel`** — how the application went out. Enum: `referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`. Written by `/sent`; checked by rule `meta.channel-enum`.
+- **`channel`** — how the application went out. Enum: `referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`. Written by `/sent`; checked by rule `meta.channel-enum`. Read by `plugin/scripts/funnel.py` for the funnel by channel (dashboard, `career-coach`, `/today`'s weekly line); a role without it counts as `unknown`.
 - **`referred_by`** — the person who referred the user, as a quoted wiki link: `referred_by: "[[Dana Lee]]"`. Written by `/sent` when `channel: referral`.
 - **`last_inbound`** — date of the most recent contact from the company (reply, scheduling, call, interview, rejection, offer). ISO 8601, only ever moves forward. Written through `scripts/record-inbound.py` by `/today` (contact the user confirmed in the input phase or stated in the catch-all), `/interview-analysis` (the interview date) and `/follow-up` (the user says the company wrote back). Read by `/today`, `/interview-prep` and `follow-ups.py`, whose 10-day quiet clock is the single quiet-application rule.
 - **`next_event`** — free-form upcoming interview or call, written by `/today`. `/follow-up` skips `interviewing` roles that have one.

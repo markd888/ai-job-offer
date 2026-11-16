@@ -34,6 +34,7 @@ from serve import (  # noqa: E402
     collect_artifacts,
     collect_companies,
     compute_weekly_progress,
+    funnel,
     latest_brief,
     read_strategy,
 )
@@ -57,6 +58,7 @@ def build_snapshot(
         "companies": companies,
         "strategy": read_strategy(persona_root),
         "weekly_progress": compute_weekly_progress(persona_root, companies, today=today),
+        "funnel_by_channel": funnel.funnel_by_channel(companies),
         "latest_brief": latest_brief(persona_root),
         # Hide the real on-disk path from the public bundle.
         "userdata_root": f"<demo: {persona_root.name}>",

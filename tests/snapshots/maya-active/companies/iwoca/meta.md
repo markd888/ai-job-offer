@@ -7,6 +7,7 @@ position: Senior PM, SMB Lending
 link: https://example.com/iwoca-jobs/senior-pm-smb-lending
 date_added: 2026-07-01
 date_applied: 2026-07-08
+channel: company-site
 ---
 
 # iwoca
