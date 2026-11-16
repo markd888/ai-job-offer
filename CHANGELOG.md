@@ -44,6 +44,21 @@ without adopting the pipeline tracker.
 
 ---
 
+## [Unreleased]
+
+### Fixed
+- `follow-ups.py` lists due roles most recent first, as `/follow-up` says; a non-numeric `follow_ups:` no longer crashes it.
+- Cloud copy: the Worker now runs first on every request and serves nothing without a valid Cloudflare Access token (RS256 checked against the team's keys, `aud`, `iss`, `exp`). It fails closed until `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` are set. Before, the raw `/data/*.json` snapshots were served straight from the asset store and protection depended entirely on Access being configured in the dashboard.
+- `build_cloud.sh` reads `userdata/` from the directory it's run in (or a path argument) instead of `plugin/userdata`, and stops if it isn't there.
+
+### Added
+- Tests for `follow-ups.py`, `ats-check.py`, `archive-application.py` and `cv-build.py`; a Node test for the Worker's Access gate. CI installs the scripts' requirements and the Carlito font so the PDF tests run instead of skipping.
+- `plugin/scripts/requirements.txt`; README lists what each part needs. `/apply` says when it skips the PDF and ATS check for want of them.
+
+### Changed
+- Schemas document the fork's fields: `phone` (profile), `follow_ups`, `last_follow_up`, `max_stage`, plus `date_applied`, `last_inbound`, `next_event` that `/follow-up` reads.
+- `__pycache__/` is no longer committed.
+
 ## [0.7.1] — 2026-11-16
 
 Brings the plugin's dashboard up to the one in daily use.

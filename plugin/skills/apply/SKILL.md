@@ -126,6 +126,8 @@ python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/ats-check.py" <pdf> --md <cv-md> \
 
 Use a Python that has `reportlab` and `pypdf` (a workspace venv such as `.claude/.venv/bin/python` if there is one). Keep the CV to one page: if it runs over, trim by relevance to this posting, then try font size 8.8. Fix every hard failure (pages, contacts, glyphs, order, fidelity) and re-run until it passes; details in `${CLAUDE_PLUGIN_ROOT}/skills/ats-check/SKILL.md`. Missing keywords are added only where the master CV or profile supports them. The contacts check reads the phone from `profile.md` (`phone:`).
 
+If no Python with `reportlab` and `pypdf` is available, or `cv-build.py` stops on a missing Carlito font, don't improvise another PDF route: keep the tailored markdown, say in one line that the PDF and ATS check were skipped and what to install (`pip install -r ${CLAUDE_PLUGIN_ROOT}/scripts/requirements.txt`, plus the Carlito font), and carry on with the output below, replacing the ATS check line with `ATS check: skipped — <reason>`.
+
 ### When the application goes out
 
 When the user says it was sent (status → `applied`), save the posting text to a temp file and freeze what was sent:

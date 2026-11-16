@@ -53,20 +53,18 @@ The TONE.md file is the most important thing to read before submitting any chang
 
 ## Privacy hard rule
 
-This repo must contain **zero personal data**. Before any PR, run:
+This repo must contain **zero personal data**. The blocklist itself is personal data, so it never lives in the repo:
 
-```bash
-rg -i 'arkadii|arcady|samokat|manychat|impress|delivery club|bookmate|skyeng|yandex|barcelona|madrid|reforge|MSU|kolmogorov|/Users/arkadii|673625|9452fc52|€80|€100|€110|€140' \
-   --glob='!.github/' \
-   --glob='!CONTRIBUTING.md' \
-   .
-```
+- **CI** reads it from the `PRIVACY_PATTERNS` repository secret (one regex per line, `#` comments allowed) and scans every tracked file on each push and PR via `.github/workflows/privacy-check.yml`. If the secret isn't set, the check fails rather than passing silently.
+- **Locally**, keep the same list in `.privacy-patterns.local` at the repo root (gitignored) or point `PRIVACY_PATTERNS_FILE` at a file outside the repo, then run:
 
-Must return zero matches (exit code 1). The `.github/` and `CONTRIBUTING.md` exclusions are because both legitimately contain the blocklist as documentation (the CI workflow's rule + this file).
+  ```bash
+  make privacy-check
+  ```
 
-**CI enforces this** — every push to `main` and every PR runs the scan via `.github/workflows/privacy-check.yml`. PRs with privacy violations will not merge.
+Update the list by editing your local file and re-uploading it: `gh secret set PRIVACY_PATTERNS < .privacy-patterns.local`. Keep terms specific enough not to hit the example data (`Stripe`, `Finom`, `N26`, `n8n` already appear in `userdata/examples/` and `tests/`); use `\b…\b` for short words.
 
-If you're forking for your own use, you'll inevitably add your own personal data to `userdata/` while you're using the plugin. That's fine — `userdata/` is gitignored except `userdata/examples/`. Don't open a PR with personal data in `userdata/` (or anywhere else); the CI will catch it. If you fork as a standalone for your own search, you can either replace the blocklist in the CI workflow with your own terms or delete that workflow.
+`userdata/` is gitignored except `userdata/examples/`, so your own search data stays local while you use the plugin.
 
 ## Testing changes
 

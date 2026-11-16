@@ -32,6 +32,9 @@ jobs:
             git diff --stat -- plugin/dashboard/dist/
             exit 1
           fi
+      - name: Verify cloud Worker Access gate
+        working-directory: plugin/dashboard
+        run: node --test worker/index.test.mjs
       - name: Verify dashboard tests
         working-directory: plugin/dashboard
         run: |

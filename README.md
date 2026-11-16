@@ -12,7 +12,7 @@ A Claude Code plugin for senior product leaders running a job search. Finds open
 
 Built for senior PMs, lead PMs, and heads of product. Everything inside is shaped around how that search actually runs; a different role can fork the architecture, but the defaults will need rework.
 
-- **Lean.** Pure markdown, zero dependencies. One `/setup` and you're running. Everything lives in `.md` files under `userdata/`, gitignored by default and editable by hand.
+- **Lean.** Markdown at the core: the pipeline, skills and agents need nothing installed. One `/setup` and you're running. Everything lives in `.md` files under `userdata/`, gitignored by default and editable by hand. The CV PDF and ATS check add a small Python toolchain — see [Requirements](#requirements).
 - **Tailored to the senior-PM context.** Reviewer agents play the four people who'll actually interview you, and a simulator runs mock rounds. Offer evaluation checks the role's stage against how you operate — builder, scaler, or operator — and flags hollow-HoP risk before you sign.
 - **Honest.** When the search itself isn't working, `career-coach` says so: eight weeks in with one thread, it tells you adjusting cadence won't fix it.
 
@@ -28,6 +28,19 @@ cd <your-workspace>
 ```
 
 Then `/job-offer:today` every morning, and `/job-offer:help` anytime for a one-page map of every skill and agent.
+
+## Requirements
+
+| What | Needs | Install |
+|---|---|---|
+| Pipeline, scoring, prep, coaching | Claude Code only | — |
+| CV and cover-letter PDF (`cv-build.py`, `cover-letter-build.py`) | Python 3.10+, `reportlab`, the Carlito font | `pip install -r plugin/scripts/requirements.txt`; Carlito: macOS Font Book (download from Google Fonts), Debian/Ubuntu `apt install fonts-crosextra-carlito` |
+| ATS check (`ats-check.py`) | `pypdf`, or poppler's `pdftotext` | included in `requirements.txt` |
+| Follow-ups, application archive | Python 3.10+, standard library only | — |
+| Dashboard | Python 3 (standard library); Node only to rebuild the bundle | — |
+| Cloud copy of the dashboard | Node, `wrangler`, a Cloudflare Access application | see [`plugin/dashboard/README.md`](plugin/dashboard/README.md) |
+
+Without the Python packages `/job-offer:apply` still writes the tailored CV markdown; it says the PDF step was skipped and why.
 
 ## job-sweep — just the weekly role list
 

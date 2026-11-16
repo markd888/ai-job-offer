@@ -54,6 +54,9 @@ EXCLUDE_ARGS=()
 for d in "${EXCLUDE_DIRS[@]}"; do
   EXCLUDE_ARGS+=(--exclude-dir="$d")
 done
+# The patterns file may live inside the scanned tree (.privacy-patterns.local
+# at the repo root); it matches itself by definition.
+EXCLUDE_ARGS+=(--exclude="$(basename "$PATTERNS_FILE")")
 
 # grep -REi: recursive, extended regex, case-insensitive.
 # grep -I: skip binary files — the demo bundle ships a .mp4 whose raw bytes
