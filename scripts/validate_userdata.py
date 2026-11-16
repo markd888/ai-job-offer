@@ -20,6 +20,7 @@ Finding = namedtuple("Finding", ["path", "rule", "detail"])
 
 STATUS_ENUM = {"new", "to_apply", "applied", "interviewing", "offer",
                "rejected", "not_interested"}
+CHANNEL_ENUM = {"referral", "cold", "recruiter", "linkedin", "company-site", "other"}
 META_REQUIRED = ["company", "position", "status", "link"]
 META_FORBIDDEN = ["role", "target_date"]
 PROFILE_REQUIRED = ["name", "target_titles", "tier_weights", "tier_thresholds"]
@@ -91,6 +92,8 @@ def _check_meta(root: Path, p: Path) -> list[Finding]:
     link = fm.get("link", "")
     if link and not link.startswith(("http://", "https://")):
         out.append(Finding(rel, "meta.link-format", f"link '{link}' is not http(s)"))
+    if fm.get("channel") and fm["channel"] not in CHANNEL_ENUM:
+        out.append(Finding(rel, "meta.channel-enum", f"channel '{fm['channel']}' not in enum"))
     present_forbidden = [k for k in META_FORBIDDEN if k in fm]
     if present_forbidden:
         out.append(Finding(rel, "meta.forbidden-key",

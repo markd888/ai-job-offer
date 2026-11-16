@@ -2,7 +2,7 @@
 
 The canonical state file per `(company, position)` pair. Read by `/today`, `/apply`, `/interview-prep`, `/job-search`, and the dashboard. Schema drift here propagates silently into downstream skills.
 
-Checked by `scripts/validate_userdata.py` (rules `meta.required`, `meta.status-enum`, `meta.link-format`, `meta.forbidden-key`), which the test-personas harness runs in Phase 3.5 and CI runs over `tests/snapshots/`.
+Checked by `scripts/validate_userdata.py` (rules `meta.required`, `meta.status-enum`, `meta.link-format`, `meta.forbidden-key`, `meta.channel-enum`), which the test-personas harness runs in Phase 3.5 and CI runs over `tests/snapshots/`.
 
 Used by the test-personas Phase 3.5 schema check. If you change the schema, update every reader's SKILL.md and re-run cold-start verification.
 
@@ -34,7 +34,9 @@ These are commonly present and read by some skills; absence is allowed but flagg
 - **`monitoring`** — boolean, `true` for companies the user wants to be re-checked on `/job-search` runs even when no role is active.
 - **`source`** — discovery source. Examples: `discovery`, `recheck`, `user`, `evaluate-position`.
 - **`location`** — optional one-line location/remote flag.
-- **`date_applied`** — date the application went out. ISO 8601. Read by `/today` and `/follow-up`.
+- **`date_applied`** — date the application went out. ISO 8601. Written by `/sent` (or the dashboard's status dropdown); read by `/today` and `/follow-up`, which counts the quiet days from it.
+- **`channel`** — how the application went out. Enum: `referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`. Written by `/sent`; checked by rule `meta.channel-enum`.
+- **`referred_by`** — the person who referred the user, as a quoted wiki link: `referred_by: "[[Dana Lee]]"`. Written by `/sent` when `channel: referral`.
 - **`last_inbound`** — date of the most recent message from the company. ISO 8601. Read by `/today` and `/follow-up`.
 - **`next_event`** — free-form upcoming interview or call, written by `/today`. `/follow-up` skips `interviewing` roles that have one.
 - **`follow_ups`** — integer, follow-ups sent for this application (0–2). Written by `/follow-up` only after the user confirms one went out; thank-you notes don't count.
@@ -56,6 +58,7 @@ If any of these appear, treat as schema drift:
 2. **`meta.status-enum`:** `status` value not in the allowed list → schema drift finding.
 3. **`meta.link-format`:** non-empty `link` that doesn't start with `http://` or `https://` → schema drift finding.
 4. **`meta.forbidden-key`:** any of `role:`, `target_date:` present → schema drift finding.
+5. **`meta.channel-enum`:** non-empty `channel` value not in the allowed list → schema drift finding.
 
 Schema findings are surfaced to the judge as a 6th input block. The judge treats each finding as a Hard violation under Rule 7 (schema drift), independent of conversation transcript evidence — schema drift is provable from file contents alone.
 
