@@ -13,6 +13,10 @@ Usage:
 
 Channels: referral, cold, recruiter, linkedin, company-site, other.
 
+With --referred-by, the referral is also logged on that person's
+userdata/people/<slug>.md (created as a `referrer` if new) and the role is
+linked to them, so /outreach can thank them later.
+
 It refuses, changing nothing, when the role is already recorded as applied
 with a date, or is past the application (interviewing, offer, rejected,
 not_interested), unless --force. With no CV in the role folder it records the
@@ -45,6 +49,31 @@ def _load_metafile():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
+
+
+def _log_referral(role: Path, name: str, company: str, position: str, day: str) -> str:
+    """Log the referral on the referrer's people/ file and link the role to it."""
+    role = role.resolve()
+    companies = next((p for p in role.parents if p.name == "companies"), None)
+    if companies is None:
+        return ""
+    path = Path(__file__).resolve().parent / "record-outreach.py"
+    spec = importlib.util.spec_from_file_location("record_outreach", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    userdata = companies.parent
+    # A referrer often works somewhere else (an investor, a friend at another
+    # firm), so an existing person is matched by name alone; the role's company
+    # is only a default for someone new.
+    known = mod.people.find_person(userdata, name)
+    try:
+        person, created = mod.record(userdata, name=name, direction="received", kind="referral",
+                                     text=f"Referred me for {position or 'the role'} at {company or role.name}.",
+                                     day=day, company="" if known else company, relation="referrer",
+                                     role=role.relative_to(companies).as_posix())
+    except SystemExit as e:  # the application is already recorded; don't fail it over the people file
+        return f"Application recorded, but the referral wasn't logged on a people file: {e}"
+    return ("Added" if created else "Logged the referral in") + f" people/{person.name}"
 
 
 def main() -> int:
@@ -97,7 +126,13 @@ def main() -> int:
         line += "; no CV in the folder, nothing archived"
     meta_path.write_text(mf.append_history(meta, line))
 
+    person_note = ""
+    if referred:
+        person_note = _log_referral(role, referred, mf.field(meta, "company"), mf.field(meta, "position"), a.date)
+
     print(f"Recorded: applied {a.date} via {a.channel}" + (f", referred by {referred}" if referred else ""))
+    if person_note:
+        print(person_note)
     if archived:
         print(f"Archived {len(rows)} file(s) to {archived}")
         if posting_note:

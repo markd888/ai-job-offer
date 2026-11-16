@@ -9,6 +9,8 @@ setup → job-search → dashboard → today (daily, ongoing)
                                   ↓
                             evaluate-position (per role, when a link comes in)
                                   ↓
+                            outreach (someone you know at the company: referral or intro ask)
+                                  ↓
                             apply (when a role moves to to_apply) — builds the PDF, runs ats-check
                                   ↓
                             sent (when the application goes out)
@@ -36,6 +38,8 @@ When a skill finishes, look at current filesystem and journal state, then pick t
 | `/apply` just built a CV, or the user says they're about to send it | Nudge in chat | "Tell me once it's sent and I'll record it." |
 | The user says an application went out ("sent it", "applied to <Co>") and the role isn't `applied` with a `date_applied` yet | `/job-offer:sent <Co>` | "Want me to record the <Co> application as sent today?" |
 | An interview round ended today (calendar, debrief or the user says so) | `/job-offer:follow-up thanks <Co>` | "Want a short thank-you to <name> while it's fresh?" |
+| The user says a person replied, referred them or made an intro | `/job-offer:outreach <Name>` (log it) | "Want me to log Dana's reply? If she's put you forward, /sent records the application with her as the referrer." |
+| A `to_apply` or `new` P0/P1 role has someone in `userdata/people/` linked to it (or at that company) with no `referral-ask` logged | `/job-offer:outreach <Co>` | "You know <Name> at <Co> — a referral ask before you apply?" |
 | Companies exist with `status: new` and no `userdata/outputs/applications.md` (or applications.md is stale) | `/job-offer:dashboard` | "Open the dashboard to sort through your new roles — or just tell me here which ones you want to go after." |
 | At least one company `status: interviewing` and no `interview-prep-<date>.md` for it | `/job-offer:interview-prep <Co>` | "You have an interview coming up at <Co> with no prep doc yet." |
 | At least one company `status: interviewing`, a product-case/analytical round is likely (research-brief mentions a case round, or it's a product/growth role), and no `userdata/case-practice/` log exists in the last 7 days | `/job-offer:case-practice <Co>` | "Case-likely round at <Co> — drill product cases with /job-offer:case-practice." |

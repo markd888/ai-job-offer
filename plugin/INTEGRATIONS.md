@@ -63,13 +63,13 @@ Claude calls the Granola MCP to fetch the matching meeting, extracts the transcr
 
 > "Search my Gmail for the last 7 days of emails from any address containing 'recruiter', 'talent', or '@<company-domain>'. Summarise each in one line and append a new dated entry to `userdata/journal.md`."
 
-Claude calls the inbox MCP, summarises, writes to journal. The journal entries then power `/today`'s warm-outreach count. When `/today` reads the inbox itself (Gmail wired via `/job-offer:integrations`), each reply you confirm also sets `last_inbound` on that role, which keeps it off the follow-up list.
+Claude calls the inbox MCP, summarises, writes to journal. The journal entries give `/today` context; outreach to people is counted from `userdata/people/` logs written by `/job-offer:outreach`. When `/today` reads the inbox itself (Gmail wired via `/job-offer:integrations`), each reply you confirm also sets `last_inbound` on that role, which keeps it off the follow-up list.
 
-**Where it plugs in.** Upstream of `/today` (journal feeds the warm-outreach count) and `/evaluate-position` (recruiter context informs the score). Not a direct skill modification — the user runs it as a pre-flight before `/today`.
+**Where it plugs in.** Upstream of `/today` (journal context; replies from people go to `/job-offer:outreach`) and `/evaluate-position` (recruiter context informs the score). Not a direct skill modification — the user runs it as a pre-flight before `/today`.
 
 **Privacy / ToS.** Reading personal email through any MCP means email contents pass through Claude's context. Be deliberate about which queries you run; the search filters above scope it to recruiter conversations, but a too-broad query reads more than you'd want. Gmail's ToS allows authenticated API access; check your MCP's auth model.
 
-**Fallback if MCP unavailable.** Maintain `journal.md` by hand — append a `## YYYY-MM-DD` heading every day or two and jot what happened. `/today` already keyword-scans last 7 days for outreach signals; the manual journal works fine.
+**Fallback if MCP unavailable.** Maintain `journal.md` by hand — append a `## YYYY-MM-DD` heading every day or two and jot what happened. The manual journal works fine; log messages to people with `/job-offer:outreach` so they count toward your weekly outreach.
 
 ---
 

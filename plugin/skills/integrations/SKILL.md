@@ -143,7 +143,7 @@ Last detected: <YYYY-MM-DD>. Re-run `/job-offer:integrations` to refresh.
 > "Before running /job-offer:today, use <tool-prefix> to list events in the next 14 days whose title matches any of: <keywords>, OR contains a company name from userdata/companies/*/meta.md. Pass that list into /today as additional heads-up context."
 
 ## gmail — <status>
-**Used by:** journal updates (warm-outreach signal for /today)
+**Used by:** /today's input phase (recruiter replies → `last_inbound`) and journal updates
 **Tool prefix:** <detected-prefix>
 **Filter:** <filter-string>
 **Invocation pattern:**

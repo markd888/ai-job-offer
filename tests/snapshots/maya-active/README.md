@@ -9,6 +9,7 @@ Synthetic reference install for job-offer. Demonstrates a lived-in state at 2026
 - Shape-mismatch warning — fires for Cleo (`interviewing` at ~180 ppl, over Maya's preferred 150-ppl ceiling, no equity signal in research-brief).
 - Closed-summary line — counts 5 decided this search; 2 rejected (Stripe at take-home, Anthropic Applied PM), 3 not-interested (Atom Bank, Pleo, GoCardless).
 - Pipeline table dual-glob — both flat and role-slug-subfolder companies appear. Plaid (Senior PM, Consumer Credit + Senior PM, Growth Loops) and Anthropic (Applied PM, Claude API + Lead PM, Claude Code) exercise the multi-role subfolder layout; the rest are flat.
+- People — `people/` holds Dana Okafor (former colleague at Wagestream, reached out, no referral ask yet — the `/outreach Wagestream` path), Anna (SeedX, referred Maya to Lendable) and Tom (Lendable's CEO). Weekly outreach is counted from their `## Log` lines.
 - Calendar-event reference — Lendable's `next_event: "Reference call Wed 2026-08-05 11:00"` is 2 days out from today; would surface in Heads-up if calendar were wired (it isn't in this install — see "What's NOT wired" below).
 - Weekly reflection trigger — fires (marker `outputs/.last-weekly-reflection` is in ISO week 20; today is ISO week 21).
 - First-run automation nudge — suppressed (marker `outputs/.automation-nudge-shown` exists; delete it to see the nudge).

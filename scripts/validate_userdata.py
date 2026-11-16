@@ -11,12 +11,21 @@ Exit 0 = clean, 1 = findings, 2 = usage error.
 """
 from __future__ import annotations
 
+import importlib.util
 import re
 import sys
 from collections import namedtuple
 from pathlib import Path
 
 Finding = namedtuple("Finding", ["path", "rule", "detail"])
+
+# People-file rules (enums, the log-line shape) live with the code that writes
+# them, in plugin/scripts/people.py; load it by path so there's one definition.
+_PEOPLE_PY = Path(__file__).resolve().parent.parent / "plugin" / "scripts" / "people.py"
+_spec = importlib.util.spec_from_file_location("people", _PEOPLE_PY)
+people = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(people)
+PERSON_REQUIRED = ["name", "relation"]
 
 STATUS_ENUM = {"new", "to_apply", "applied", "interviewing", "offer",
                "rejected", "not_interested"}
@@ -148,6 +157,28 @@ def _check_brief(root: Path, p: Path) -> list[Finding]:
     return out
 
 
+def _check_person(root: Path, p: Path) -> list[Finding]:
+    text = p.read_text()
+    fm = parse_frontmatter(text)
+    rel = _rel(root, p)
+    out = []
+    missing = [k for k in PERSON_REQUIRED if not fm.get(k)]
+    if missing:
+        out.append(Finding(rel, "person.required", f"missing/empty: {', '.join(missing)}"))
+    if fm.get("relation") and fm["relation"] not in people.RELATIONS:
+        out.append(Finding(rel, "person.relation-enum", f"relation '{fm['relation']}' not in enum"))
+    if fm.get("channel") and fm["channel"] not in people.CHANNELS:
+        out.append(Finding(rel, "person.channel-enum", f"channel '{fm['channel']}' not in enum"))
+    for role in people.roles_of(people.frontmatter(text)):
+        if not (root / "companies" / role / "meta.md").is_file():
+            out.append(Finding(rel, "person.role-link", f"role '{role}' has no companies/{role}/meta.md"))
+    if not re.search(r"^## Log[ \t]*$", text, re.MULTILINE):
+        out.append(Finding(rel, "person.log-format", "no '## Log' section"))
+    for line in people.parse_log(text)[1]:
+        out.append(Finding(rel, "person.log-format", f"unparsed log line: {line.strip()[:80]}"))
+    return out
+
+
 def validate_tree(root: Path) -> list[Finding]:
     root = Path(root)
     out: list[Finding] = []
@@ -159,6 +190,8 @@ def validate_tree(root: Path) -> list[Finding]:
         for pattern in ("*/research-brief.md", "*/*/research-brief.md"):
             for p in sorted(companies.glob(pattern)):
                 out.extend(_check_brief(root, p))
+    for p in people.person_files(root):
+        out.extend(_check_person(root, p))
     profile = root / "profile.md"
     if profile.exists():
         out.extend(_check_profile(root, profile))
