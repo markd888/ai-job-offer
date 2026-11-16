@@ -49,8 +49,11 @@ without adopting the pipeline tracker.
 ### Added
 - `/sent <Company>` records an application going out in one step after the user's yes: `status: applied`, `date_applied`, `channel`, optional `referred_by`, the `submitted-<date>/` archive and one History line (`plugin/scripts/record-sent.py`). Before, nothing wrote `date_applied`, so a role marked applied in chat never came up in `/follow-up`.
 - `channel` (`referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`) and `referred_by` in the meta.md schema; `validate_userdata.py` checks `channel` against the enum (rule `meta.channel-enum`).
+- `last_inbound` is written now (`plugin/scripts/record-inbound.py`): by `/today` for contact the user confirms or mentions, by `/interview-analysis` for the interview date, and by `/follow-up` when the user says a company wrote back. It only moves forward. Before, nothing wrote it, so `/today`'s active-interview rule never fired and a company that had replied could still be chased.
 
 ### Changed
+- One quiet-application rule: `/today` drops its own 14-day "Chase or close" rule and "stale applied" heads-up and uses `follow-ups.py` (10 days since the latest of `date_applied`, `last_inbound`, `last_follow_up`) for both following up and closing.
+- `record-sent.py` and `record-inbound.py` share `plugin/scripts/metafile.py` for frontmatter edits.
 - `/apply` no longer archives anything or writes to `meta.md`; when the application goes out it hands over to `/sent`.
 - `archive-application.py` exposes `archive()` for `record-sent.py` and takes `--no-history`.
 

@@ -63,7 +63,7 @@ Claude calls the Granola MCP to fetch the matching meeting, extracts the transcr
 
 > "Search my Gmail for the last 7 days of emails from any address containing 'recruiter', 'talent', or '@<company-domain>'. Summarise each in one line and append a new dated entry to `userdata/journal.md`."
 
-Claude calls the inbox MCP, summarises, writes to journal. The journal entries then power `/today`'s warm-outreach count + the `last_inbound` updates the user does manually on company meta.md files (or asks Claude to do).
+Claude calls the inbox MCP, summarises, writes to journal. The journal entries then power `/today`'s warm-outreach count. When `/today` reads the inbox itself (Gmail wired via `/job-offer:integrations`), each reply you confirm also sets `last_inbound` on that role, which keeps it off the follow-up list.
 
 **Where it plugs in.** Upstream of `/today` (journal feeds the warm-outreach count) and `/evaluate-position` (recruiter context informs the score). Not a direct skill modification — the user runs it as a pre-flight before `/today`.
 

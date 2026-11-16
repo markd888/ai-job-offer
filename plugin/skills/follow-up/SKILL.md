@@ -1,6 +1,6 @@
 ---
 name: follow-up
-description: This skill should be used when the user asks to "/follow-up", "/follow-up <Company>", "who should I chase", "draft a follow-up for <Company>", "nudge <Company>", "send a thank-you to <Company>", or when /today's heads-up lists follow-ups due. Lists applications quiet for 10+ days (at most two follow-ups each), drafts a short follow-up or post-interview thank-you in the user's voice using only claims from what was actually submitted, and records it in meta.md once the user says it was sent. Drafts only — never sends anything.
+description: This skill should be used when the user asks to "/follow-up", "/follow-up <Company>", "who should I chase", "draft a follow-up for <Company>", "nudge <Company>", "send a thank-you to <Company>", "<Company> replied", "<Company> got back to me", or when /today's heads-up lists follow-ups due. Lists applications quiet for 10+ days (at most two follow-ups each), drafts a short follow-up or post-interview thank-you in the user's voice using only claims from what was actually submitted, records it in meta.md once the user says it was sent, and records a company's reply (last_inbound) when the user mentions one. Drafts only — never sends anything.
 ---
 
 # /follow-up — chase quiet applications, thank interviewers
@@ -50,6 +50,17 @@ Save the draft to `<role folder>/follow-up-<YYYY-MM-DD>.md` with the channel and
 - `journal.md`, under today's heading: `- [<Company>] Follow-up #<n> sent via <channel>. (source: user)`
 
 For a thank-you, record the History and journal lines only; it doesn't count toward the two follow-ups.
+
+## When the company writes back
+
+Whenever the user says a company replied, called or scheduled something — here, after a follow-up, or anywhere in the conversation — record it, so the role leaves the quiet list:
+
+```sh
+python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/record-inbound.py" <role folder> --date <YYYY-MM-DD> \
+  --what "<reply from Dana (recruiter)>" --source user
+```
+
+Plus a journal line: `- [<Company>] <what came in>. (source: user)`. A rejection or an offer still needs the user's yes before the status changes.
 
 ## Never
 

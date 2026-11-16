@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
-import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -40,27 +39,12 @@ def _load_archiver():
     return mod
 
 
-def field(meta: str, key: str) -> str:
-    m = re.search(rf"^{key}:\s*\"?([^\"\n#]*?)\"?\s*(#.*)?$", meta, re.M)
-    return m.group(1).strip() if m else ""
-
-
-def set_fields(meta: str, values: dict[str, str]) -> str:
-    """Set top-level frontmatter keys in place, adding missing ones at the end
-    of the block. Every other line, including the body, is left as it was."""
-    lines = meta.split("\n")
-    try:
-        start = next(i for i, l in enumerate(lines) if l.strip() == "---")
-        end = next(i for i in range(start + 1, len(lines)) if lines[i].strip() == "---")
-    except StopIteration:
-        raise SystemExit("meta.md has no frontmatter block")
-    pending = dict(values)
-    for i in range(start + 1, end):
-        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*:", lines[i])
-        if m and m.group(1) in pending:
-            lines[i] = f"{m.group(1)}: {pending.pop(m.group(1))}"
-    lines[end:end] = [f"{k}: {v}" for k, v in pending.items()]
-    return "\n".join(lines)
+def _load_metafile():
+    path = Path(__file__).resolve().parent / "metafile.py"
+    spec = importlib.util.spec_from_file_location("metafile", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def main() -> int:
@@ -78,12 +62,11 @@ def main() -> int:
         date.fromisoformat(a.date)
     except ValueError:
         sys.exit(f"--date {a.date!r} is not YYYY-MM-DD")
+    mf = _load_metafile()
     role = a.role_dir
-    meta_path = role / "meta.md"
-    if not meta_path.is_file():
-        sys.exit(f"No meta.md in {role}")
+    meta_path = mf.role_meta(role)
     meta = meta_path.read_text()
-    status, applied_on = field(meta, "status"), field(meta, "date_applied")
+    status, applied_on = mf.field(meta, "status"), mf.field(meta, "date_applied")
     if not a.force:
         if status not in OPEN_STATUSES:
             sys.exit(f"Status is '{status}', past the application; pass --force to record it anyway")
@@ -98,11 +81,12 @@ def main() -> int:
         except archiver.ArchiveError as e:
             sys.exit(str(e))
 
-    values = {"status": "applied", "date_applied": a.date, "channel": a.channel, "last_activity": a.date}
+    values = {"status": "applied", "date_applied": a.date, "channel": a.channel,
+              "last_activity": mf.later(mf.field(meta, "last_activity"), a.date)}
     referred = a.referred_by.strip().strip("[]")
     if referred:
         values["referred_by"] = '"[[' + referred.replace('"', "'") + ']]"'
-    meta = set_fields(meta, values)
+    meta = mf.set_fields(meta, values)
 
     line = f"- {a.date}: status → applied via {a.channel}"
     if referred:
@@ -111,8 +95,7 @@ def main() -> int:
         line += f"; materials archived in {archived.name}/"
     elif not a.no_archive:
         line += "; no CV in the folder, nothing archived"
-    meta_path.write_text(meta)
-    archiver.append_history(meta_path, line)
+    meta_path.write_text(mf.append_history(meta, line))
 
     print(f"Recorded: applied {a.date} via {a.channel}" + (f", referred by {referred}" if referred else ""))
     if archived:
