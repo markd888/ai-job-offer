@@ -13,6 +13,8 @@ setup → job-search → dashboard → today (daily, ongoing)
                                   ↓
                             apply (when a role moves to to_apply) — builds the PDF, runs ats-check
                                   ↓
+                            cover-letter (when the posting asks for one, or someone will read it)
+                                  ↓
                             sent (when the application goes out)
                                   ↓
                             follow-up (when it's quiet 10+ days; records replies too)
@@ -35,7 +37,8 @@ When a skill finishes, look at current filesystem and journal state, then pick t
 | Current state | Suggested next step | Wording hint |
 |---|---|---|
 | `userdata/profile.md` just written, no companies in `userdata/companies/` | `/job-offer:job-search` | "Run /job-offer:job-search now to seed your applications list." |
-| `/apply` just built a CV, or the user says they're about to send it | Nudge in chat | "Tell me once it's sent and I'll record it." |
+| `/apply` just built a CV and the role folder has no `cover-*.md` | `/job-offer:cover-letter <Co>` | "Want a cover letter for <Co> too, or is the CV enough?" |
+| `/apply` or `/cover-letter` just finished, or the user says they're about to send it | Nudge in chat | "Tell me once it's sent and I'll record it." |
 | The user says an application went out ("sent it", "applied to <Co>") and the role isn't `applied` with a `date_applied` yet | `/job-offer:sent <Co>` | "Want me to record the <Co> application as sent today?" |
 | An interview round ended today (calendar, debrief or the user says so) | `/job-offer:follow-up thanks <Co>` | "Want a short thank-you to <name> while it's fresh?" |
 | The user says a person replied, referred them or made an intro | `/job-offer:outreach <Name>` (log it) | "Want me to log Dana's reply? If she's put you forward, /sent records the application with her as the referrer." |

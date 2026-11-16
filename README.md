@@ -60,7 +60,7 @@ Five phases, plus what runs alongside them.
 
 1. **Set up once.** `/job-offer:setup` writes your profile, strategy, and the rubric everything else scores against. Drop a CV at `userdata/cv.md` first and it pre-fills most answers.
 2. **Discover & score.** `/job-offer:job-search` runs a weekly sweep — parallel subagents recheck your P0/P1 companies via ATS APIs and discover new roles via scoped search. `/job-offer:evaluate-position <url>` scores one-off postings. Both write a company folder, a tier score, and a 200-word research brief.
-3. **Apply.** `/job-offer:apply <Company>` tailors your master CV for one role. Every claim traces to your CV, your profile, or your own answers — it never invents facts.
+3. **Apply.** `/job-offer:apply <Company>` tailors your master CV for one role, and `/job-offer:cover-letter <Company>` writes a short letter to go with it when one is needed. Every claim traces to your CV, your profile, or your own answers — they never invent facts.
 4. **Interview.** `/job-offer:interview-prep <Company>` adapts stories from your bank for a specific round. Rehearse with `job-offer:interviewer-simulator`, debrief with `/job-offer:interview-analysis`.
 5. **Decide.** `/job-offer:evaluate-offer` sense-checks an offer or compares two — verdict, comp shape, archetype fit, negotiation moves.
 
@@ -77,6 +77,7 @@ Alongside: `/job-offer:today` (morning brief), `job-offer:career-coach` (anytime
 | `/job-offer:evaluate-position <url>` | Score a posting against your tier rubric. Hard-filter and anti-goal gates, liveness check, user override. |
 | `/job-offer:job-search` | Weekly sweep. Rechecks your tracked companies via public ATS APIs (Ashby / Greenhouse / Lever), discovers new roles via scoped search, scores and files them. |
 | `/job-offer:apply <Company>` | Tailor your master CV for one role. Up to five clarifying questions, then a single-pass draft. |
+| `/job-offer:cover-letter <Company>` | A 150–250-word letter answering the posting's top two or three needs with one proof each. Every number and name is checked against your CV and profile; it tells you what it did not claim. |
 | `/job-offer:story-builder` | Your universal STAR-story bank. Each story carries 3-5 angles for different question types. |
 | `/job-offer:interview-prep <Company>` | Adapt 3-5 stories for a specific round. `--stage` shapes the prep; late rounds add founder-vetting questions. |
 | `/job-offer:case-practice [Company]` | Rapid-recognition case drill. Every pick scored with the failure mode it demonstrates, tracked against an 80% readiness gate. |
