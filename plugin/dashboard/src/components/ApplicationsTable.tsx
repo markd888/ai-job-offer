@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Box,
   Button,
   Code,
   Group,
@@ -19,6 +18,7 @@ import { postNote } from "../api";
 import { daysSince, relativeDate } from "../dates";
 import type { Position } from "../types";
 import { STATUS_KEYS, statusColor, statusLabel } from "../statusColors";
+import { useScrollEdges } from "../useScrollEdges";
 import { StatusSelect } from "./StatusSelect";
 import { TierBadge, isScored } from "./TierBadge";
 
@@ -54,6 +54,8 @@ export function ApplicationsTable({ companies, onChange, onOpen }: Props) {
   const [tier, setTier] = useState("all");
   const [query, setQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const tabEdges = useScrollEdges(tabsRef, groups.length);
 
   const current = groups.find((g) => g.key === tab) ?? groups.find((g) => g.key === DEFAULT_TAB) ?? groups[0];
 
@@ -64,7 +66,7 @@ export function ApplicationsTable({ companies, onChange, onOpen }: Props) {
 
   if (groups.length === 0) {
     return (
-      <section className="jst-card" style={{ padding: 24 }}>
+      <section className="jst-card jst-card-pad">
         <Stack gap="sm" align="flex-start">
           <Text fz="lg" fw={600}>No companies yet.</Text>
           <Text size="sm" c="dimmed">
@@ -88,25 +90,39 @@ export function ApplicationsTable({ companies, onChange, onOpen }: Props) {
   const visible = showAll ? filtered : filtered.slice(0, PAGE_SIZE);
 
   return (
-    <section id="pipeline" className="jst-card" aria-labelledby="pipeline-h" style={{ overflow: "hidden" }}>
-      <Group justify="space-between" wrap="wrap" gap="sm" px={20} pt={20}>
+    <section id="pipeline" className="jst-card jst-pipeline" aria-labelledby="pipeline-h">
+      <div className="jst-card-head">
         <h2 id="pipeline-h" className="jst-h2">Pipeline</h2>
-        <TextInput
-          aria-label="Search company or role"
-          placeholder="Search company or role"
-          leftSection={<IconSearch size={16} stroke={1.8} />}
-          value={query}
-          onChange={(e) => setQuery(e.currentTarget.value)}
-          radius="md"
-          className="jst-search"
-        />
-      </Group>
+        <div className="jst-toolbar">
+          <div className="jst-seg" role="group" aria-label="Filter by tier">
+            {tiersPresent.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                className="jst-chip"
+                aria-pressed={tier === f.key}
+                onClick={() => setTier(f.key)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <TextInput
+            aria-label="Search company or role"
+            placeholder="Search company or role"
+            leftSection={<IconSearch size={15} stroke={1.8} />}
+            value={query}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+            size="xs"
+            radius="md"
+            className="jst-search"
+            classNames={{ input: "jst-search-input" }}
+          />
+        </div>
+      </div>
 
-      <div
-        role="tablist"
-        aria-label="Pipeline stage"
-        style={{ display: "flex", gap: 4, padding: "8px 12px 0", borderBottom: "1px solid var(--jst-border)", overflowX: "auto" }}
-      >
+      <div className="jst-fade jst-fade-surface" data-more-left={tabEdges.left} data-more-right={tabEdges.right}>
+      <div ref={tabsRef} className="jst-tabs" role="tablist" aria-label="Pipeline stage">
         {groups.map((g) => (
           <button
             key={g.key}
@@ -125,53 +141,38 @@ export function ApplicationsTable({ companies, onChange, onOpen }: Props) {
           </button>
         ))}
       </div>
-
-      <Group gap={8} px={20} py={14}>
-        {tiersPresent.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            className="jst-chip"
-            aria-pressed={tier === f.key}
-            onClick={() => setTier(f.key)}
-          >
-            {f.label}
-          </button>
-        ))}
-      </Group>
+      </div>
 
       <div className="jst-row jst-row-head" role="presentation">
         <span>Tier</span>
         <span>Company &amp; role</span>
+        <span />
         <span className="jst-col-status">Status</span>
-        <span>Last</span>
+        <span className="jst-col-last">Last</span>
       </div>
 
       {visible.map((p) => (
         <PositionRow key={p.folder_path} p={p} onOpen={onOpen} onChange={onChange} />
       ))}
 
-      {filtered.length === 0 && (
-        <Text size="sm" c="dimmed" px={20} py={28} style={{ borderTop: "1px solid var(--jst-divider)" }}>
-          No roles match these filters.
-        </Text>
+      {filtered.length === 0 && <p className="jst-row-empty">No roles match these filters.</p>}
+
+      {filtered.length > 0 && (
+        <div className="jst-table-fill" aria-hidden>
+          <p className="jst-table-fill-msg">That’s the whole list.</p>
+        </div>
       )}
 
-      <Group
-        justify="space-between"
-        px={20}
-        py={12}
-        style={{ borderTop: "1px solid var(--jst-divider)", background: "var(--jst-subtle)" }}
-      >
-        <Text size="sm" c="dimmed" className="jst-num">
+      <div className="jst-table-foot">
+        <span className="jst-num">
           Showing {visible.length} of {filtered.length}
-        </Text>
+        </span>
         {filtered.length > PAGE_SIZE && (
           <button type="button" className="jst-btn" onClick={() => setShowAll((v) => !v)}>
             {showAll ? "Show fewer" : "Show all"}
           </button>
         )}
-      </Group>
+      </div>
     </section>
   );
 }
@@ -191,36 +192,34 @@ function PositionRow({ p, onOpen, onChange }: PositionRowProps) {
   return (
     <div className="jst-row" onClick={() => onOpen(p)}>
       <TierBadge tier={p.tier} />
-      <Group gap="xs" align="center" wrap="nowrap" style={{ minWidth: 0 }}>
-        <UnstyledButton
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpen(p);
-          }}
-          style={{ minWidth: 0, flex: "0 1 auto" }}
-          aria-label={`Open ${p.company} — ${p.position || "pending"}`}
-        >
-          <p className="jst-co">
-            {p.company}
-            {needsFollowUp && <span className="jst-tag">Follow up</span>}
-          </p>
-          <p className="jst-role">{p.position || "(pending)"}</p>
-        </UnstyledButton>
-        <Box onClick={(e) => e.stopPropagation()} style={{ flexShrink: 0, lineHeight: 0, display: "flex", gap: 2 }}>
-          <OpenPostingIcon link={p.link} company={p.company} />
-          <QuickAddNote
-            folderPath={p.folder_path}
-            company={p.company}
-            opened={popoverOpen}
-            onChange={setPopoverOpen}
-            onAdded={onChange}
-          />
-        </Box>
-      </Group>
+      <UnstyledButton
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpen(p);
+        }}
+        className="jst-row-main"
+        aria-label={`Open ${p.company} — ${p.position || "pending"}`}
+      >
+        <p className="jst-co">
+          {p.company}
+          {needsFollowUp && <span className="jst-tag">Follow up</span>}
+        </p>
+        <p className="jst-role" title={p.position || undefined}>{p.position || "(pending)"}</p>
+      </UnstyledButton>
+      <div className="jst-actions" onClick={(e) => e.stopPropagation()}>
+        <OpenPostingIcon link={p.link} company={p.company} />
+        <QuickAddNote
+          folderPath={p.folder_path}
+          company={p.company}
+          opened={popoverOpen}
+          onChange={setPopoverOpen}
+          onAdded={onChange}
+        />
+      </div>
       <div className="jst-col-status" onClick={(e) => e.stopPropagation()}>
         <StatusSelect folderPath={p.folder_path} current={p.status} onChange={onChange} />
       </div>
-      <span className={`jst-age jst-num${needsFollowUp ? " jst-age-stale" : ""}`}>{relativeDate(last)}</span>
+      <span className={`jst-age jst-col-last jst-num${needsFollowUp ? " jst-age-stale" : ""}`}>{relativeDate(last)}</span>
     </div>
   );
 }
@@ -233,23 +232,24 @@ interface OpenPostingIconProps {
 export function OpenPostingIcon({ link, company }: OpenPostingIconProps) {
   if (!link) {
     // Reserve the slot so the pencil doesn't jump horizontally between rows.
-    return <Box w={36} h={36} />;
+    return <span className="jst-icon-slot" aria-hidden />;
   }
   return (
-    <Tooltip label="Open posting" openDelay={400} withArrow>
+    <Tooltip label="Open posting" openDelay={400} withArrow events={{ hover: true, focus: false, touch: false }}>
       <ActionIcon
         component="a"
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        size={36}
+        size={32}
+        className="jst-icon-action"
         variant="subtle"
         color="gray"
         radius="md"
         onClick={(e) => e.stopPropagation()}
         aria-label={`Open posting for ${company} in new tab`}
       >
-        <IconExternalLink size={18} stroke={1.6} />
+        <IconExternalLink size={16} stroke={1.6} />
       </ActionIcon>
     </Tooltip>
   );
@@ -309,11 +309,13 @@ export function QuickAddNote({ folderPath, company, opened, onChange, onAdded }:
       radius="md"
       width={320}
       trapFocus
+      returnFocus
     >
       <Popover.Target>
-        <Tooltip label="Add a note" openDelay={400} withArrow disabled={opened || savedFlash}>
+        <Tooltip label="Add a note" openDelay={400} withArrow disabled={opened || savedFlash} events={{ hover: true, focus: false, touch: false }}>
           <ActionIcon
-            size={36}
+            size={32}
+            className="jst-icon-action"
             variant={savedFlash ? "light" : "subtle"}
             color={savedFlash ? "green" : "gray"}
             radius="md"
@@ -323,9 +325,8 @@ export function QuickAddNote({ folderPath, company, opened, onChange, onAdded }:
               onChange(!opened);
             }}
             aria-label={savedFlash ? "Saved" : `Add a note about ${company}`}
-            style={{ transition: "background-color 200ms ease, color 200ms ease" }}
           >
-            {savedFlash ? <IconCheck size={18} stroke={2} /> : <IconPencilPlus size={18} stroke={1.6} />}
+            {savedFlash ? <IconCheck size={16} stroke={2} /> : <IconPencilPlus size={16} stroke={1.6} />}
           </ActionIcon>
         </Tooltip>
       </Popover.Target>
@@ -337,6 +338,7 @@ export function QuickAddNote({ folderPath, company, opened, onChange, onAdded }:
             minRows={3}
             radius="md"
             placeholder={`What's new with ${company}?`}
+            aria-label={`Note about ${company}`}
             value={note}
             onChange={(e) => setNote(e.currentTarget.value)}
             disabled={saving}

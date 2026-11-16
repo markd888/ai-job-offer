@@ -44,6 +44,21 @@ without adopting the pipeline tracker.
 
 ---
 
+## [0.7.1] — 2026-11-16
+
+Brings the plugin's dashboard up to the one in daily use.
+
+### Added
+- Edit an interview card's next step in place (`next_event`; steps split on new lines or `;`).
+- A status change from the dropdown stamps the date it implies (`date_applied`, `date_rejected`, `date_not_interested`) when the role has none.
+- Feedback-request counter in the week's progress; warm outreach counts people, not journal lines.
+- Briefcase favicon.
+
+### Changed
+- Dashboard redesign on one grid and spacing scale, with a claude.ai look; the mini funnel counts each role by the deeper of `rejection_stage` and `max_stage`.
+- Active cards are the same size: the role title clamps to two lines and cards share one flexible width.
+- Interview rows scroll, the heads-up list is capped, and the side column order is fixed.
+
 ## [0.7.0] — 2026-10-30
 
 First release of job-offer, forked from pm-job-search 0.6.0 and renamed (skills are `/job-offer:<skill>`).

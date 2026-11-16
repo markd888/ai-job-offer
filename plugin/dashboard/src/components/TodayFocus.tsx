@@ -1,4 +1,4 @@
-import { Code, Text } from "@mantine/core";
+import { Code } from "@mantine/core";
 import { IconCheck } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 
 import { isHeadsUpSection, isPipelineSection, isTodaySection, parseBrief } from "../brief";
 import { DEMO_MODE } from "../config";
+import { humanizeIsoDates, humanizeIsoDatesInMarkdown } from "../dates";
 import type { DailyBrief } from "../types";
 import { briefMdComponents } from "./briefMarkdown";
 
@@ -65,26 +66,26 @@ export function TodayFocus({ brief }: Props) {
       : null;
 
   return (
-    <section className="jst-card" aria-labelledby="focus-h" style={{ overflow: "hidden" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "20px 20px 14px" }}>
+    <section className="jst-card" aria-labelledby="focus-h">
+      <div className="jst-card-head">
         <div>
           <h2 id="focus-h" className="jst-h2">Today’s focus</h2>
-          <p className="jst-muted" style={{ margin: "4px 0 0", fontSize: 13 }}>
-            {brief ? <>From the daily brief · {brief.date}</> : "No daily brief yet"}
+          <p className="jst-sub">
+            {brief ? <>From the daily brief · {humanizeIsoDates(brief.date)}</> : "No daily brief yet"}
             {isStale && <span className="jst-tag">Stale — run /today</span>}
           </p>
         </div>
         {today && today.items.length > 0 && (
-          <p className="jst-num jst-muted" style={{ margin: 0, fontSize: 13 }}>
+          <p className="jst-meta jst-num">
             {today.items.filter((i) => done.includes(i)).length} / {today.items.length} done
           </p>
         )}
       </div>
 
       {!brief && (
-        <Text size="sm" c="dimmed" px={20} pb={20}>
+        <p className="jst-meta jst-card-body">
           Run <Code>/today</Code> in Claude Code to generate one.
-        </Text>
+        </p>
       )}
 
       {today?.items.map((item) => (
@@ -96,16 +97,16 @@ export function TodayFocus({ brief }: Props) {
           onClick={() => toggle(item)}
         >
           <span className="jst-box">
-            <IconCheck size={14} stroke={3} />
+            <IconCheck size={13} stroke={3} />
           </span>
-          <span className="jst-task-text" style={{ flex: 1, minWidth: 0 }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={inlineMd}>{item}</ReactMarkdown>
+          <span className="jst-task-text">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={inlineMd}>{humanizeIsoDatesInMarkdown(item)}</ReactMarkdown>
           </span>
         </button>
       ))}
 
       {fallback && (
-        <div style={{ padding: "0 20px 16px" }}>
+        <div className="jst-card-body">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={briefMdComponents}>{fallback}</ReactMarkdown>
         </div>
       )}

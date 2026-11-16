@@ -1,4 +1,4 @@
-export const REPO_URL = "https://github.com/archugunov/pm-job-search";
+export const REPO_URL = "https://github.com/archugunov/job-offer";
 export const INSTALL_URL = `${REPO_URL}#install`;
 export const AUTHOR_NAME = "Arkadii Chugunov";
 export const AUTHOR_LINKEDIN_URL = "https://www.linkedin.com/in/a-chugunov/";

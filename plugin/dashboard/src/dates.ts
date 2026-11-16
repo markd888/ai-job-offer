@@ -73,3 +73,23 @@ export function startOfToday(): Date {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
+
+/** Whole days from now until an ISO date (never negative), or null when missing/unparseable. */
+export function daysUntil(iso: string | undefined): number | null {
+  if (!iso) return null;
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, Math.ceil((t - Date.now()) / DAY_MS));
+}
+
+/**
+ * humanizeIsoDates for markdown: rewrites dates in the prose but leaves link
+ * targets, autolinks, bare URLs and `code` exactly as written, so a link to
+ * interview-prep-2026-11-15.md still works.
+ */
+export function humanizeIsoDatesInMarkdown(md: string): string {
+  return md
+    .split(/(`[^`]*`|\]\([^)]*\)|<[^>\s]+>|https?:\/\/[^\s)>]+)/g)
+    .map((part, i) => (i % 2 === 1 ? part : humanizeIsoDates(part)))
+    .join("");
+}

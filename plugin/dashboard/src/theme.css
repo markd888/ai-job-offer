@@ -1,130 +1,311 @@
-/* Design tokens for the dashboard. Mantine sets data-mantine-color-scheme on
-   <html>, so every token flips with the light/dark toggle. Components read
-   these through the classes below or var(--jst-*) in inline styles. */
+/* Design tokens and shared layout for the dashboard, in the claude.ai look:
+   warm ivory (light) and charcoal (dark) surfaces, a clay accent used
+   sparingly, serif titles over a sans UI, thin borders instead of shadows.
+
+   Mantine sets data-mantine-color-scheme on <html>, so every colour token
+   flips with the light/dark toggle. Spacing, radii and type sizes are defined
+   once here; components use the jst-* classes below instead of inline styles,
+   so every block sits on the same grid. */
+
+:root {
+  /* Spacing scale: the only gaps and paddings used on the page. */
+  --jst-s1: 4px;
+  --jst-s2: 8px;
+  --jst-s3: 12px;
+  --jst-s4: 16px;
+  --jst-s5: 24px;
+  --jst-s6: 32px;
+
+  /* Card side padding and the gap between blocks. */
+  --jst-pad: var(--jst-s5);
+  --jst-gap: var(--jst-s5);
+
+  --jst-r-card: 14px;
+  --jst-r-inner: 10px;
+  --jst-r-chip: 6px;
+  --jst-r-pill: 999px;
+
+  /* Type scale. */
+  --jst-fs-2xs: 11px;
+  --jst-fs-xs: 12px;
+  --jst-fs-sm: 13px;
+  --jst-fs-md: 14px;
+  --jst-fs-lg: 16px;
+  --jst-fs-xl: 18px;
+  --jst-fs-2xl: 22px;
+  --jst-serif: ui-serif, "New York", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+
+  /* Height of buttons and inputs, and of icon buttons (grown for touch). */
+  --jst-control: 32px;
+  --jst-hit: 32px;
+  /* Width of the edge fade on sideways scrollers; FADE_PX in useScrollEdges.ts. */
+  --jst-fade-w: 48px;
+  --jst-rail-w: 340px;
+}
+
+/* Fingers need bigger targets than a pointer. */
+@media (pointer: coarse) {
+  :root {
+    --jst-hit: 44px;
+    --jst-control: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --jst-pad: var(--jst-s4);
+    --jst-gap: var(--jst-s4);
+  }
+}
 
 :root[data-mantine-color-scheme="light"] {
-  --jst-bg: #f4f5f7;
+  --jst-bg: #f5f4ee;
   --jst-surface: #ffffff;
-  --jst-subtle: #f8f9fb;
-  --jst-track: #eef0f3;
-  --jst-border: #e3e6eb;
-  --jst-border-strong: #c9ced6;
-  --jst-divider: #eef0f3;
-  --jst-ink: #12151c;
-  --jst-ink-2: #3a4352;
-  --jst-muted: #5b6270;
-  --jst-box: #9aa1ac;
-  --jst-on-ink: #ffffff;
-  --jst-hover: #e9ebef;
-  --jst-accent: #2447d6;
-  --jst-ok: #12805c;
-  --jst-on-ok: #ffffff;
-  --jst-ok-bg: #f1f7f4;
-  --jst-ok-chip-bg: #e8f4ee;
-  --jst-ok-fg: #0e6b4c;
-  --jst-warn-fg: #8a4b00;
-  --jst-warn-bg: #fff1db;
-  --jst-danger-fg: #b42318;
-  --jst-danger-bg: #fdecea;
-  --jst-neutral-bar: #c3c8d0;
-  --jst-chip-bg: #ebeef3;
-  --jst-link: #2447d6;
-  --jst-link-hover: #1a34a3;
-  --jst-status-offer: #7a3fd1;
-  --jst-status-new: #c27803;
-  --jst-status-to-apply: #d0601a;
-  --jst-status-applied: #2447d6;
-  --jst-status-rejected: #9aa1ac;
-  --jst-status-not-interested: #c3c8d0;
+  --jst-subtle: #faf9f5;
+  --jst-hover: #f0eee6;
+  --jst-track: #edeae0;
+  --jst-border: #e2dfd3;
+  --jst-border-strong: #c9c5b7;
+  --jst-divider: #ece9df;
+  --jst-ink: #1f1e1d;
+  --jst-ink-2: #3d3b35;
+  --jst-muted: #66645c;
+  --jst-box: #8b887e;
+  --jst-accent: #c6613f;
+  --jst-on-accent: #ffffff;
+  --jst-accent-bg: #faefe9;
+  --jst-accent-fg: #9a4524;
+  --jst-link: #a84d2c;
+  --jst-link-hover: #8a3d22;
+  --jst-selection: #f3d6c8;
+  --jst-ok: #3f7d55;
+  --jst-ok-bg: #eaf2e7;
+  --jst-ok-fg: #2f6a45;
+  --jst-warn-fg: #8a5300;
+  --jst-warn-bg: #f8ead0;
+  --jst-danger-fg: #b0331f;
+  --jst-danger-bg: #f9e4de;
+  --jst-neutral-bar: #bdb9ac;
+  --jst-chip-bg: #efece3;
+  --jst-status-offer: #8a5cc7;
+  --jst-status-new: #c48a1c;
+  --jst-status-to-apply: #c6613f;
+  --jst-status-applied: #4a72b0;
+  --jst-status-rejected: #a29e93;
+  --jst-status-not-interested: #cdc9bd;
 }
 
 :root[data-mantine-color-scheme="dark"] {
-  --jst-bg: #0e1015;
-  --jst-surface: #161920;
-  --jst-subtle: #1b1f27;
-  --jst-track: #232833;
-  --jst-border: #262b35;
-  --jst-border-strong: #3a404c;
-  --jst-divider: #20242d;
-  --jst-ink: #eceef2;
-  --jst-ink-2: #c4c9d3;
-  --jst-muted: #9aa2b1;
-  --jst-box: #5c6370;
-  --jst-on-ink: #0e1015;
-  --jst-hover: #1f232c;
-  --jst-accent: #3d63f5;
-  --jst-ok: #3fbf8a;
-  --jst-on-ok: #0e1015;
-  --jst-ok-bg: #13261e;
-  --jst-ok-chip-bg: #13261e;
-  --jst-ok-fg: #6fd9a8;
-  --jst-warn-fg: #f5b961;
-  --jst-warn-bg: #3a2a12;
-  --jst-danger-fg: #ff8a80;
-  --jst-danger-bg: #3a1a1a;
-  --jst-neutral-bar: #3a404c;
-  --jst-chip-bg: #262b35;
-  --jst-link: #8fa6ff;
-  --jst-link-hover: #b3c2ff;
-  --jst-status-offer: #b48cff;
-  --jst-status-new: #e5a33a;
-  --jst-status-to-apply: #f08a4b;
-  --jst-status-applied: #7c95ff;
-  --jst-status-rejected: #6b7280;
-  --jst-status-not-interested: #4b5260;
+  --jst-bg: #1f1e1d;
+  --jst-surface: #262624;
+  --jst-subtle: #2b2a28;
+  --jst-hover: #302f2c;
+  --jst-track: #353430;
+  --jst-border: #3a3935;
+  --jst-border-strong: #4f4d47;
+  --jst-divider: #31302d;
+  --jst-ink: #f5f4ee;
+  --jst-ink-2: #d9d6cb;
+  --jst-muted: #a8a59b;
+  --jst-box: #7c796f;
+  --jst-accent: #d97757;
+  --jst-on-accent: #1f1e1d;
+  --jst-accent-bg: #3a2b23;
+  --jst-accent-fg: #eda184;
+  --jst-link: #e7957a;
+  --jst-link-hover: #f2b39c;
+  --jst-selection: #5a3426;
+  --jst-ok: #79bd8d;
+  --jst-ok-bg: #233026;
+  --jst-ok-fg: #95d1a6;
+  --jst-warn-fg: #e8b864;
+  --jst-warn-bg: #3a2f1b;
+  --jst-danger-fg: #f2907e;
+  --jst-danger-bg: #3d2420;
+  --jst-neutral-bar: #5d5b54;
+  --jst-chip-bg: #353430;
+  --jst-status-offer: #b997ea;
+  --jst-status-new: #e2ac4c;
+  --jst-status-to-apply: #d97757;
+  --jst-status-applied: #8eabe0;
+  --jst-status-rejected: #77746b;
+  --jst-status-not-interested: #55534d;
 }
 
 body {
   background: var(--jst-bg);
   color: var(--jst-ink);
+  font-size: var(--jst-fs-md);
+  line-height: 1.45;
+  overflow-x: hidden;
 }
+
+::selection {
+  background: var(--jst-selection);
+  color: var(--jst-ink);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--jst-border-strong) transparent;
+}
+
+:where(button, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--jst-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Page grid ---------- */
+
+.jst-page {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: var(--jst-s5) clamp(var(--jst-s4), 3vw, var(--jst-s6)) calc(var(--jst-s6) * 2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--jst-gap);
+}
+
+.jst-topbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--jst-s1) var(--jst-s3);
+  min-height: var(--jst-hit);
+}
+.jst-topbar-title {
+  margin: 0 auto 0 0;
+  font-family: var(--jst-serif);
+  font-size: var(--jst-fs-2xl);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.jst-meta-list {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--jst-s4);
+  row-gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--jst-fs-sm);
+  color: var(--jst-muted);
+}
+.jst-meta-list strong {
+  font-weight: 500;
+  color: var(--jst-ink-2);
+}
+
+/* Interviews span the page; below them the work column sits next to the rail.
+   The last row takes any spare height so a long rail never opens a hole
+   between Today's focus and Pipeline. */
+.jst-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--jst-rail-w);
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    "active active"
+    "focus rail"
+    "pipeline rail";
+  gap: var(--jst-gap);
+}
+.jst-area-active { grid-area: active; min-width: 0; }
+.jst-area-focus { grid-area: focus; min-width: 0; }
+.jst-area-rail { grid-area: rail; min-width: 0; }
+/* Pipeline and the rail end on the same line: whichever is shorter stretches.
+   A short list closes with a quiet end-of-list line in the spare space, and a
+   long list scrolls past a rail whose content stays in view. */
+.jst-area-pipeline { grid-area: pipeline; min-width: 0; display: flex; flex-direction: column; }
+.jst-area-pipeline > .jst-card { flex: 1; display: flex; flex-direction: column; }
+
+/* One column: what needs doing today, then the week, then the full list.
+   Below 1120px a column beside the rail would leave the table too narrow. */
+@media (max-width: 1120px) {
+  .jst-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas:
+      "active"
+      "focus"
+      "rail"
+      "pipeline";
+  }
+}
+
+/* ---------- Shared pieces ---------- */
 
 .jst-num {
-  font-family: var(--mantine-font-family-monospace);
   font-variant-numeric: tabular-nums;
 }
-
-.jst-eyebrow {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--jst-muted);
+.jst-nowrap {
+  white-space: nowrap;
 }
 
 .jst-card {
   background: var(--jst-surface);
   border: 1px solid var(--jst-border);
-  border-radius: 14px;
+  border-radius: var(--jst-r-card);
+}
+.jst-card-pad {
+  padding: var(--jst-pad);
+}
+
+/* Every card and rail section starts its title the same distance from the top
+   (--jst-s4) and the side (--jst-pad). */
+.jst-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--jst-s2) var(--jst-s3);
+  padding: var(--jst-s4) var(--jst-pad) var(--jst-s3);
+}
+/* Centre a control-height toolbar on the title's first line without letting
+   it push the title down. */
+.jst-card-head .jst-toolbar {
+  margin-block: calc((var(--jst-fs-xl) * 1.3 - var(--jst-control)) / 2);
+}
+.jst-card-head > .jst-meta {
+  line-height: calc(var(--jst-fs-xl) * 1.3);
+}
+.jst-card-body {
+  padding: 0 var(--jst-pad) var(--jst-s4);
 }
 
 .jst-h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--jst-serif);
+  font-size: var(--jst-fs-xl);
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 .jst-h3 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--jst-serif);
+  font-size: var(--jst-fs-lg);
+  font-weight: 500;
+  line-height: 1.3;
 }
 
-.jst-muted {
+.jst-sub {
+  margin: 0;
+  font-size: var(--jst-fs-sm);
   color: var(--jst-muted);
 }
 
-.jst-link {
-  color: var(--jst-link);
-  font-size: 13px;
+.jst-label {
+  margin: 0;
+  font-size: var(--jst-fs-xs);
   font-weight: 500;
-  text-decoration: none;
+  color: var(--jst-muted);
 }
-.jst-link:hover {
-  color: var(--jst-link-hover);
-  text-decoration: underline;
+
+.jst-meta {
+  margin: 0;
+  font-size: var(--jst-fs-sm);
+  color: var(--jst-muted);
 }
 
 /* Tier badge */
@@ -132,11 +313,13 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 36px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 6px;
-  font: 600 12px/1 var(--mantine-font-family-monospace);
+  width: var(--jst-s6);
+  height: var(--jst-s5);
+  border-radius: var(--jst-r-chip);
+  font-size: var(--jst-fs-xs);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   flex: none;
 }
 .jst-tier-P0 { background: var(--jst-danger-bg); color: var(--jst-danger-fg); }
@@ -151,148 +334,281 @@ body {
 
 .jst-dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: var(--jst-s2);
+  height: var(--jst-s2);
+  border-radius: var(--jst-r-pill);
   flex: none;
 }
+.jst-dot-ok { background: var(--jst-ok); }
 
 .jst-count {
   display: inline-flex;
   align-items: center;
   height: 20px;
-  padding: 0 7px;
-  border-radius: 10px;
+  padding: 0 var(--jst-s2);
+  border-radius: var(--jst-r-pill);
   background: var(--jst-track);
   color: var(--jst-ink-2);
-  font: 500 12px/1 var(--mantine-font-family-monospace);
+  font-size: var(--jst-fs-xs);
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Pipeline stage tabs */
-.jst-tab {
+.jst-tag {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 14px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--jst-muted);
-  cursor: pointer;
+  height: 20px;
+  padding: 0 var(--jst-s2);
+  margin-left: var(--jst-s2);
+  border-radius: var(--jst-r-chip);
+  background: var(--jst-warn-bg);
+  color: var(--jst-warn-fg);
+  font-family: var(--mantine-font-family);
+  font-size: var(--jst-fs-2xs);
+  font-weight: 600;
+  vertical-align: middle;
   white-space: nowrap;
 }
-.jst-tab:hover { color: var(--jst-ink); }
-.jst-tab[aria-selected="true"] { color: var(--jst-ink); border-bottom-color: var(--jst-ink); }
-
-/* Tier filter chips */
-.jst-chip {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid var(--jst-border);
-  border-radius: 16px;
-  background: var(--jst-surface);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--jst-ink-2);
-  cursor: pointer;
-}
-.jst-chip:hover { border-color: var(--jst-border-strong); }
-.jst-chip[aria-pressed="true"],
-.jst-chip[aria-pressed="true"]:hover {
-  background: var(--jst-ink);
-  border-color: var(--jst-ink);
-  color: var(--jst-on-ink);
-}
+.jst-tag-ok { background: var(--jst-ok-bg); color: var(--jst-ok-fg); }
 
 .jst-btn {
-  height: 40px;
-  padding: 0 14px;
+  height: var(--jst-control);
+  padding: 0 var(--jst-s3);
   border: 1px solid var(--jst-border-strong);
-  border-radius: 10px;
+  border-radius: var(--jst-r-inner);
   background: var(--jst-surface);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--jst-fs-sm);
   font-weight: 500;
   color: var(--jst-ink);
   cursor: pointer;
 }
-.jst-btn:hover { background: var(--jst-subtle); }
+.jst-btn:hover { background: var(--jst-hover); }
 
-/* Pipeline rows */
-.jst-row {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 150px 64px;
+.jst-icon-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 20px;
-  border-top: 1px solid var(--jst-divider);
-  min-height: 64px;
+  justify-content: center;
+  width: var(--jst-hit);
+  height: var(--jst-hit);
+  padding: 0;
+  border: 1px solid var(--jst-border);
+  border-radius: var(--jst-r-inner);
+  background: var(--jst-surface);
+  color: var(--jst-ink-2);
   cursor: pointer;
 }
-.jst-row:hover { background: var(--jst-subtle); }
-.jst-row-head {
-  min-height: 40px;
-  padding-top: 0;
-  padding-bottom: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--jst-muted);
-  cursor: default;
-}
-.jst-row-head:hover { background: transparent; }
-.jst-row:focus-visible { outline: 2px solid var(--jst-accent); outline-offset: -2px; }
+.jst-icon-btn:hover:not(:disabled) { background: var(--jst-hover); color: var(--jst-ink); }
+.jst-icon-btn:disabled { opacity: 0.4; cursor: default; }
 
+/* Mantine ActionIcons (posting, note, theme): size comes from --jst-hit so
+   they grow on touch screens. Mantine writes --ai-size inline. */
+.jst-icon-action {
+  --ai-size: var(--jst-hit) !important;
+}
+/* Keeps the note button in place on rows without a posting link. */
+.jst-icon-slot {
+  display: inline-block;
+  width: var(--jst-hit);
+  height: var(--jst-hit);
+  flex: none;
+}
+
+/* Text button used for "Show N more". */
+.jst-more {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  min-height: var(--jst-control);
+  padding: 0;
+  font: inherit;
+  font-size: var(--jst-fs-sm);
+  font-weight: 500;
+  color: var(--jst-link);
+  cursor: pointer;
+}
+.jst-more:hover { color: var(--jst-link-hover); text-decoration: underline; }
+
+/* Two-line company + role block, used by interview cards and pipeline rows. */
 .jst-co {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--jst-fs-md);
   font-weight: 600;
+  line-height: 1.35;
   color: var(--jst-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .jst-role {
-  margin: 2px 0 0;
-  font-size: 13px;
+  margin: 0;
+  font-size: var(--jst-fs-sm);
+  line-height: 1.4;
   color: var(--jst-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.jst-age { font-size: 13px; color: var(--jst-muted); }
-.jst-age-stale { color: var(--jst-warn-fg); }
 
-.jst-tag {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 7px;
-  margin-left: 8px;
-  border-radius: 5px;
-  background: var(--jst-warn-bg);
-  color: var(--jst-warn-fg);
-  font-size: 11px;
-  font-weight: 600;
-  vertical-align: 2px;
+.jst-actions {
+  display: flex;
+  gap: var(--jst-s1);
+  line-height: 0;
+  flex: none;
 }
-.jst-tag-neutral { background: var(--jst-track); color: var(--jst-ink-2); }
 
-/* Today's focus checklist */
+/* Sideways scrollers (interview row, stage tabs) fade only on a side that has
+   more to show. The fade is an overlay on a wrapper, not a mask on the
+   scroller, so the scroller's own focus ring stays visible. */
+.jst-fade {
+  position: relative;
+  --jst-fade-bg: var(--jst-bg);
+}
+.jst-fade-surface {
+  --jst-fade-bg: var(--jst-surface);
+}
+.jst-fade::before,
+.jst-fade::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: var(--jst-fade-w);
+  pointer-events: none;
+  visibility: hidden;
+}
+.jst-fade::before { left: 0; background: linear-gradient(to right, var(--jst-fade-bg), transparent); }
+.jst-fade::after { right: 0; background: linear-gradient(to left, var(--jst-fade-bg), transparent); }
+.jst-fade[data-more-left="true"]::before,
+.jst-fade[data-more-right="true"]::after { visibility: visible; }
+/* Leave the tab strip's bottom border unfaded. */
+.jst-fade-surface::before,
+.jst-fade-surface::after { bottom: 1px; }
+
+/* ---------- In interviews ---------- */
+
+.jst-section-head {
+  display: flex;
+  align-items: center;
+  gap: var(--jst-s2);
+  min-height: var(--jst-hit);
+  margin-bottom: var(--jst-s3);
+}
+.jst-section-head .jst-spacer { flex: 1; }
+
+/* One row of cards that scrolls sideways; the arrows in the header appear
+   when it overflows. */
+.jst-hscroll {
+  display: flex;
+  gap: var(--jst-s4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--jst-r-card);
+}
+.jst-hscroll::-webkit-scrollbar { display: none; }
+
+/* min-width: 0 keeps every card at the same width: without it an unbreakable
+   string (a pasted URL) sets the card's minimum width and widens it. */
+.jst-hscroll-item {
+  flex: 1 0 min(280px, 84%);
+  min-width: 0;
+  max-width: 420px;
+  scroll-snap-align: start;
+}
+
+.jst-active-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jst-s3);
+  padding: var(--jst-s4) var(--jst-pad);
+}
+.jst-active-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--jst-s2);
+}
+.jst-active-title {
+  min-width: 0;
+  text-align: left;
+}
+.jst-active-head .jst-co,
+.jst-active-head .jst-role { white-space: normal; }
+/* Role titles take exactly two lines (longer ones are clipped with an
+   ellipsis), so the Next step boxes start at the same height on every card. */
+.jst-active-head .jst-role {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  min-height: 2.8em;
+}
+.jst-active-head .jst-co {
+  font-family: var(--jst-serif);
+  font-size: var(--jst-fs-xl);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.jst-active-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Next step is click-to-edit. The box stretches so card footers line up, and
+   its text stays pinned to the top. */
+.jst-next {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: var(--jst-s1);
+  flex: 1;
+  width: 100%;
+  padding: var(--jst-s3);
+  border-radius: var(--jst-r-inner);
+  background: var(--jst-accent-bg);
+  color: var(--jst-ink);
+  text-align: left;
+}
+.jst-next .jst-label { color: var(--jst-accent-fg); }
+.jst-next-step { cursor: pointer; }
+.jst-next-step:hover { box-shadow: inset 0 0 0 1px var(--jst-accent); }
+.jst-next-line {
+  margin: 0;
+  padding-right: var(--jst-s5);
+  font-size: var(--jst-fs-md);
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.jst-next-line + .jst-next-line { margin-top: var(--jst-s1); }
+.jst-next-empty {
+  font-weight: 400;
+  color: var(--jst-muted);
+}
+.jst-next-pencil {
+  position: absolute;
+  top: var(--jst-s3);
+  right: var(--jst-s3);
+  color: var(--jst-accent-fg);
+  line-height: 0;
+}
+
+/* ---------- Today's focus ---------- */
+
 .jst-task {
   display: flex;
-  gap: 14px;
+  gap: var(--jst-s3);
   align-items: flex-start;
   width: 100%;
-  padding: 14px 20px;
+  padding: var(--jst-s3) var(--jst-pad);
   border: 0;
   border-top: 1px solid var(--jst-divider);
   background: transparent;
@@ -302,40 +618,104 @@ body {
   cursor: pointer;
 }
 .jst-task:hover { background: var(--jst-subtle); }
+.jst-task:focus-visible { outline-offset: -2px; }
+.jst-task:last-child { border-radius: 0 0 var(--jst-r-card) var(--jst-r-card); }
 .jst-box {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  margin-top: 1px;
+  width: 20px;
+  height: 20px;
   border: 1.5px solid var(--jst-box);
-  border-radius: 6px;
+  border-radius: var(--jst-r-chip);
   flex: none;
   color: transparent;
 }
 .jst-task[aria-pressed="true"] .jst-box {
-  background: var(--jst-ok);
-  border-color: var(--jst-ok);
-  color: var(--jst-on-ok);
+  background: var(--jst-accent);
+  border-color: var(--jst-accent);
+  color: var(--jst-on-accent);
 }
 .jst-task[aria-pressed="true"] .jst-task-text {
   text-decoration: line-through;
   color: var(--jst-muted);
 }
-.jst-task-text { font-size: 15px; line-height: 1.45; }
+.jst-task-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--jst-fs-md);
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
 .jst-task-text p { margin: 0; }
 
-.jst-when {
-  font: 500 12px/1.3 var(--mantine-font-family-monospace);
-  color: var(--jst-muted);
+/* ---------- Rail: Funnel, This week, Coming up, Heads-up in one panel ---------- */
+
+/* clip, not hidden: hidden would make the panel a scroll container and stop
+   the inner block from sticking. */
+.jst-rail {
+  overflow: clip;
+}
+/* While a long Pipeline scrolls, the rail content stays in view. A rail
+   taller than the window scrolls with the page until its end shows, then
+   sticks by its bottom edge (--jst-rail-h is measured in App.tsx). */
+.jst-rail-inner {
+  position: sticky;
+  top: min(var(--jst-s4), calc(100vh - var(--jst-rail-h, 0px) - var(--jst-s4)));
+}
+/* The divider is a line above each section; the panel clips the first one so
+   it never doubles the panel's own border. */
+.jst-rail-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jst-s3);
+  padding: var(--jst-s4) var(--jst-pad);
+  box-shadow: 0 -1px 0 var(--jst-border);
+}
+.jst-rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jst-s3);
+  min-height: 20px;
 }
 
-.jst-tick { width: 18px; height: 6px; border-radius: 3px; background: var(--jst-ink); }
-.jst-tick-off { background: var(--jst-border-strong); }
+@media (max-width: 1120px) {
+  .jst-rail-inner { position: static; }
+}
+
+/* Between phone and laptop the rail is full width: two columns, filled row by
+   row (Funnel | This week, Coming up | Heads-up), so both columns end together.
+   A lone last section takes the whole row. */
+@media (min-width: 700px) and (max-width: 1120px) {
+  .jst-rail-inner {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .jst-rail-sec:nth-child(even) {
+    box-shadow: 0 -1px 0 var(--jst-border), -1px 0 0 var(--jst-border);
+  }
+  .jst-rail-sec:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+/* Funnel */
+.jst-funnel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: var(--jst-s3);
+  row-gap: var(--jst-s2);
+  margin: 0;
+  font-size: var(--jst-fs-sm);
+}
+.jst-funnel dt { color: var(--jst-ink-2); }
+.jst-funnel dd { margin: 0; }
+.jst-funnel-count { text-align: right; font-weight: 500; }
+.jst-funnel-rate { text-align: right; min-width: var(--jst-s6); color: var(--jst-muted); }
 
 .jst-bar-track {
-  border-radius: 5px;
+  height: 6px;
+  border-radius: var(--jst-r-pill);
   background: var(--jst-track);
   overflow: hidden;
 }
@@ -344,21 +724,277 @@ body {
   border-radius: inherit;
   background: var(--jst-accent);
 }
+.jst-bar-neutral { background: var(--jst-neutral-bar); }
+.jst-bar-done { background: var(--jst-ok); }
 
-/* Brief markdown inside heads-up cards */
-.jst-note {
-  padding: 14px;
-  border-radius: 10px;
-  background: var(--jst-subtle);
-  font-size: 14px;
-  line-height: 1.45;
+/* This week */
+.jst-ticks { display: flex; gap: var(--jst-s1); }
+.jst-tick { width: 14px; height: 4px; border-radius: var(--jst-r-pill); background: var(--jst-ink-2); }
+.jst-tick-off { background: var(--jst-border-strong); }
+
+.jst-target {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jst-s2);
 }
+.jst-target-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--jst-s3);
+  font-size: var(--jst-fs-sm);
+}
+.jst-target-count { display: inline-flex; align-items: center; gap: var(--jst-s1); color: var(--jst-muted); }
+.jst-target-count strong { font-weight: 600; color: var(--jst-ink); }
+.jst-target-done { color: var(--jst-ok-fg); line-height: 0; }
+.jst-target-hint { margin: 0; font-size: var(--jst-fs-xs); color: var(--jst-muted); }
+.jst-target-hint-warn { color: var(--jst-warn-fg); }
+
+/* Coming up */
+.jst-events {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jst-s3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.jst-event {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--jst-s3);
+  align-items: start;
+}
+.jst-event-day {
+  padding: var(--jst-s1) 0;
+  border-radius: var(--jst-r-inner);
+  background: var(--jst-track);
+  color: var(--jst-ink);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.jst-event-day-soon { background: var(--jst-warn-bg); color: var(--jst-warn-fg); }
+.jst-event-day-deadline { background: var(--jst-danger-bg); color: var(--jst-danger-fg); }
+.jst-event-dow { margin: 0; font-size: var(--jst-fs-2xs); font-weight: 600; letter-spacing: 0.04em; line-height: 1.2; }
+.jst-event-num { margin: 0; font-family: var(--jst-serif); font-size: var(--jst-fs-xl); font-weight: 500; line-height: 1.1; }
+.jst-event-body { display: block; min-width: 0; text-align: left; }
+.jst-event-body:hover .jst-event-co { text-decoration: underline; }
+.jst-event-co { margin: 0; font-size: var(--jst-fs-sm); font-weight: 600; line-height: 1.35; }
+.jst-event-title { margin: 0; font-size: var(--jst-fs-sm); line-height: 1.4; color: var(--jst-muted); }
+.jst-event-when { margin: 0; font-size: var(--jst-fs-xs); color: var(--jst-muted); font-variant-numeric: tabular-nums; }
+
+/* Heads-up: a plain divided list, the brief's own bold lead-ins do the work. */
+.jst-notes {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.jst-note {
+  padding: var(--jst-s3) 0;
+  border-top: 1px solid var(--jst-divider);
+  font-size: var(--jst-fs-sm);
+  line-height: 1.5;
+  color: var(--jst-ink-2);
+  overflow-wrap: anywhere;
+}
+.jst-note:first-child { padding-top: 0; border-top: 0; }
+.jst-note:last-child { padding-bottom: 0; }
 .jst-note p { margin: 0; }
+.jst-note strong { font-weight: 600; color: var(--jst-ink); }
+.jst-note ul,
+.jst-note ol { margin: var(--jst-s1) 0 0; padding-left: var(--jst-s4); }
 
-.jst-search { width: 260px; }
+/* ---------- Pipeline ---------- */
 
-@media (max-width: 760px) {
+.jst-pipeline { overflow: clip; }
+
+.jst-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--jst-s2) var(--jst-s3);
+}
+.jst-search { width: 220px; }
+.jst-search-input {
+  height: var(--jst-control);
+  min-height: var(--jst-control);
+  font-size: var(--jst-fs-sm);
+}
+
+/* Tab text lines up with the card's text edge. */
+.jst-tabs {
+  display: flex;
+  gap: var(--jst-s1);
+  padding: 0 calc(var(--jst-pad) - var(--jst-s3));
+  border-bottom: 1px solid var(--jst-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.jst-tabs::-webkit-scrollbar { display: none; }
+.jst-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jst-s2);
+  height: calc(var(--jst-control) + var(--jst-s2));
+  padding: 0 var(--jst-s3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  font: inherit;
+  font-size: var(--jst-fs-sm);
+  font-weight: 500;
+  color: var(--jst-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.jst-tab:hover { color: var(--jst-ink); }
+.jst-tab:focus-visible { outline-offset: -2px; }
+.jst-tab[aria-selected="true"] { color: var(--jst-ink); border-bottom-color: var(--jst-accent); }
+
+/* Tier filter: one segmented control, as tall as the search box. */
+.jst-seg {
+  display: inline-flex;
+  padding: var(--jst-s1);
+  border-radius: var(--jst-r-inner);
+  background: var(--jst-track);
+}
+.jst-chip {
+  height: calc(var(--jst-control) - var(--jst-s1) * 2);
+  padding: 0 var(--jst-s3);
+  border: 0;
+  border-radius: var(--jst-r-chip);
+  background: transparent;
+  font: inherit;
+  font-size: var(--jst-fs-sm);
+  font-weight: 500;
+  color: var(--jst-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.jst-chip:hover { color: var(--jst-ink); }
+.jst-chip[aria-pressed="true"] {
+  background: var(--jst-surface);
+  color: var(--jst-ink);
+  box-shadow: 0 0 0 1px var(--jst-border);
+}
+
+.jst-row {
+  display: grid;
+  grid-template-columns: var(--jst-s6) minmax(0, 1fr) calc(var(--jst-hit) * 2 + var(--jst-s1)) 148px 40px;
+  align-items: center;
+  column-gap: var(--jst-s3);
+  min-height: 52px;
+  padding: var(--jst-s1) var(--jst-pad);
+  border-top: 1px solid var(--jst-divider);
+  cursor: pointer;
+}
+.jst-row:hover { background: var(--jst-subtle); }
+.jst-row-head {
+  min-height: var(--jst-control);
+  padding-top: 0;
+  padding-bottom: 0;
+  border-top: 0;
+  font-size: var(--jst-fs-xs);
+  font-weight: 500;
+  color: var(--jst-muted);
+  cursor: default;
+}
+.jst-row-head:hover { background: transparent; }
+.jst-row-main { display: block; min-width: 0; text-align: left; }
+.jst-col-last { text-align: right; }
+.jst-age { font-size: var(--jst-fs-sm); color: var(--jst-muted); }
+.jst-age-stale { color: var(--jst-warn-fg); }
+
+.jst-row-empty {
+  margin: 0;
+  padding: var(--jst-s5) var(--jst-pad);
+  border-top: 1px solid var(--jst-divider);
+  font-size: var(--jst-fs-sm);
+  color: var(--jst-muted);
+}
+
+/* Spare height under a short list (when the rail is taller). An end-of-list
+   line sits right under the last row when there is room for it, so the
+   stretched card reads as finished rather than empty. */
+.jst-table-fill {
+  flex: 1 1 0;
+  min-height: 0;
+  container-type: size;
+  text-align: center;
+}
+.jst-table-fill-msg {
+  margin: var(--jst-s5) 0 0;
+  font-family: var(--jst-serif);
+  font-size: var(--jst-fs-md);
+  font-style: italic;
+  color: var(--jst-muted);
+}
+@container (max-height: 64px) {
+  .jst-table-fill-msg { display: none; }
+}
+
+.jst-table-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jst-s3);
+  min-height: calc(var(--jst-control) + var(--jst-s3));
+  margin-top: auto;
+  padding: var(--jst-s1) var(--jst-pad);
+  border-top: 1px solid var(--jst-divider);
+  background: var(--jst-subtle);
+  font-size: var(--jst-fs-sm);
+  color: var(--jst-muted);
+}
+
+/* Status dropdown inside a row: quiet until hovered or focused. */
+.jst-status-input {
+  height: var(--jst-control);
+  min-height: var(--jst-control);
+  border-radius: var(--jst-r-inner);
+  background: transparent;
+  border-color: var(--jst-border);
+  color: var(--jst-ink-2);
+  font-weight: 500;
+}
+.jst-status-input:hover { border-color: var(--jst-border-strong); }
+.jst-status-input:focus,
+.jst-status-input:focus-visible { border-color: var(--jst-accent); }
+.jst-status-input:focus-visible {
+  outline: 2px solid var(--jst-accent);
+  outline-offset: 1px;
+}
+
+@media (max-width: 640px) {
+  .jst-meta-list { order: 3; flex-basis: 100%; column-gap: var(--jst-s3); }
+  .jst-toolbar { width: 100%; }
+  .jst-card-head .jst-toolbar { margin-block: 0; }
+  .jst-seg { width: 100%; }
+  .jst-chip { flex: 1; padding: 0 var(--jst-s1); }
   .jst-search { width: 100%; }
-  .jst-row { grid-template-columns: 52px minmax(0, 1fr) 52px; padding: 8px 16px; }
+  /* Phone row: the action buttons take the right column with the age under
+     them, so company and role keep most of the width. */
+  .jst-row {
+    grid-template-columns: var(--jst-s6) minmax(0, 1fr) auto;
+    grid-template-areas:
+      "tier main actions"
+      "tier main last";
+    column-gap: var(--jst-s2);
+    padding-block: var(--jst-s2);
+  }
+  .jst-row > .jst-tier { grid-area: tier; }
+  .jst-row > .jst-row-main { grid-area: main; }
+  .jst-row > .jst-actions { grid-area: actions; }
+  .jst-row > .jst-col-last { grid-area: last; }
+  .jst-row-head,
   .jst-col-status { display: none; }
+  .jst-row .jst-role {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 }

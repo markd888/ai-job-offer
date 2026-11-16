@@ -28,9 +28,12 @@ const DEPTH: Record<string, number> = { application: 0, screening: 1, interview:
 export function stageReached(r: Role): Stage | null {
   if (r.status === 'offer') return 'offer';
   if (r.status === 'interviewing') return (['screening', 'screening', 'interview', 'final'] as Stage[])[DEPTH[r.max_stage ?? 'screening'] ?? 1];
-  const applied = r.status === 'applied' || r.status === 'rejected' || !!r.date_applied;
+  // A role you dropped (not_interested) or that was rejected without a recorded
+  // rejection_stage still reached whatever max_stage says, so take the deeper one.
+  const deepest = Math.max(DEPTH[r.rejection_stage ?? 'application'] ?? 0, DEPTH[r.max_stage ?? 'application'] ?? 0);
+  const applied = r.status === 'applied' || r.status === 'rejected' || !!r.date_applied || deepest >= 1;
   if (!applied) return null;
-  const d = DEPTH[r.rejection_stage ?? 'application'] ?? 0;
+  const d = deepest;
   return (['applied', 'screening', 'interview', 'final'] as Stage[])[d];
 }
 
