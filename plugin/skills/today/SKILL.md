@@ -82,7 +82,9 @@ If **Skip** → proceed to output phase silently.
 
 Do not rely on enter-to-skip. Do not chain a second question after this one (TONE Rule A — one ask per message).
 
-User responds in free text. Parse for company tags: explicit `[Plaid]`, `Plaid:`, or first-token match against the company list. Lines without a company tag are logged to `journal.md` only (no meta.md write, no guessing). Lines WITH a company tag are also logged to `journal.md` only — catch-all input is free text and never writes to meta.md, even when the tag matches a known company. Only integration-sourced facts that pass through the Step 3 confirm flow may update meta.md.
+User responds in free text. Parse for company tags: explicit `[Plaid]`, `Plaid:`, or first-token match against the company list. Lines without a company tag are logged to `journal.md` only (no meta.md write, no guessing). Lines WITH a company tag are also logged to `journal.md` only — catch-all input is free text and never changes status, events or anything else in meta.md, even when the tag matches a known company. Only integration-sourced facts that pass through the Step 3 confirm flow may update meta.md.
+
+One exception, because it is the user's own statement of a fact: a tagged line that plainly says the company got in touch (replied, called, wrote, scheduled, sent a rejection or an offer) also records that contact with `record-inbound.py` (see "meta.md updates" below), dated as the user said or today. Nothing else changes, and the write confirmation names it (`Noted that Plaid got back to you today.`). A line about the user's own action ("I chased Plaid") is not inbound.
 
 ### Step 5 — write phase
 
@@ -122,7 +124,16 @@ Rules:
 
 ### meta.md updates
 
-Per-company meta.md uses (or gains, if not already present) three fields written by the input phase. Existing fields owned by other skills — `company`, `position`, `tier`, `link`, `date_applied`, `date_added`, `monitoring`, `last_inbound`, `rejection_stage`, `date_rejected`, `date_not_interested` — are untouched.
+Per-company meta.md uses (or gains, if not already present) the fields below, written by the input phase. Existing fields owned by other skills — `company`, `position`, `tier`, `link`, `date_applied`, `date_added`, `monitoring`, `rejection_stage`, `date_rejected`, `date_not_interested` — are untouched.
+
+- **`last_inbound:`** — date the company last got in touch. Written for every confirmed fact that is contact *from* the company: a `recruiter-reply`, `rejection`, `scheduling` or `offer` email, a `new-event` or `rescheduled` calendar item the company sent, a captured Granola call, or a catch-all line as described in Step 4. Use the email's or meeting's date, not today's. Write it with the script, which keeps the later date and adds the History line itself:
+
+  ```sh
+  python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/record-inbound.py" <role folder> --date <YYYY-MM-DD> \
+    --what "<reply from Sarah (recruiter)>" --source <gmail|calendar|granola|user>
+  ```
+
+  `follow-ups.py` and the quiet-application rule count from it, so a role that just heard back drops off the follow-up list.
 
 - **`next_event:`** — string, free-form. Examples: `"R2 panel Fri 2026-05-22 14:00"`, `"Recruiter call Thu 2026-05-21 10:00"`. Cleared (set to empty string or removed) when the input phase confirms the event passed without follow-up OR when it was cancelled. Updated in-place when an event is rescheduled.
 - **`status:`** — enum, one of: `new`, `to_apply`, `applied`, `interviewing`, `offer`, `rejected`, `not_interested`. The input phase only transitions OUT of an active state when a fact unambiguously implies it: a confirmed rejection → `rejected`, a confirmed offer → `offer`. Confirmed scheduling events do NOT auto-promote `applied` → `interviewing` (other skills own that transition based on richer signal).
@@ -179,7 +190,7 @@ Granola data is consumed by the INPUT phase only — see `## Input phase` Step 2
 
 - /today never writes to integrations.md.
 - /today never persists raw Calendar/Gmail responses verbatim. Only the user-confirmed facts that pass through the input phase land on disk (see `## Input phase` for the contract); the saved brief includes the rendered output, not raw API responses.
-- /today never auto-updates `last_inbound` on company meta.md based on Gmail matches alone. The input phase may update `next_event`, `status`, and the `## History` block when the user confirms an inferred fact, but `last_inbound` is still maintained by other skills.
+- /today never auto-updates `last_inbound` on company meta.md based on Gmail matches alone. It writes `last_inbound` only for contact the user confirmed in Step 3 or stated in Step 4, alongside `next_event`, `status` and the `## History` block.
 
 ## Output: the daily brief
 
@@ -201,7 +212,7 @@ them in order.
 2. **Checkpoint due in ≤14 days** → `Review checkpoint due <date>: <condition> → <action>` (one bullet per upcoming checkpoint; cap at one if multiple).
 3. **Recruiter email needing reply (when gmail wired)** — any matched email from the Gmail fetch where the from-address is recruiter/talent AND the company is in `status: interviewing` or `status: applied` AND no reply has gone out (cannot fully verify; use it as a prompt regardless) → `Reply to <name> at <Company> re: "<subject>"` (cap at one).
 4. **Active interview thread** — any meta.md with `status: interviewing` AND `last_inbound` within the last 7 days → `Prep for <Company> — pull stories with /interview-prep <Company>` (one bullet per qualifying company, most recent inbound first; cap at two).
-5. **Stale `applied`** — any meta.md with `status: applied` AND `date_applied` more than 14 days ago AND no `last_inbound` (or last_inbound also >14d) → `Chase or close <Company> — applied <N>d ago, no response` (cap at one).
+5. **Quiet application** — the one quiet-application rule, shared with `/job-offer:follow-up`: run `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/follow-ups.py" --userdata "$(pwd)/userdata"` once per brief (the heads-up line below reuses the same output). Quiet means no news for 10+ days since the latest of `date_applied`, `last_inbound` and `last_follow_up`, so a company that wrote back recently is never chased. Pick the first role under "Follow-up due" with a named contact, a tailored CV or tier P0/P1 (else the first listed) → `Follow up with <Company> — quiet <N>d → /job-offer:follow-up <Company>`. If nothing is due but roles are listed under "Close instead" → `Close <Company> — quiet <N>d, <reason> → mark it rejected?`. Cap at one. Do not compute a separate day count here.
 6. **Weekly-target gap >50%** (warm_outreach OR applications, whichever is further behind) → `Send <N> more <warm outreach|applications> this week (<count>/<target>)`. Skip if no target set. "This week" = current ISO week, Monday → today inclusive; same window as the applications.md warm-outreach summary line.
 
    Two gates on this one:
@@ -227,8 +238,7 @@ Non-obvious risks or opportunities — technical, tactical, or strategic — der
 - **Upcoming events this week (when calendar wired):** matched events within the next 7 days, sorted soonest first, e.g. `Wed 21 May 14:00 — Plaid (cpo-round), Fri 23 May 11:00 — N26 (recruiter)`. Skip if none.
 - **New inbound (when gmail wired):** unmatched relevant emails (recruiter/talent senders or pipeline-keyword subjects) where no company in `userdata/companies/` matches. Format: `<count> — <Company-guess from sender domain> ("<subject>")`. Each is a prompt to evaluate adding to the pipeline. Skip if none.
 - **Checkpoints due within 14d:** comma-separated list of `<date> (<condition>)`. Skip if none.
-- **Stale items (>14d in `applied` with no movement):** count and inline list, e.g. `2 — Klarna (16d), Monzo (21d)`. Skip if none.
-- **Follow-ups due.** Run `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/follow-ups.py" --userdata "$(pwd)/userdata"`. When anything is due, add one line: `**Follow-ups** — <n> applications quiet 10+ days (<top 2 companies>) → /job-offer:follow-up drafts them`. When it lists roles to close, add them to the same line. Skip if nothing is due.
+- **Follow-ups due.** From the same `follow-ups.py` output as Today rule 5 — the brief's only quiet-application signal; there is no separate "stale applied" count. When anything is due, add one line: `**Follow-ups** — <n> applications quiet 10+ days (<top 2 companies>) → /job-offer:follow-up drafts them`. When it lists roles to close, add them to the same line. Leave out the role Today already names. Skip if nothing is due.
 - **Shape-mismatch warning on active interviews.** Trigger: any meta.md with `status: interviewing` AND (`team_size > 150` OR the company body/research-brief mentions ">150 ppl") AND the company is NOT in any `target_industries` entry from profile.md AND no explicit equity / brand signal in research-brief. When triggered: `Shape mismatch — <Company> is interviewing but <signal recap>. Re-read the role-fit verdict before next round.` This is the hollowing-risk check: a big-co interview proceeding without the shape signals the user actually wants. Skip if no qualifying meta.
 - **Coach nudge.** Surfaces when a multi-week pattern suggests `job-offer:career-coach` would help diagnose. Three independent triggers — fire at most ONE per /today run. **Trigger C is highest severity; if C fires, suppress A and B.** Skip if no trigger fires.
   - **Trigger A — cadence drift.** Weekly targets (`applications` AND/OR `warm_outreach`) missed by >50% for 3 weeks running. Compute by counting `date_applied` per 7-day window AND keyword-scanning journal per window across the last 21 days. When triggered: `Cadence under 50% three weeks running — job-offer:career-coach can help work out if the targets or the search itself needs a rethink.`
@@ -444,7 +454,7 @@ Each meta.md represents one `(company, position)` pair. Counts (active threads, 
 - Never invents data. If `last_inbound` is missing, do not guess; rank by what is available.
 - Never persists Calendar / Gmail / Granola responses to disk verbatim. Integration data lives in-context for the run; only the user-confirmed facts written to journal.md and meta.md persist.
 - Never writes to journal.md or meta.md without explicit user confirmation in the input phase. Inferred facts must be confirmed (or corrected) before they land — no silent writes from integration data.
-- Never auto-fills meta.md fields beyond the input-phase contract (`next_event`, `status`, `## History` block). Other skills still own positions, tier, link, date_applied, date_added.
+- Never auto-fills meta.md fields beyond the input-phase contract (`next_event`, `status`, `last_inbound`, `## History` block). Other skills still own positions, tier, link, date_applied, date_added.
 
 ## Smoke test against the Maya example
 
@@ -464,8 +474,8 @@ To exercise the integration-fold-in code paths AND the targeted-confirms flow, c
 
 With the catch-all skipped, the output phase against Maya's expanded install (8 status slots, Plaid multi-role, Lendable in `offer` status) should produce the 3-section brief:
 
-- **Section 1 "Today"**: (4) Plaid prep — `last_inbound: 2026-05-13` is 5d ago, within 7d → fires. (5) iwoca chase/close — `date_applied: 2026-04-22` is 26d ago, >14d → fires. (6) Applications gap — 1/3 = 67% gap, fires. If today is Monday, the Monday warm-outreach batch nudge may also fire (count is at 3/5 — depends on weekend warm-outreach activity). No checkpoint trigger (next is 2026-06-15 = 28d out). No imminent-event or recruiter-reply bullets (no integrations).
-- **Section 2 "Heads-up"**: stale-applied bullet fires for iwoca (26d). Shape-mismatch warning fires for Cleo (180 ppl, no equity signal — though strict reading of the trigger requires the company NOT to be in `target_industries`; Cleo's consumer-finance vertical is borderline against Maya's `fintech` / `consumer credit` targets — an LLM may interpret either way). Late-stage prompts fire for Plaid CC (active interview thread with recent inbound). Trigger A coach nudge may fire (applications cadence under 50% for 3 weeks running — depends on journal counts per week).
+- **Section 1 "Today"**: (4) Plaid prep — `last_inbound: 2026-05-13` is 5d ago, within 7d → fires. (5) iwoca — `date_applied: 2026-04-22`, no inbound, 26d quiet → `follow-ups.py` lists it under "Follow-up due" → `Follow up with iwoca — quiet 26d` fires. (6) Applications gap — 1/3 = 67% gap, fires. If today is Monday, the Monday warm-outreach batch nudge may also fire (count is at 3/5 — depends on weekend warm-outreach activity). No checkpoint trigger (next is 2026-06-15 = 28d out). No imminent-event or recruiter-reply bullets (no integrations).
+- **Section 2 "Heads-up"**: no separate stale-applied bullet; the Follow-ups line leaves out iwoca, which Today already names. Shape-mismatch warning fires for Cleo (180 ppl, no equity signal — though strict reading of the trigger requires the company NOT to be in `target_industries`; Cleo's consumer-finance vertical is borderline against Maya's `fintech` / `consumer credit` targets — an LLM may interpret either way). Late-stage prompts fire for Plaid CC (active interview thread with recent inbound). Trigger A coach nudge may fire (applications cadence under 50% for 3 weeks running — depends on journal counts per week).
 - **Section 3 "Pipeline state"**: counts only, no rows. `Active: 7 — 1 offer (Lendable), 2 interviewing, 2 applied, 2 to apply.` Multi-role Plaid contributes two to the counts (one interviewing, one to apply) but is not named, since neither group is a single company. Then the weekly line if targets are set, then `2 decided this search; 1 rejected, 1 not interested.` (Stripe rejected + Atom Bank not interested.) Then the dashboard pointer, since 7 > 3.
 
 If the catch-all DOES return content (e.g. the user types `[Plaid] CPO round confirmed Thu` during step 4), verify that:

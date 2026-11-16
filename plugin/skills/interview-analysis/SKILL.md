@@ -138,9 +138,18 @@ If a section's evidence list is empty, render the section with `<None — see no
 
 Use the user's `## Tone of Voice` from profile.md. Default if unset: direct, short sentences, no euphemism. The debrief is for the user's own use — softening hurts more than helps.
 
-## Status hints (do NOT mutate meta.md)
+## Status hints (do NOT mutate status)
 
-The debrief surfaces recommendations under "Meta updates" but never edits `meta.md` itself. The user runs the change (`/today` will surface the suggestion or the user edits directly). Reasoning: status transitions are decisions, not derivations — the user's call.
+The debrief surfaces recommendations under "Meta updates" but never changes status or other decision fields in `meta.md`. The user runs the change (`/today` will surface the suggestion or the user edits directly). Reasoning: status transitions are decisions, not derivations — the user's call.
+
+The one thing it does record is the fact that the interview happened, since an interview is contact from the company and restarts the quiet clock `/job-offer:follow-up` and `/today` share:
+
+```sh
+python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/record-inbound.py" <role folder> --date <interview date> \
+  --what "<stage> interview with <interviewer or role>" --source interview
+```
+
+It sets `last_inbound` (only ever forward) and adds one History line. Use the interview's date, not today's, when the debrief is written later.
 
 If the interview signal is unambiguous (e.g. "we don't think this is a fit, thank you for your time"), make the recommendation explicit:
 > **Strongly recommend** marking <Company> as rejected at the <stage> stage, with what they said as the note.
@@ -164,7 +173,7 @@ If the debrief recommends a status change, repeat it in the chat output (don't b
 
 ## What /interview-analysis never does
 
-- Never edits `meta.md` directly. Recommendations only.
+- Never edits `meta.md` directly beyond recording the interview with `record-inbound.py`. Status and every other field: recommendations only.
 - Never edits the universal story bank (no story body changes, no angle additions). It recommends; `/story-builder` executes.
 - Never edits the prep doc the interview used. The prep was a forecast; the debrief is what happened.
 - Never invents transcript content. If a section can't be evidenced from the input, the bullet is `<None evidenced — needs user fill-in.>`.

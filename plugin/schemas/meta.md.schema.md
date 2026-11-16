@@ -37,7 +37,7 @@ These are commonly present and read by some skills; absence is allowed but flagg
 - **`date_applied`** — date the application went out. ISO 8601. Written by `/sent` (or the dashboard's status dropdown); read by `/today` and `/follow-up`, which counts the quiet days from it.
 - **`channel`** — how the application went out. Enum: `referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`. Written by `/sent`; checked by rule `meta.channel-enum`.
 - **`referred_by`** — the person who referred the user, as a quoted wiki link: `referred_by: "[[Dana Lee]]"`. Written by `/sent` when `channel: referral`.
-- **`last_inbound`** — date of the most recent message from the company. ISO 8601. Read by `/today` and `/follow-up`.
+- **`last_inbound`** — date of the most recent contact from the company (reply, scheduling, call, interview, rejection, offer). ISO 8601, only ever moves forward. Written through `scripts/record-inbound.py` by `/today` (contact the user confirmed in the input phase or stated in the catch-all), `/interview-analysis` (the interview date) and `/follow-up` (the user says the company wrote back). Read by `/today`, `/interview-prep` and `follow-ups.py`, whose 10-day quiet clock is the single quiet-application rule.
 - **`next_event`** — free-form upcoming interview or call, written by `/today`. `/follow-up` skips `interviewing` roles that have one.
 - **`follow_ups`** — integer, follow-ups sent for this application (0–2). Written by `/follow-up` only after the user confirms one went out; thank-you notes don't count.
 - **`last_follow_up`** — date of the most recent follow-up. ISO 8601. Written by `/follow-up`; restarts the 10-day quiet clock.
