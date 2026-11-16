@@ -128,7 +128,7 @@ Use a Python that has `reportlab` and `pypdf` (a workspace venv such as `.claude
 
 If no Python with `reportlab` and `pypdf` is available, or `cv-build.py` stops on a missing Carlito font, don't improvise another PDF route: keep the tailored markdown, say in one line that the PDF and ATS check were skipped and what to install (`pip install -r ${CLAUDE_PLUGIN_ROOT}/scripts/requirements.txt`, plus the Carlito font), and carry on with the output below, replacing the ATS check line with `ATS check: skipped — <reason>`.
 
-A cover letter PDF in the same look: `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/cover-letter-build.py" <letter.md> <out.pdf> --cv <cv-md>`.
+A cover letter is `/job-offer:cover-letter <Company>`'s job: it reads this tailored CV, so it never claims more than the CV does, and builds its PDF in the same look.
 
 ### When the application goes out
 
@@ -155,7 +155,7 @@ Template:
 >
 > ATS check: <passes | fixed <checks>>; keywords <n>/<m> covered.
 >
-> Open the file and edit anything that doesn't sound like you before you send it. <Closing question — one only, per TONE Rule A — typically: "Want me to draft a short cover note next?", or, when the user is about to send it now: "Tell me once it's sent and I'll record it.">
+> Open the file and edit anything that doesn't sound like you before you send it. <Closing question — one only, per TONE Rule A — typically: "Want a cover letter for <Company> too, or is the CV enough?" (runs `/job-offer:cover-letter <Company>`), or, when the user is about to send it now: "Tell me once it's sent and I'll record it.">
 
 When the user then says it went out, run `/job-offer:sent <Company>`.
 
@@ -184,7 +184,7 @@ If WebFetch was tried via `--from-url` and fell back to research-brief, add a se
 - Never invents facts, dates, metrics, technologies, team sizes, or project outcomes. If a JD keyword has no supporting evidence, surface it in the chat output, never in the CV.
 - Never touches `meta.md` — no status flip, no date update, no History line, nothing. Recording the application is `/job-offer:sent`'s job, after the user's yes.
 - Never edits `userdata/cv.md` (the master) or `userdata/profile.md`. Read-only on both.
-- Never writes a cover note or outreach message. Suggests them as next steps in chat output.
+- Never writes a cover letter or outreach message itself — `/job-offer:cover-letter` and `/job-offer:outreach` do, from the same sources. Offers them in the closing question.
 - Never deletes prior `cv-*.md` files. Each re-run produces a new dated/versioned file.
 - Never shows or hands over a PDF that fails the ATS check's hard checks.
 - Never bypasses `## What NOT to Frame As` — those bullets are hard guardrails, not suggestions.
