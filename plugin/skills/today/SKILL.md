@@ -46,17 +46,9 @@ After targeted confirms (or in place of them when step 2 produced nothing):
 
 **Input prompt (subsequent runs only):**
 
-Use `AskUserQuestion` with two options:
+`AskUserQuestion`: "Want to log updates since your last brief? Mock interviews, prep work, energy notes, new leads, anything structural." Options **Share updates** (→ "Go ahead — what's new?") / **Skip** (→ output phase, silently). No enter-to-skip, no second question (TONE Rule A).
 
-Question: "Want to log updates since your last brief? Mock interviews, prep work, energy notes, new leads, anything structural."
-Options: **Share updates** / **Skip**
-
-If **Share updates** → open a free-text follow-up: "Go ahead — what's new?"
-If **Skip** → proceed to output phase silently.
-
-Do not rely on enter-to-skip. Do not chain a second question after this one (TONE Rule A — one ask per message).
-
-User responds in free text. Parse for company tags: explicit `[Plaid]`, `Plaid:`, or first-token match against the company list. Lines without a company tag are logged to `journal.md` only (no meta.md write, no guessing). Lines WITH a company tag are also logged to `journal.md` only — catch-all input is free text and never changes status, events or anything else in meta.md, even when the tag matches a known company. Only integration-sourced facts that pass through the Step 3 confirm flow may update meta.md.
+Parse the free text for company tags (`[Plaid]`, `Plaid:`, or a first token matching a company). Every line, tagged or not, goes to `journal.md` only — catch-all text never changes status, events or anything else in meta.md. Only facts confirmed in Step 3 may.
 
 One exception, because it is the user's own statement of a fact: a tagged line that plainly says the company got in touch (replied, called, wrote, scheduled, sent a rejection or an offer) also records that contact with `record-inbound.py` (see "meta.md updates" below), dated as the user said or today. Nothing else changes, and the write confirmation names it (`Noted that Plaid got back to you today.`). A line about the user's own action ("I chased Plaid") is not inbound.
 
@@ -66,7 +58,7 @@ Commit the confirmed facts. See "Write contracts" section below for the exact jo
 
 Writes are idempotent per `/today` run: if the user runs `/today` twice the same day with no new facts (step 2 finds nothing new, step 4 skipped), no journal write occurs and no `## YYYY-MM-DD` heading is added or modified.
 
-**Dashboard nudge cross-reference.** When confirming an in-chat status change (e.g. user says "mark Plaid to apply"), check whether the "In-chat update nudge — fire once per session" rule in `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` should fire. If this is the first status-change-in-chat of the current Claude Code conversation, append the tip line per that rule. Track the once-per-session flag transiently in conversation context, not on disk.
+**Dashboard nudge.** On the first in-chat status change of the conversation, apply the once-per-session nudge in `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` (tracked in context, not on disk).
 
 After step 5 completes, proceed to the existing "Output: the daily brief" section.
 
@@ -78,13 +70,13 @@ Before Step 5 writes anything, read `${CLAUDE_PLUGIN_ROOT}/references/today-writ
 
 Read in this order. Skip gracefully if a file is missing — the brief degrades section-by-section, never errors out wholesale.
 
-1. `userdata/strategy.md` — frontmatter (`weekly_targets`, `pipeline_targets`, `checkpoints`). Used by Top-3-actions trigger rules and the warm-outreach summary line in applications.md. The `## Headline goal` paragraph and `target_offer_date` are not read by the brief itself.
+1. `userdata/strategy.md` — frontmatter (`weekly_targets`, `pipeline_targets`, `checkpoints`, `search_state`).
 2. All company `meta.md` files. Use BOTH globs (companies are either flat or in role-slug subfolders):
    - `userdata/companies/*/meta.md`
    - `userdata/companies/*/*/meta.md`
 3. `userdata/journal.md` — last 7 days of entries (entries are dated `## YYYY-MM-DD` headings; take everything with a date within the last 7 days).
 4. `userdata/outputs/applications.md` if it exists (needed for the partition rewrite — see "applications.md regeneration" below).
-5. `userdata/integrations.md` if it exists — parse the `## calendar` and `## gmail` sections for wired-status + tool prefix. See "Integration data" below. Skip silently if the file is absent — the brief still produces a complete output from markdown alone.
+5. `userdata/integrations.md` if it exists (see Steps 2–3); absent → markdown only, silently.
 
 Do not read `userdata/profile.md`. /today does not need profile content; trust strategy.md and the per-company meta.
 
@@ -96,16 +88,14 @@ Section order: **Today → Heads-up → Pipeline state.**
 
 ### 1. `## Today`
 
-At most three bullets. Each bullet is concrete and anchored to a company name or a strategy element. Surface bullets by running the trigger rules below, in this priority order, and stopping at three:
-
-The heading is `## Today` (not "Top 3 actions"): one bullet is often the honest number. Don't pad to three, don't number them.
+At most three bullets, each anchored to a company or a strategy element: run the rules below in priority order and stop at three. One bullet is often the honest number — don't pad, don't number them.
 
 1. **Imminent calendar event (when calendar wired)** — any matched event within the next 48 hours → `<Day HH:MM> — <Company> <event-type>: prep with /interview-prep <Company>` (cap at two; most-soonest first).
 2. **Checkpoint due in ≤14 days** → `Review checkpoint due <date>: <condition> → <action>` (one bullet per upcoming checkpoint; cap at one if multiple).
-3. **Recruiter email needing reply (when gmail wired)** — any matched email from the Gmail fetch where the from-address is recruiter/talent AND the company is in `status: interviewing` or `status: applied` AND no reply has gone out (cannot fully verify; use it as a prompt regardless) → `Reply to <name> at <Company> re: "<subject>"` (cap at one).
+3. **Recruiter email needing reply (when gmail wired)** — any matched email from the Gmail fetch where the from-address is recruiter/talent AND the company is in `status: interviewing` or `status: applied` AND no reply seen → `Reply to <name> at <Company> re: "<subject>"` (cap at one).
 4. **Active interview thread** — any meta.md with `status: interviewing` AND `last_inbound` within the last 7 days → `Prep for <Company> — pull stories with /interview-prep <Company>` (one bullet per qualifying company, most recent inbound first; cap at two).
 5. **Quiet application** — the one quiet-application rule, shared with `/job-offer:follow-up`: run `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/follow-ups.py" --userdata "$(pwd)/userdata"` once per brief (the heads-up line below reuses the same output). Quiet means no news for 10+ days since the latest of `date_applied`, `last_inbound` and `last_follow_up`, so a company that wrote back recently is never chased. Pick the first role under "Follow-up due" with a named contact, a tailored CV or tier P0/P1 (else the first listed) → `Follow up with <Company> — quiet <N>d → /job-offer:follow-up <Company>`. If nothing is due but roles are listed under "Close instead" → `Close <Company> — quiet <N>d, <reason> → mark it rejected?`. Cap at one. Do not compute a separate day count here.
-6. **Weekly-target gap >50%** (warm_outreach OR applications, whichever is further behind) → `Send <N> more <warm outreach|applications> this week (<count>/<target>)`. Skip if no target set. "This week" = current ISO week, Monday → today inclusive; same window as the applications.md warm-outreach summary line. Count outreach from people logs, as in the applications.md summary line below. When outreach is the one behind, name a person or a role to start with — a `to_apply` P0/P1 role with someone in `userdata/people/` linked to it beats a generic count — and point to `/job-offer:outreach`.
+6. **Weekly-target gap >50%** (warm_outreach OR applications, whichever is further behind) → `Send <N> more <warm outreach|applications> this week (<count>/<target>)`. Skip if no target set. Outreach counts from people logs (the same count the dashboard shows). When outreach is the one behind, name a person or a role to start with — a `to_apply` P0/P1 role with someone in `userdata/people/` linked to it beats a generic count — and point to `/job-offer:outreach`.
 
    Skip it entirely when no roles are filed at all (the user needs `/job-search` first). When both are equally behind, pick `applications`. Report only one, never both.
 7. **Founder outreach line (conditional on `strategy.md`)** — Read `userdata/strategy.md`. If `weekly_targets.founder_outreach` exists with a numeric target N, and today is Monday AND the warm-outreach count for Saturday + Sunday is 0, render: `Founder outreach — N this week (M done so far).` Where M is counted from journal entries tagged or describing founder DMs in the current ISO week. If `weekly_targets.founder_outreach` is absent, missing, or zero, do not render any founder line at all. Do not invent a target.
@@ -158,13 +148,13 @@ Rules:
 - Drop any zero-count clause from the Active line. `Active: 11 — 1 to apply, 10 new.` is the whole line on a fresh pipeline.
 - Drop the "This week" line entirely when `strategy.md` has no weekly targets set.
 - Name companies ONLY where a status is a single company and that name is the point — `1 offer (Lendable)`. Never name more than two in this section; if there are three or more in a group, the count stands alone.
-- No per-role rows, no tier labels, no scores, no URLs, no "last activity" column. Anything a user would want to click belongs in the dashboard, and any role that genuinely needs attention today should have surfaced in `## Today` or `## Heads-up` already.
+- No per-role rows, tier labels, scores, URLs or "last activity" — those belong in the dashboard.
 
 Then one summary line for decided history:
 
 > N decided this search; M rejected, K not interested.
 
-Where `N = M + K`, `rejected` = roles with `status: rejected`, and `not interested` = `status: not_interested`. Drop zero-count clauses: if K=0, render `N decided this search; M rejected.`; if M=0, render `N decided this search; K not interested.`; if both zero, skip the line entirely.
+`N = M + K` (`status: rejected` / `not_interested`). Drop a zero clause; both zero → skip the line.
 
 Close the section with a pointer, only when the pipeline holds more than three roles:
 
@@ -200,15 +190,15 @@ Two glob patterns expose all roles:
 - `userdata/companies/*/meta.md` — single-role companies (flat).
 - `userdata/companies/*/*/meta.md` — multi-role companies (role-slug subfolders).
 
-A company may appear in BOTH globs if a 1→2 migration is mid-way; in practice the migration code (other skills) ensures only one layout per company. If both layouts exist for the same company, prefer the role-slug-subfolder entries and print one warning line: `<Company>: both flat and subfolder meta.md present — using subfolder entries.`
+If a company has both layouts (a migration mid-way), use the subfolder entries and print one line: `<Company>: both flat and subfolder meta.md present — using subfolder entries.`
 
 Each meta.md represents one `(company, position)` pair. Counts (active threads, applications-this-week, etc.) are over distinct meta.md files. Two different positions at the same company count as two rows in pipeline_state and applications.md.
 
 ## Date handling
 
 - "Today" is the system local date. Format dates as `YYYY-MM-DD`.
-- "Within last N days" means `today - (N-1) <= date <= today` (inclusive — last 7 days includes today and the prior 6). Used by triggers tied to recency (stale `applied`, late-stage interview prompts, active-interview-thread detection, integration fetch windows).
-- "Current ISO week" / "this week" means `today - today.weekday() <= date <= today` (inclusive — Monday of this week through today; collapses to a single day on Monday, grows to 7 days by Sunday). Used by weekly-progress tracking (warm-outreach summary line, weekly-target gap trigger).
+- "Within last N days" = `today - (N-1) <= date <= today`, inclusive.
+- "This week" = current ISO week, Monday through today inclusive (one day on Monday).
 - A missing date field is "unknown" — treat as oldest (so it does NOT trigger "within N days" rules) and rank last when sorting "most recent activity".
 - "Nd ago" rendering: `0` → `today`, `1` → `1d ago`, etc.
 
@@ -217,9 +207,9 @@ Each meta.md represents one `(company, position)` pair. Counts (active threads, 
 - Never writes `userdata/profile.md`, `userdata/strategy.md`, or `userdata/integrations.md`.
 - Never touches text outside the GENERATED markers in `applications.md`.
 - Never invents data. If `last_inbound` is missing, do not guess; rank by what is available.
-- Never persists Calendar / Gmail / Granola responses to disk verbatim. Integration data lives in-context for the run; only the user-confirmed facts written to journal.md and meta.md persist.
-- Never writes to journal.md or meta.md without explicit user confirmation in the input phase. Inferred facts must be confirmed (or corrected) before they land — no silent writes from integration data.
-- Never auto-fills meta.md fields beyond the input-phase contract (`next_event`, `status`, `last_inbound`, `## History` block). Other skills still own positions, tier, link, date_applied, date_added.
+- Never persists Calendar / Gmail / Granola responses; only user-confirmed facts reach journal.md and meta.md.
+- Never writes an inferred fact the user hasn't confirmed.
+- Never writes meta.md fields beyond `next_event`, `status`, `last_inbound` and `## History`.
 
 ## Smoke test
 

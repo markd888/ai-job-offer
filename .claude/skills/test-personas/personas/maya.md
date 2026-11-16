@@ -1,7 +1,7 @@
 ---
 name: maya
 display_name: Maya Patel
-journey_fit: [cold-start, active-loop, sweep-smoke]
+journey_fit: [cold-start, active-loop, sweep-smoke, application-to-interview]
 ---
 
 ## Who you are

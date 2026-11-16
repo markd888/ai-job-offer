@@ -21,8 +21,8 @@ For each `(persona × journey)` pairing requested, runs five phases:
 
 Parse the user's invocation message for these forms (no native flag support in skills — match free-text):
 
-- `/test-personas` (no args) → the release-gate sweep: `cold-start`, `active-loop`, `edge-recovery`. (`sweep-smoke` is excluded from the default sweep — run it by name.)
-- `--journey <name>` or `journey: <name>` → run only the named journey. Valid names: `cold-start`, `active-loop`, `edge-recovery`, `sweep-smoke`.
+- `/test-personas` (no args) → the release-gate sweep: `cold-start`, `active-loop`, `edge-recovery`. (`sweep-smoke` and `application-to-interview` are excluded from the default sweep — run them by name.)
+- `--journey <name>` or `journey: <name>` → run only the named journey. Valid names: `cold-start`, `active-loop`, `edge-recovery`, `sweep-smoke`, `application-to-interview`.
 - `--persona <name>` or `persona: <name>` → run only journeys whose `journey_fit` includes that persona. Valid names: `maya`, `diego`, `contrarian`.
 - `--skip-judge` or `skip judge` → run conversation loops but skip Phase 4 (transcripts only).
 
@@ -79,6 +79,7 @@ For each journey, the validation checks vary. Use this rule of thumb:
 - **active-loop** (snapshot: `maya-active`) — check `userdata/profile.md` exists and contains sections `## Companies of interest` and `## Proof Points` (note the capitalization — match what's actually in the snapshot). Check `userdata/strategy.md` has frontmatter keys `target_offer_date` and `weekly_targets`. Check `userdata/companies/` has at least one subdirectory.
 - **edge-recovery** (snapshot: `contrarian-messy`) — check that at least 2 directories exist in `userdata/companies/` (proves the dedup test setup landed correctly).
 - **sweep-smoke** (snapshot: `empty`) — no validation needed; same reasoning as cold-start.
+- **application-to-interview** (snapshot: `maya-active`) — check `userdata/companies/Zopa/meta.md` exists with `status: to_apply` and no `date_applied`, and `userdata/cv.md` exists.
 
 If any check fails, write a clear error and stop the journey:
 
@@ -123,6 +124,7 @@ Loop until termination:
    - `prompt:` constructed as follows (see template below)
    - Wait for the agent's reply. Capture its assistant message as `LATEST_PLUGIN_OUTPUT`.
 3. **Append the assistant turn to the transcript.** Write `## Turn N — ASSISTANT\n\n<LATEST_PLUGIN_OUTPUT>\n\n`.
+3a. **Run any orchestrator step due now.** If the journey has an `## Orchestrator steps` section, check each step's trigger against the turn just appended and the files on disk; when one fires, run its command via Bash and append the heading it names to the transcript (e.g. `## Orchestrator — time skip: 10 days`). Neither sub-agent is told about it except through that transcript line. Each step runs at most once.
 4. **Check termination conditions** from the journey file's `Termination` section. If satisfied, exit the loop.
 5. **Check max_turns.** If reached, exit with a note in the transcript: `## Loop ended: max_turns reached`.
 6. **Dispatch the user-simulator agent** via the Agent tool:

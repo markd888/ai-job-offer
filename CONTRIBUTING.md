@@ -30,6 +30,70 @@ Or install from the published GitHub:
 
 When developing, you'll want to test changes against the example installs in `userdata/examples/maya/` (full) and `userdata/examples/diego/` (skeletal). Maya stress-tests the rich-pipeline case; Diego stress-tests the missing-files case.
 
+## Developing
+
+Run the plugin straight from your clone, in the folder where your real search
+lives, so there is one copy of the code. A marketplace install is a second copy
+in `~/.claude/plugins/cache/`, which is how a fix made in the clone ends up
+missing from the dashboard you actually use.
+
+1. **Clone once**, anywhere — these steps use `~/job-offer`:
+
+   ```bash
+   git clone <repo-url> ~/job-offer
+   ```
+
+2. **Turn the installed copy off for that search folder**, so its skills don't
+   load next to the clone's (two `job-offer:today` skills, two dashboards):
+
+   ```bash
+   cd ~/my-search          # the folder that holds userdata/
+   claude plugin disable job-offer@job-offer --scope local
+   ```
+
+   `--scope local` keeps the change in this folder only, so other workspaces
+   keep using the released plugin.
+
+3. **Start Claude Code with the clone loaded**:
+
+   ```bash
+   claude --plugin-dir ~/job-offer/plugin
+   ```
+
+   `${CLAUDE_PLUGIN_ROOT}` now points at `~/job-offer/plugin`, so every skill,
+   script, reference and agent comes from the clone. An alias saves typing:
+   `alias jo='claude --plugin-dir ~/job-offer/plugin'`.
+
+4. **Edit, then re-run.** Skills, references and scripts are read when they're
+   used, so a changed `SKILL.md` or script applies the next time you invoke it;
+   start a new session if a change to a skill's `description:` or to an agent
+   doesn't show up.
+
+5. **The dashboard from the clone:**
+
+   ```bash
+   python3 ~/job-offer/plugin/dashboard/serve.py --userdata "$(pwd)/userdata" --port 7890
+   ```
+
+   After a change under `plugin/dashboard/src/`, run `npm run build` in
+   `plugin/dashboard` and reload the page; commit `dist/` with the source (CI's
+   verify-dist check fails otherwise).
+
+6. **Mind the checked-out branch.** Your search runs on whatever the clone has
+   checked out. Keep `main` checked out there and do feature work in a
+   worktree (`git -C ~/job-offer worktree add ../job-offer-feat feat/x`); point
+   `--plugin-dir` at the worktree only to try the branch on real data.
+
+7. **Never run the test harness in your search folder.** `/test-personas`
+   resets `userdata/` from a snapshot. Run it from the clone, where `userdata/`
+   holds only the examples and test runs.
+
+To go back to the released plugin: `claude plugin enable job-offer@job-offer
+--scope local` and start Claude Code without `--plugin-dir`.
+`claude plugin details job-offer` shows each component's projected token cost —
+useful after touching an always-loaded skill like `/today` (kept at ≤ 20 KB by
+`tests/test_skill_size.py`).
+
 ## Plugin shape
 
 ```

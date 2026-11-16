@@ -64,7 +64,9 @@ def test_cli_on_maya_quotes_counts_and_withholds_small_rates():
 
 def test_career_coach_and_today_quote_the_script_not_their_own_numbers():
     coach = (ROOT / "plugin" / "agents" / "career-coach.md").read_text()
-    today = (ROOT / "plugin" / "skills" / "today" / "SKILL.md").read_text()
+    # /today's channel line lives in the weekly-reflection reference it loads on demand.
+    today = (ROOT / "plugin" / "references" / "today-weekly-reflection.md").read_text()
+    assert "today-weekly-reflection.md" in (ROOT / "plugin" / "skills" / "today" / "SKILL.md").read_text()
     assert "scripts/funnel.py" in coach and "scripts/funnel.py" in today
     assert "fewer than 5 applications" in coach and "too few to read" in coach
     assert "Never a rate the script didn't print" in today

@@ -12,6 +12,13 @@ So the data moves, not the assertions.
     python3 scripts/rebase_fixture_dates.py maya-active
     python3 scripts/rebase_fixture_dates.py all --as-of 2026-08-07
     python3 scripts/rebase_fixture_dates.py all --dry-run
+    python3 scripts/rebase_fixture_dates.py --time-skip 10 --root userdata
+
+`--time-skip N --root DIR` is the harness's clock: it moves every date in a
+working userdata tree N days into the past, which to a skill reading the wall
+clock is the same as N days passing. Used mid-journey (the follow-up journey
+waits ten days after an application); `test-runs/` and `examples/` are left
+alone.
 
 Two properties matter and both come from shifting every date by one constant:
 
@@ -231,6 +238,42 @@ def rebase(snapshot: str, as_of: dt.date, dry_run: bool) -> int:
     return 0
 
 
+def time_skip(root: pathlib.Path, days: int, dry_run: bool) -> int:
+    """Shift every date under a working userdata tree `days` into the past."""
+    if not root.is_dir():
+        print(f"error: no directory at {root}", file=sys.stderr)
+        return 1
+    delta = dt.timedelta(days=-days)
+    edits, renames = 0, []
+    for p in iter_files(root):
+        if {"test-runs", "examples"} & set(p.relative_to(root).parts):
+            continue
+        text = read(p)
+        if text is not None:
+            shifted = shift_text(text, delta)
+            if shifted != text:
+                edits += 1
+                if not dry_run:
+                    p.write_text(shifted, encoding="utf-8")
+        new_name = shift_name(p.name, delta)
+        if new_name != p.name:
+            renames.append((p, p.with_name(new_name)))
+    # Folders named by date too (submitted-<date>/), deepest first so a parent
+    # rename doesn't invalidate a child's path.
+    dirs = [d for d in root.rglob("*") if d.is_dir()
+            and not {"test-runs", "examples"} & set(d.relative_to(root).parts)]
+    for d in sorted(dirs, key=lambda d: len(d.parts), reverse=True):
+        new_name = shift_name(d.name, delta)
+        if new_name != d.name:
+            renames.append((d, d.with_name(new_name)))
+    for old, new in renames:
+        if not dry_run:
+            old.rename(new)
+    verb = "would edit" if dry_run else "edited"
+    print(f"time skip {days}d under {root}: {verb} {edits} file(s), {len(renames)} rename(s)")
+    return 0
+
+
 def freshness(as_of: dt.date) -> int:
     """Read-only staleness report. Used by `make check-fixture-freshness`."""
     stale = False
@@ -253,10 +296,20 @@ def freshness(as_of: dt.date) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("snapshot", help="snapshot name, 'all', or 'check' for a report")
+    ap.add_argument("snapshot", nargs="?", help="snapshot name, 'all', or 'check' for a report")
+    ap.add_argument("--time-skip", type=int, metavar="DAYS",
+                    help="move every date under --root DAYS into the past (harness clock)")
+    ap.add_argument("--root", type=pathlib.Path, help="working userdata tree for --time-skip")
     ap.add_argument("--as-of", help="target date (default: today)")
     ap.add_argument("--dry-run", action="store_true", help="print without writing")
     args = ap.parse_args()
+
+    if args.time_skip is not None:
+        if args.root is None or args.time_skip <= 0:
+            ap.error("--time-skip needs a positive DAYS and --root")
+        return time_skip(args.root, args.time_skip, args.dry_run)
+    if args.snapshot is None:
+        ap.error("give a snapshot name, 'all' or 'check' (or --time-skip with --root)")
 
     as_of = dt.date.today()
     if args.as_of:
