@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date
 from textwrap import dedent
 
-from serve import count_recent_applications, count_warm_outreach, compute_weekly_progress
+from serve import count_feedback_requests, count_recent_applications, count_warm_outreach, compute_weekly_progress
 
 
 TODAY = date(2026, 5, 15)  # Friday — week runs Mon 2026-05-11 through Fri 2026-05-15.
@@ -223,3 +223,41 @@ def test_window_days_matches_position_in_iso_week(tmp_path):
     for today, expected in cases:
         out = compute_weekly_progress(tmp_path, [], today=today)
         assert out["window_days"] == expected, f"{today}: expected {expected}, got {out['window_days']}"
+
+
+def test_warm_outreach_bullet_headcount_counts_people():
+    md = (
+        "## 2026-05-13\n"
+        "- [Acme] Outreach sent on LinkedIn to 4 people (2 own contacts, 2 cold)\n"
+        "- [Beta] Messaged Jo on LinkedIn\n"
+        "- [Gamma] Sent connection notes to 5 people (outreach)\n"
+    )
+    assert count_warm_outreach(md, TODAY) == 10
+
+
+# ----- count_feedback_requests ------------------------------------------------
+
+
+def test_feedback_requests_counted_in_window_only():
+    journal = dedent(
+        """\
+        ## 2026-05-08
+        - [Old] Feedback request sent by email to the recruiter. (source: user)
+
+        ## 2026-05-13
+        - [Monzo] Feedback request sent by email to Chloe on the EU rejection. (source: user)
+        - [Tabby] Messaged Aleksandr: referral ask, plus asked for feedback on the rejection. (source: user)
+        """
+    )
+    assert count_feedback_requests(journal, TODAY) == 2
+
+
+def test_feedback_given_or_promised_is_not_a_request():
+    journal = dedent(
+        """\
+        ## 2026-05-13
+        - [Payment Genes] James will give feedback on the CV by the end of the week. (source: user)
+        - [Rooh] Rejected after the tech check (Alena, written feedback). (source: user)
+        """
+    )
+    assert count_feedback_requests(journal, TODAY) == 0

@@ -15,7 +15,7 @@ import { MobileLanding } from "./components/MobileLanding";
 import { TodayFocus } from "./components/TodayFocus";
 import { WeekProgress } from "./components/WeekProgress";
 import { DEMO_MODE } from "./config";
-import { longDate } from "./dates";
+import { daysUntil, humanizeIsoDates, longDate } from "./dates";
 import type { DashboardState, Position } from "./types";
 
 // Poll the state endpoint while the tab is visible so the dashboard
@@ -116,18 +116,22 @@ export function App() {
     body = <Loader />;
   } else {
     body = (
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-start" }}>
-        <main style={{ flex: "999 1 640px", minWidth: 0, display: "flex", flexDirection: "column", gap: 24 }}>
+      <div className="jst-grid">
+        <div className="jst-area-active">
           <ActiveRoles companies={state.companies} onOpen={setOpenPosition} onChange={refresh} />
+        </div>
+        <div className="jst-area-focus">
           <TodayFocus brief={state.latest_brief} />
-          <ApplicationsTable companies={state.companies} onChange={refresh} onOpen={setOpenPosition} />
-        </main>
-        <aside style={{ flex: "1 1 340px", minWidth: 0, display: "flex", flexDirection: "column", gap: 24 }}>
+        </div>
+        <Rail>
+          <MiniFunnel companies={state.companies} />
           <WeekProgress strategy={state.strategy} weeklyProgress={state.weekly_progress} />
           <ComingUp companies={state.companies} onOpen={setOpenPosition} />
           <HeadsUp brief={state.latest_brief} />
-          <MiniFunnel companies={state.companies} />
-        </aside>
+        </Rail>
+        <main className="jst-area-pipeline">
+          <ApplicationsTable companies={state.companies} onChange={refresh} onOpen={setOpenPosition} />
+        </main>
       </div>
     );
   }
@@ -139,8 +143,8 @@ export function App() {
           <DemoBanner />
         </Box>
       )}
-      <div style={{ maxWidth: 1360, margin: "0 auto", padding: "24px clamp(16px, 3vw, 40px) 64px", display: "flex", flexDirection: "column", gap: 24 }}>
-        <Header weekDay={state?.weekly_progress.window_days} />
+      <div className="jst-page">
+        <TopBar weekDay={state?.weekly_progress.window_days} offerDate={state?.strategy.target_offer_date} />
         {body}
       </div>
       <CompanyDrawer
@@ -156,18 +160,45 @@ export function App() {
   );
 }
 
-function Header({ weekDay }: { weekDay?: number }) {
+// Page title on the left; date, week day, offer countdown and theme switch on
+// the right. One row above the grid, so every column starts on the same line.
+function TopBar({ weekDay, offerDate }: { weekDay?: number; offerDate?: string }) {
+  const offerDays = daysUntil(offerDate);
   return (
-    <header style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-      <h1 style={{ margin: 0, fontSize: 15, fontWeight: 700, letterSpacing: "-0.01em" }}>job-offer</h1>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <p className="jst-num jst-muted" style={{ margin: 0, fontSize: 13 }}>
-          {longDate(new Date())}
-          {weekDay !== undefined && ` · week day ${weekDay}/7`}
-        </p>
-        <ThemeToggle />
-      </div>
+    <header className="jst-topbar">
+      <h1 className="jst-topbar-title">Job search</h1>
+      <ul className="jst-meta-list jst-num">
+          <li><strong>{longDate(new Date())}</strong></li>
+          {weekDay !== undefined && <li>Week day {weekDay}/7</li>}
+          {offerDays !== null && offerDate && (
+            <li>
+              Offer target {humanizeIsoDates(offerDate)} · {offerDays} {offerDays === 1 ? "day" : "days"} left
+            </li>
+          )}
+      </ul>
+      <ThemeToggle />
     </header>
+  );
+}
+
+// The rail keeps its content in view while a long Pipeline scrolls past. Its
+// height feeds the sticky offset in theme.css (.jst-rail-inner): a rail taller
+// than the window scrolls until its end shows, then sticks by its bottom edge.
+function Rail({ children }: { children: ReactNode }) {
+  const inner = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = inner.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => el.style.setProperty("--jst-rail-h", `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <aside className="jst-area-rail jst-card jst-rail" aria-label="Week at a glance">
+      <div ref={inner} className="jst-rail-inner">
+        {children}
+      </div>
+    </aside>
   );
 }
 
@@ -176,15 +207,16 @@ function ThemeToggle() {
   const scheme = useComputedColorScheme("dark");
   const next = scheme === "dark" ? "light" : "dark";
   return (
-    <Tooltip label={`Switch to ${next} mode`} withArrow>
+    <Tooltip label={`Switch to ${next} mode`} withArrow events={{ hover: true, focus: false, touch: false }}>
       <ActionIcon
         variant="default"
-        size={44}
+        size={32}
+        className="jst-icon-action"
         radius="md"
         onClick={() => setColorScheme(next)}
         aria-label={`Switch to ${next} mode`}
       >
-        {scheme === "dark" ? <IconSun size={18} stroke={1.8} /> : <IconMoon size={18} stroke={1.8} />}
+        {scheme === "dark" ? <IconSun size={16} stroke={1.8} /> : <IconMoon size={16} stroke={1.8} />}
       </ActionIcon>
     </Tooltip>
   );

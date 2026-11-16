@@ -62,7 +62,7 @@ def test_state_endpoint_returns_userdata_root_absolute(running_server: str, user
 def test_state_endpoint_returns_weekly_progress_shape(running_server: str):
     body = _get_json(f"{running_server}/api/state")
     wp = body["weekly_progress"]
-    assert set(wp.keys()) == {"warm_outreach", "applications", "window_days"}
+    assert set(wp.keys()) == {"warm_outreach", "feedback_requests", "applications", "window_days"}
     # window_days is days-into-the-current-ISO-week (Mon=1, Sun=7). Varies by
     # the real wall-clock day this test runs on.
     assert isinstance(wp["window_days"], int)

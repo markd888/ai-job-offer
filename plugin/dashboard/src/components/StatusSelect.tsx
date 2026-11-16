@@ -1,4 +1,4 @@
-import { Box, Group, Select, Text } from "@mantine/core";
+import { Group, Select, Text } from "@mantine/core";
 import { useState } from "react";
 
 import { patchStatus } from "../api";
@@ -12,18 +12,9 @@ interface Props {
   onChange: () => void;
 }
 
-function StatusDot({ status, size = 8 }: { status: string; size?: number }) {
-  return (
-    <Box
-      w={size}
-      h={size}
-      style={{
-        borderRadius: "50%",
-        backgroundColor: statusColor(status),
-        flexShrink: 0,
-      }}
-    />
-  );
+// The colour comes from statusColors.ts, so it stays inline; size and shape are .jst-dot.
+function StatusDot({ status }: { status: string }) {
+  return <span className="jst-dot" style={{ backgroundColor: statusColor(status) }} aria-hidden />;
 }
 
 export function StatusSelect({ folderPath, current, onChange }: Props) {
@@ -33,18 +24,19 @@ export function StatusSelect({ folderPath, current, onChange }: Props) {
   return (
     <Select
       size="xs"
-      radius={9999}
-      variant="filled"
+      radius="md"
+      aria-label="Status"
+      classNames={{ input: "jst-status-input" }}
       data={STATUS_OPTIONS}
       value={value}
       disabled={saving}
       leftSection={<StatusDot status={value} />}
-      leftSectionWidth={22}
+      leftSectionWidth={28}
       comboboxProps={{ width: "max-content", middlewares: { flip: true, shift: true } }}
       renderOption={({ option, checked }) => (
         <Group gap="xs" align="center" wrap="nowrap">
           <StatusDot status={option.value} />
-          <Text size="sm" fw={checked ? 600 : 400} style={{ whiteSpace: "nowrap" }}>
+          <Text size="sm" fw={checked ? 600 : 400} className="jst-nowrap">
             {option.label}
           </Text>
         </Group>

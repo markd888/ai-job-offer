@@ -143,6 +143,84 @@ def rewrite_status(md: str, new_status: str) -> str:
     return f"---\n{new_block}\n---\n{body}"
 
 
+# Date field each status implies. A status change from the dashboard stamps it
+# when missing, so weekly counts (date_applied) and the decided history
+# (date_rejected / date_not_interested) work for roles moved by dropdown.
+_STATUS_DATE_FIELD = {
+    "applied": "date_applied",
+    "rejected": "date_rejected",
+    "not_interested": "date_not_interested",
+}
+
+
+def stamp_status_date(md: str, new_status: str, today: date) -> str:
+    """Add the date field implied by `new_status` to the frontmatter if absent.
+
+    An existing value (even an older one) is never overwritten. The new line is
+    appended at the end of the frontmatter block. Unknown statuses are a no-op.
+    """
+    field = _STATUS_DATE_FIELD.get(new_status)
+    if field is None:
+        return md
+    match = _FRONTMATTER_RE.match(md)
+    if not match:
+        return md
+    fm_block, body = match.group(1), match.group(2)
+    existing = re.search(rf"^\s*{field}\s*:\s*(.*)$", fm_block, re.MULTILINE)
+    if existing and existing.group(1).strip().strip("\"'"):
+        return md
+    line = f"{field}: {today.isoformat()}"
+    if existing:
+        fm_block = fm_block[: existing.start()] + line + fm_block[existing.end() :]
+    else:
+        fm_block = f"{fm_block}\n{line}"
+    return f"---\n{fm_block}\n---\n{body}"
+
+
+_NEXT_EVENT_LINE_RE = re.compile(r"^[ \t]*next_event[ \t]*:.*$", re.MULTILINE)
+
+
+def normalize_next_event(value: str) -> str:
+    """One frontmatter-safe line: newlines become '; ' (the card splits on ';'),
+    double quotes become single quotes, empty steps are dropped."""
+    steps = [s.strip() for s in re.split(r"[\r\n;]+", value) if s.strip()]
+    return "; ".join(steps).replace('"', "'")
+
+
+def rewrite_next_event(md: str, value: str, today: date) -> str:
+    """Set (or clear, when value is empty) `next_event:` in the frontmatter and
+    append a `## History` line, the same trail /today writes for next_event.
+
+    Raises ValueError if there is no frontmatter.
+    """
+    match = _FRONTMATTER_RE.match(md)
+    if not match:
+        raise ValueError("no frontmatter")
+    fm_block, body = match.group(1), match.group(2)
+    new_value = normalize_next_event(value)
+    line = f'next_event: "{new_value}"'
+    existing = _NEXT_EVENT_LINE_RE.search(fm_block)
+    if existing:
+        if _clean_value(existing.group(0).split(":", 1)[1].strip()) == new_value:
+            return md
+        fm_block = fm_block[: existing.start()] + line + fm_block[existing.end() :]
+    elif new_value:
+        fm_block = f"{fm_block}\n{line}"
+    else:
+        return md
+
+    history = (
+        f'- {today.isoformat()}: next_event → "{new_value}" (dashboard)'
+        if new_value
+        else f"- {today.isoformat()}: next_event cleared (dashboard)"
+    )
+    body = body.rstrip("\n")
+    if not re.search(r"^## History\s*$", body, re.MULTILINE):
+        body = f"{body}\n\n## History" if body.strip() else "## History"
+    body = f"{body}\n{history}\n"
+    return f"---\n{fm_block}\n---\n{body}"
+
+
 def atomic_write(target: Path, content: str) -> None:
     """Write content to target atomically: write to temp file in same dir, then rename.
 
@@ -317,6 +395,9 @@ def _make_handler(
             if self.path.startswith("/api/positions/") and self.path.endswith("/status"):
                 self._handle_status_patch()
                 return
+            if self.path.startswith("/api/positions/") and self.path.endswith("/next_event"):
+                self._handle_next_event_patch()
+                return
             self._send_status(404, b"not found")
 
         def do_POST(self) -> None:  # noqa: N802
@@ -378,11 +459,38 @@ def _make_handler(
                 return
             try:
                 new_md = rewrite_status(meta_path.read_text(encoding="utf-8"), new_status)
+                new_md = stamp_status_date(new_md, new_status, date.today())
             except ValueError as e:
                 self._send_status(409, str(e).encode())
                 return
             atomic_write(meta_path, new_md)
             self._send_json(200, {"ok": True})
+
+        def _handle_next_event_patch(self) -> None:
+            folder_path = self.path[len("/api/positions/") : -len("/next_event")]
+            meta_path = _resolve_meta_path(userdata_root, folder_path)
+            if meta_path is None:
+                self._send_status(400, b"invalid folder_path")
+                return
+            if not meta_path.is_file():
+                self._send_status(404, b"company not found")
+                return
+            try:
+                body = self._read_json_body()
+            except _json.JSONDecodeError:
+                self._send_status(400, b"invalid json")
+                return
+            value = body.get("next_event")
+            if not isinstance(value, str):
+                self._send_status(400, b"missing next_event")
+                return
+            try:
+                new_md = rewrite_next_event(meta_path.read_text(encoding="utf-8"), value, date.today())
+            except ValueError as e:
+                self._send_status(409, str(e).encode())
+                return
+            atomic_write(meta_path, new_md)
+            self._send_json(200, {"ok": True, "next_event": normalize_next_event(value)})
 
         def _handle_note_post(self) -> None:
             folder_path = self.path[len("/api/positions/") : -len("/notes")]
@@ -596,6 +704,8 @@ def delete_note(md: str, index: int, expected_heading: str) -> str:
 #     mention any of the keywords below. Each bullet contributes at most 1.
 #   - applications: count of meta.md files with date_applied in the current ISO
 #     week.
+#   - feedback_requests: count of journal.md bullets in the current ISO week
+#     that log a feedback request (dashboard-only; /today doesn't report it).
 # Window is the current ISO week: [Monday of this week, today] inclusive.
 # So on a Tuesday the window is 2 days; on a Sunday it is 7. This matches the
 # user's intuitive "this week" framing — a Monday morning shows a fresh week.
@@ -616,6 +726,10 @@ _WARM_OUTREACH_RE = re.compile(
     re.IGNORECASE,
 )
 
+# A bullet that names a head-count ("to 5 people", "2 contacts") counts that
+# many outreaches instead of one, so a batch logged as one line isn't undercounted.
+_OUTREACH_HEADCOUNT_RE = re.compile(r"\b(\d{1,2})\s+(?:people|persons|contacts)\b", re.IGNORECASE)
+
 _JOURNAL_HEADING_RE = re.compile(r"^##\s+(.*?)\s*$")
 _JOURNAL_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})$")
 _BULLET_START_RE = re.compile(r"^\s*[-*]\s")
@@ -629,34 +743,31 @@ def read_journal(userdata_root: Path) -> str:
     return journal_path.read_text(encoding="utf-8")
 
 
-def count_warm_outreach(journal_md: str, today: date) -> int:
-    """Count distinct journal bullets mentioning a warm-outreach keyword in the current ISO week.
+def _week_bullets(journal_md: str, today: date) -> list[str]:
+    """Return the text of each journal bullet dated in the current ISO week.
 
-    Each bullet (top-level `- …` or `* …`) within the window contributes at most one
-    to the count, even if it contains multiple keywords. Continuation lines (indented
-    text following a bullet) count as part of the same bullet for keyword matching.
+    A bullet is a top-level `- …` or `* …` line plus its continuation lines.
     Bullets under dated headings outside [Monday of this week, today] are skipped.
     Malformed date headings (non-ISO) close the window until the next valid one.
     """
     if not journal_md.strip():
-        return 0
+        return []
 
     window_start = today - timedelta(days=today.weekday())
-    count = 0
+    bullets: list[str] = []
     in_window = False
     bullet_lines: list[str] = []
 
-    def _flush() -> int:
-        if bullet_lines and _WARM_OUTREACH_RE.search("\n".join(bullet_lines)):
-            return 1
-        return 0
+    def _flush() -> None:
+        if bullet_lines:
+            bullets.append("\n".join(bullet_lines))
 
     for line in journal_md.splitlines():
         heading = _JOURNAL_HEADING_RE.match(line)
         if heading:
             # Any `## ` heading closes the current bullet and resets scope.
             # Only ISO-date headings open a new in-window section.
-            count += _flush()
+            _flush()
             bullet_lines = []
             date_match = _JOURNAL_DATE_RE.match(heading.group(1))
             if date_match:
@@ -674,13 +785,46 @@ def count_warm_outreach(journal_md: str, today: date) -> int:
             continue
 
         if _BULLET_START_RE.match(line):
-            count += _flush()
+            _flush()
             bullet_lines = [line]
         elif bullet_lines:
             bullet_lines.append(line)
 
-    count += _flush()
+    _flush()
+    return bullets
+
+
+def count_warm_outreach(journal_md: str, today: date) -> int:
+    """Count warm outreaches logged in journal bullets in the current ISO week.
+
+    A bullet mentioning a warm-outreach keyword counts 1, or N when it names a
+    head-count ("sent to 5 people"). Each bullet contributes at most one match
+    even if it contains multiple keywords.
+    """
+    count = 0
+    for text in _week_bullets(journal_md, today):
+        if not _WARM_OUTREACH_RE.search(text):
+            continue
+        # Take the first head-count only: later numbers are usually a breakdown
+        # ("4 people (2 own contacts, 2 cold)") and would double-count.
+        headcount = _OUTREACH_HEADCOUNT_RE.search(text)
+        count += int(headcount.group(1)) if headcount else 1
     return count
+
+
+# A feedback request is the user asking a company why they were turned down.
+# Feedback someone else promised or gave ("James will give feedback") is not one.
+_FEEDBACK_REQUEST_RE = re.compile(
+    r"\bfeedback\s+requests?\b"
+    r"|\brequest(?:ed|ing)?\s+(?:for\s+)?feedback\b"
+    r"|\bask(?:ed|ing)?\b[^.\n]{0,60}\bfeedback\b",
+    re.IGNORECASE,
+)
+
+
+def count_feedback_requests(journal_md: str, today: date) -> int:
+    """Count journal bullets in the current ISO week that log a feedback request."""
+    return sum(1 for text in _week_bullets(journal_md, today) if _FEEDBACK_REQUEST_RE.search(text))
 
 
 def count_recent_applications(companies: list[dict[str, Any]], today: date) -> int:
@@ -777,14 +921,16 @@ def compute_weekly_progress(
     companies: list[dict[str, Any]],
     today: date | None = None,
 ) -> dict[str, Any]:
-    """Build the {warm_outreach, applications, window_days} payload for /api/state.
+    """Build the {warm_outreach, feedback_requests, applications, window_days} payload for /api/state.
 
     `window_days` is the number of days from Monday of this week through today
     inclusive — so Monday → 1, Tuesday → 2, …, Sunday → 7.
     """
     today = today or date.today()
+    journal_md = read_journal(userdata_root)
     return {
-        "warm_outreach": count_warm_outreach(read_journal(userdata_root), today),
+        "warm_outreach": count_warm_outreach(journal_md, today),
+        "feedback_requests": count_feedback_requests(journal_md, today),
         "applications": count_recent_applications(companies, today),
         "window_days": today.weekday() + 1,
     }

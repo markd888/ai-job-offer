@@ -47,6 +47,7 @@ export interface DailyBrief {
 
 export interface WeeklyProgress {
   warm_outreach: number;
+  feedback_requests: number;
   applications: number;
   window_days: number;
 }

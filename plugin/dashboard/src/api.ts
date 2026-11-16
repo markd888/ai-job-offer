@@ -168,6 +168,29 @@ export async function patchStatus(folderPath: string, status: string): Promise<v
   await jsonOrThrow<{ ok: true }>(res);
 }
 
+// Sets the role's `next_event` (the "Next step" on an interview card). Steps are
+// separated by newlines or ';'; an empty string clears it. Returns the value as stored.
+export async function patchNextEvent(folderPath: string, nextEvent: string): Promise<string> {
+  if (DEMO_MODE) {
+    const stored = nextEvent
+      .split(/[\r\n;]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .join("; ")
+      .replace(/"/g, "'");
+    const hit = demoState?.companies.find((c) => c.folder_path === folderPath);
+    if (hit) hit.next_event = stored;
+    return stored;
+  }
+  const res = await fetch(`/api/positions/${encodeURIComponent(folderPath)}/next_event`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ next_event: nextEvent }),
+  });
+  const body = await jsonOrThrow<{ ok: true; next_event: string }>(res);
+  return body.next_event;
+}
+
 export async function postNote(folderPath: string, note: string): Promise<void> {
   if (DEMO_MODE) {
     await ensureDemoNotes(folderPath);
