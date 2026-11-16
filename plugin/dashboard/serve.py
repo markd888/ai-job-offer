@@ -700,8 +700,10 @@ def delete_note(md: str, index: int, expected_heading: str) -> str:
 # -- Weekly progress -----------------------------------------------------------
 #
 # Mirrors the /today skill's contract (plugin/skills/today/SKILL.md):
-#   - warm_outreach: count of journal.md bullets in the current ISO week that
-#     mention any of the keywords below. Each bullet contributes at most 1.
+#   - warm_outreach: `sent` outreach lines (reach-out, referral-ask, intro-ask,
+#     follow-up) in userdata/people/*.md logs dated in the current ISO week.
+#     The rules live in plugin/scripts/people.py, shared with the skills and the
+#     schema validator; schema in plugin/schemas/person.md.schema.md.
 #   - applications: count of meta.md files with date_applied in the current ISO
 #     week.
 #   - feedback_requests: count of journal.md bullets in the current ISO week
@@ -710,25 +712,17 @@ def delete_note(md: str, index: int, expected_heading: str) -> str:
 # So on a Tuesday the window is 2 days; on a Sunday it is 7. This matches the
 # user's intuitive "this week" framing — a Monday morning shows a fresh week.
 
-_WARM_OUTREACH_KEYWORDS = (
-    "DM",
-    "outreach",
-    "coffee",
-    "intro",
-    "intro ask",
-    "reached out",
-    "messaged",
-    "connect",
-)
 
-_WARM_OUTREACH_RE = re.compile(
-    r"\b(" + "|".join(re.escape(k) for k in _WARM_OUTREACH_KEYWORDS) + r")\b",
-    re.IGNORECASE,
-)
+def _load_people_module():
+    import importlib.util
+    path = Path(__file__).resolve().parent.parent / "scripts" / "people.py"
+    spec = importlib.util.spec_from_file_location("job_offer_people", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
-# A bullet that names a head-count ("to 5 people", "2 contacts") counts that
-# many outreaches instead of one, so a batch logged as one line isn't undercounted.
-_OUTREACH_HEADCOUNT_RE = re.compile(r"\b(\d{1,2})\s+(?:people|persons|contacts)\b", re.IGNORECASE)
+
+people = _load_people_module()
 
 _JOURNAL_HEADING_RE = re.compile(r"^##\s+(.*?)\s*$")
 _JOURNAL_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})$")
@@ -794,22 +788,9 @@ def _week_bullets(journal_md: str, today: date) -> list[str]:
     return bullets
 
 
-def count_warm_outreach(journal_md: str, today: date) -> int:
-    """Count warm outreaches logged in journal bullets in the current ISO week.
-
-    A bullet mentioning a warm-outreach keyword counts 1, or N when it names a
-    head-count ("sent to 5 people"). Each bullet contributes at most one match
-    even if it contains multiple keywords.
-    """
-    count = 0
-    for text in _week_bullets(journal_md, today):
-        if not _WARM_OUTREACH_RE.search(text):
-            continue
-        # Take the first head-count only: later numbers are usually a breakdown
-        # ("4 people (2 own contacts, 2 cold)") and would double-count.
-        headcount = _OUTREACH_HEADCOUNT_RE.search(text)
-        count += int(headcount.group(1)) if headcount else 1
-    return count
+def count_warm_outreach(userdata_root: Path, today: date) -> int:
+    """Count `sent` outreach lines in people/*.md logs in the current ISO week."""
+    return people.count_outreach(userdata_root, today)
 
 
 # A feedback request is the user asking a company why they were turned down.
@@ -929,7 +910,7 @@ def compute_weekly_progress(
     today = today or date.today()
     journal_md = read_journal(userdata_root)
     return {
-        "warm_outreach": count_warm_outreach(journal_md, today),
+        "warm_outreach": count_warm_outreach(userdata_root, today),
         "feedback_requests": count_feedback_requests(journal_md, today),
         "applications": count_recent_applications(companies, today),
         "window_days": today.weekday() + 1,

@@ -477,8 +477,8 @@ Write a minimal journal file:
 
 <!--
   Free-form notes you write yourself. Date each entry as `## YYYY-MM-DD`.
-  /today scans the last 7 days for outreach keywords (DM, outreach, coffee,
-  intro, reached out, messaged, connect) to count warm-outreach attempts.
+  Outreach to people is logged by /outreach in userdata/people/, and that is
+  what /today counts toward your weekly outreach target, not this file.
 -->
 ```
 

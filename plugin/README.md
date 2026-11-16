@@ -56,7 +56,7 @@ cd <your-workspace>
 # ask job-offer:career-coach anytime — stuck, got an offer, or want to sharpen your positioning / outreach.
 ```
 
-## The workflow — 16 skills
+## The workflow — 17 skills
 
 **Reference:**
 
@@ -80,6 +80,7 @@ cd <your-workspace>
 | `/job-offer:job-search` | Weekly sweep. Parallel subagents recheck your P0/P1 companies via public ATS APIs (Ashby / Greenhouse / Lever) and discover new roles via `site:`-scoped search. Scores and files results via `/evaluate-position`. Optional `--with-playwright` for link verification. |
 | `/job-offer:apply <Company>` | Tailor your master CV (userdata/cv.md) for one role at <Company>. Reads profile.md + the company's research brief, asks up to 5 clarifying questions upfront, then drafts companies/<Co>/[<slug>/]cv-<date>.md. CV-only — cover note + outreach are user-driven follow-ups. |
 | `/job-offer:ats-check <Company>` | Checks the CV PDF the way an applicant tracking system reads it — pages, contacts, glyphs, section order, extraction fidelity, keyword coverage against the posting. `/apply` runs it after every build. |
+| `/job-offer:outreach <person or Company>` | People as records in `userdata/people/` (relation, channel, linked roles, a log of every ask and reply). Drafts a referral ask, warm intro ask, reach-out, follow-up or thank-you using only facts from the person file, profile, CV and what you sent; logs it once you say it went out. `/today` and the dashboard count weekly outreach from these logs. |
 | `/job-offer:sent <Company>` | Record an application going out, after your yes: status, date, channel (referral / cold / recruiter / LinkedIn / company site / other), who referred you, and a frozen copy of the CV, cover note, ATS check and posting in `submitted-<date>/`. Starts the follow-up clock. |
 | `/job-offer:follow-up [Company]` | Lists applications quiet for 10+ days (one rule, shared with `/today`), drafts a follow-up or thank-you using only what you sent, records it once you've sent it (max two per application), and records replies from companies. Drafts only. |
 

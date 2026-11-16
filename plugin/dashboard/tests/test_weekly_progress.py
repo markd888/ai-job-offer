@@ -1,4 +1,4 @@
-"""Tests for count_warm_outreach / count_recent_applications.
+"""Tests for count_warm_outreach (people logs) / count_recent_applications / count_feedback_requests.
 
 Window is the current ISO week: [Monday of this week, today] inclusive.
 TODAY is fixed to Friday 2026-05-15 so the window is Mon 2026-05-11 → Fri 2026-05-15.
@@ -15,165 +15,53 @@ from serve import count_feedback_requests, count_recent_applications, count_warm
 TODAY = date(2026, 5, 15)  # Friday — week runs Mon 2026-05-11 through Fri 2026-05-15.
 
 
-# ----- count_warm_outreach ----------------------------------------------------
+# ----- count_warm_outreach (userdata/people/*.md logs) ------------------------
 
 
-def test_empty_journal_returns_zero():
-    assert count_warm_outreach("", TODAY) == 0
-    assert count_warm_outreach("# Journal\n\n", TODAY) == 0
+def _person(root, slug, *log_lines, relation="former-colleague"):
+    d = root / "people"
+    d.mkdir(exist_ok=True)
+    (d / f"{slug}.md").write_text(
+        f"---\nname: {slug.title()}\nrelation: {relation}\nroles: []\n---\n\n# {slug.title()}\n\n## Log\n"
+        + "".join(line + "\n" for line in log_lines)
+    )
 
 
-def test_counts_bullet_with_keyword_in_window():
-    md = dedent("""\
-        # Journal
-
-        ## 2026-05-13
-
-        - Sent a DM to David about the Stripe role.
-        """)
-    assert count_warm_outreach(md, TODAY) == 1
+def test_no_people_folder_counts_zero(tmp_path):
+    assert count_warm_outreach(tmp_path, TODAY) == 0
 
 
-def test_skips_bullet_before_week_start():
-    # 2026-05-10 is Sunday of the previous ISO week — out of window.
-    md = dedent("""\
-        ## 2026-05-10
-
-        - Sent a DM to David.
-        """)
-    assert count_warm_outreach(md, TODAY) == 0
-
-
-def test_skips_bullet_after_today():
-    # 2026-05-16 is tomorrow — out of window.
-    md = dedent("""\
-        ## 2026-05-16
-
-        - Sent a DM to David.
-        """)
-    assert count_warm_outreach(md, TODAY) == 0
+def test_sent_outreach_kinds_in_window_counted(tmp_path):
+    _person(tmp_path, "dana",
+            "- 2026-05-11 sent reach-out (linkedin): Catch-up ask.",          # Monday — counts
+            "- 2026-05-13 sent referral-ask (linkedin): Referral for Senior PM.",  # counts
+            "- 2026-05-14 received reply (linkedin): Said yes.",              # theirs — no
+            "- 2026-05-15 sent thank-you (linkedin): Thanks for the referral.")  # not outreach
+    _person(tmp_path, "sam",
+            "- 2026-05-12 sent intro-ask (email): Intro to the Head of Credit.",   # counts
+            "- 2026-05-14 sent follow-up (email): Nudge on the intro.",           # counts
+            "- 2026-05-14 sent feedback-ask (email): Asked why not.")             # not outreach
+    assert count_warm_outreach(tmp_path, TODAY) == 4
 
 
-def test_includes_week_start_and_today_boundary():
-    # Monday (week start) and Friday (today) inclusive.
-    md = dedent("""\
-        ## 2026-05-11
-
-        - Sent a DM.
-
-        ## 2026-05-15
-
-        - Coffee with Tom.
-        """)
-    assert count_warm_outreach(md, TODAY) == 2
+def test_outreach_outside_window_not_counted(tmp_path):
+    _person(tmp_path, "dana",
+            "- 2026-05-10 sent reach-out (linkedin): Sunday of last week.",
+            "- 2026-05-16 sent reach-out (linkedin): Tomorrow.")
+    assert count_warm_outreach(tmp_path, TODAY) == 0
 
 
-def test_one_bullet_with_multiple_keywords_counts_once():
-    md = dedent("""\
-        ## 2026-05-13
-
-        - Sent a DM and grabbed coffee with David — also got an intro to Ramp.
-        """)
-    assert count_warm_outreach(md, TODAY) == 1
-
-
-def test_two_bullets_each_with_a_keyword_count_separately():
-    md = dedent("""\
-        ## 2026-05-13
-
-        - Sent a DM to David.
-        - Coffee with Tom on Friday.
-        - Plaid 2nd-round panel went well. (no keyword — not counted)
-        """)
-    assert count_warm_outreach(md, TODAY) == 2
+def test_malformed_log_lines_are_not_counted(tmp_path):
+    _person(tmp_path, "dana",
+            "- 2026-05-13 messaged Dana about a referral",        # free text, no kind
+            "- 2026-05-13 sent coffee (linkedin): Unknown kind.",  # kind not in the enum
+            "- 13/05/2026 sent reach-out: Wrong date format.")
+    assert count_warm_outreach(tmp_path, TODAY) == 0
 
 
-def test_keyword_match_is_case_insensitive():
-    md = dedent("""\
-        ## 2026-05-13
-
-        - sent a dm to David.
-        - REACHED OUT to two PMs.
-        """)
-    assert count_warm_outreach(md, TODAY) == 2
-
-
-def test_substring_does_not_match_keyword():
-    # "introduction" should not match the "intro" keyword as a substring;
-    # \b boundary keeps the match whole-word.
-    md = dedent("""\
-        ## 2026-05-13
-
-        - Wrote the introduction section of the case study.
-        """)
-    assert count_warm_outreach(md, TODAY) == 0
-
-
-def test_bullet_continuation_lines_are_part_of_same_bullet():
-    md = dedent("""\
-        ## 2026-05-13
-
-        - Two new LinkedIn DMs from senior PMs at adjacent companies asking
-          about the pricing framework. Worth a coffee if either has a referral path.
-        """)
-    # Two keywords (DMs, coffee) in one bullet → 1
-    assert count_warm_outreach(md, TODAY) == 1
-
-
-def test_multiple_dated_sections_some_in_window_some_not():
-    md = dedent("""\
-        ## 2026-05-08
-
-        - Sent a DM to David. (Friday of previous week — out of window)
-
-        ## 2026-05-13
-
-        - Coffee with Tom. (Wed of current week — in window)
-
-        ## 2026-05-15
-
-        - Got an intro from Sarah. (today — in window)
-        """)
-    assert count_warm_outreach(md, TODAY) == 2
-
-
-def test_malformed_date_heading_closes_window():
-    md = dedent("""\
-        ## 2026-05-13
-
-        - DM to David. (in window — counts)
-
-        ## not-a-date
-
-        - DM to Alice. (window closed by bad heading)
-        """)
-    assert count_warm_outreach(md, TODAY) == 1
-
-
-def test_text_outside_any_bullet_does_not_count():
-    md = dedent("""\
-        ## 2026-05-13
-
-        Free-form prose mentioning DM and coffee but not in a bullet.
-
-        - Real bullet: messaged David.
-        """)
-    assert count_warm_outreach(md, TODAY) == 1
-
-
-def test_monday_today_window_is_one_day():
-    # On Monday morning the window collapses to just today.
-    monday = date(2026, 5, 18)
-    md = dedent("""\
-        ## 2026-05-17
-
-        - DM on Sunday (previous week — out).
-
-        ## 2026-05-18
-
-        - DM on Monday (in window).
-        """)
-    assert count_warm_outreach(md, monday) == 1
+def test_journal_wording_no_longer_counts(tmp_path):
+    (tmp_path / "journal.md").write_text("## 2026-05-13\n- Outreach sent on LinkedIn to 4 people. DM to Jo.\n")
+    assert compute_weekly_progress(tmp_path, [], today=TODAY)["warm_outreach"] == 0
 
 
 # ----- count_recent_applications ---------------------------------------------
@@ -223,16 +111,6 @@ def test_window_days_matches_position_in_iso_week(tmp_path):
     for today, expected in cases:
         out = compute_weekly_progress(tmp_path, [], today=today)
         assert out["window_days"] == expected, f"{today}: expected {expected}, got {out['window_days']}"
-
-
-def test_warm_outreach_bullet_headcount_counts_people():
-    md = (
-        "## 2026-05-13\n"
-        "- [Acme] Outreach sent on LinkedIn to 4 people (2 own contacts, 2 cold)\n"
-        "- [Beta] Messaged Jo on LinkedIn\n"
-        "- [Gamma] Sent connection notes to 5 people (outreach)\n"
-    )
-    assert count_warm_outreach(md, TODAY) == 10
 
 
 # ----- count_feedback_requests ------------------------------------------------

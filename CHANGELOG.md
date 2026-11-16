@@ -53,8 +53,13 @@ without adopting the pipeline tracker.
 - `/interview-prep` works from what the employer read: the latest `submitted-*/` archive (CV and posting as sent), else the CV dated on or before `date_applied`, and says which it used (`**Sent materials:**` in the doc header). `interviewer-simulator` drills the sent CV too.
 - `/help`, `plugin/README.md` and `references/recommended-flow.md` list `/ats-check`, `/sent` and `/follow-up`; end-of-skill nudges can suggest them (record a sent application, chase a quiet one, re-check an edited CV, thank an interviewer). `tests/test_help_card.py` fails when a skill ships without a help-card entry.
 - `date_rejected`, `rejection_stage`, `rejection_note` and `date_not_interested` are documented in the meta.md schema.
+- People as records: `userdata/people/<slug>.md` with relation, channel, linked roles and a `## Log` of every ask and reply in one fixed line shape (`schemas/person.md.schema.md`; rules and enums in `plugin/scripts/people.py`). `validate_userdata.py` adds `person.required`, `person.relation-enum`, `person.channel-enum`, `person.role-link`, `person.log-format`.
+- `/outreach <person|Company>` drafts a referral ask (with a forwardable blurb), intro ask, reach-out, follow-up or thank-you from facts only — the person file, profile, master CV, submitted materials — and logs it after the user says it went out (`plugin/scripts/record-outreach.py`). Drafts only.
+- `/sent --referred-by` logs the referral on the referrer's people file (creating it if new) and links the role.
+- Maya's example install and the `maya-active` snapshot have three people (a former colleague at Wagestream, a referrer, Lendable's CEO); the `active-loop` harness journey ends with a referral ask.
 
 ### Changed
+- Weekly outreach — in the dashboard and `/today` — is the number of `sent` reach-out / referral-ask / intro-ask / follow-up lines in people logs this ISO week. The journal keyword regex and head-count parsing (`_WARM_OUTREACH_KEYWORDS`) are gone: journal wording no longer counts. Feedback requests are still counted from the journal.
 - One quiet-application rule: `/today` drops its own 14-day "Chase or close" rule and "stale applied" heads-up and uses `follow-ups.py` (10 days since the latest of `date_applied`, `last_inbound`, `last_follow_up`) for both following up and closing.
 - `record-sent.py` and `record-inbound.py` share `plugin/scripts/metafile.py` for frontmatter edits.
 - `/apply` no longer archives anything or writes to `meta.md`; when the application goes out it hands over to `/sent`.

@@ -26,7 +26,7 @@ Infer what you can before asking: the conversation, `journal.md` lines tagged `[
 
 | `channel` | When |
 |---|---|
-| `referral` | someone inside put the CV forward; ask for their name if it isn't known |
+| `referral` | someone inside put the CV forward; ask for their name if it isn't known (check `userdata/people/` first) |
 | `recruiter` | through an agency or in-house recruiter who reached out |
 | `linkedin` | LinkedIn Easy Apply or a LinkedIn message |
 | `company-site` | the company's careers page or ATS form |
@@ -48,7 +48,7 @@ python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/record-sent.py" <role folder> --channe
   [--referred-by "<Name>"] [--posting <file>] [--date YYYY-MM-DD]
 ```
 
-It writes the frontmatter, archives the latest CV (PDF and markdown), cover letter or note, ATS check and posting into `submitted-<date>/` with a manifest, and appends one History line. With no CV in the folder (applied with the master CV, say) it still records the application and says nothing was archived. If it refuses, tell the user why in one line; don't edit `meta.md` by hand instead.
+It writes the frontmatter, archives the latest CV (PDF and markdown), cover letter or note, ATS check and posting into `submitted-<date>/` with a manifest, and appends one History line. With no CV in the folder (applied with the master CV, say) it still records the application and says nothing was archived. If it refuses, tell the user why in one line; don't edit `meta.md` by hand instead. With `--referred-by`, it also logs the referral on that person's file in `userdata/people/` (creating it if they're new) and links the role to them — use the name exactly as it appears in their people file, so `/job-offer:outreach` can find them for the thank-you.
 
 Then append to `journal.md` under today's heading: `- [<Company>] Application sent via <channel>. (source: user)`.
 

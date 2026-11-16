@@ -14,7 +14,7 @@ Senior PM, lead PM, or head of product running an active search. A different rol
 |---|---|---|
 | 1 | Setup | `/job-offer:setup` |
 | 2 | Discover & score | `/job-offer:job-search` · `/job-offer:evaluate-position <url>` |
-| 3 | Apply | `/job-offer:apply <Company>` · `/job-offer:ats-check <Company>` · `/job-offer:sent <Company>` · `/job-offer:follow-up` |
+| 3 | Apply | `/job-offer:apply <Company>` · `/job-offer:ats-check <Company>` · `/job-offer:outreach <person or Company>` · `/job-offer:sent <Company>` · `/job-offer:follow-up` |
 | 4 | Interview | `/job-offer:story-builder` · `/job-offer:interview-prep <Company>` · `/job-offer:case-practice` · `job-offer:interviewer-simulator` · `/job-offer:interview-analysis` |
 | 5 | Decide | `/job-offer:evaluate-offer` |
 
@@ -27,7 +27,7 @@ Senior PM, lead PM, or head of product running an active search. A different rol
 | `/job-offer:dashboard` | When you want a visual scan of the pipeline. |
 | `/job-offer:integrations` | At setup, or after installing a new MCP server. |
 
-## Skills (16)
+## Skills (17)
 
 Reference
 
@@ -50,6 +50,7 @@ Daily and weekly
 | `/evaluate-position <url-or-paste>` | Scores one posting, writes the company folder + 200-word research brief. | A single role landed in your inbox. |
 | `/apply <Company>` | Tailors your master CV for one role. Up to 5 clarifying questions, then a single-pass draft, built to a one-page PDF and checked by `/ats-check`. | You've decided to apply. |
 | `/ats-check <Company>` | Reads the CV PDF the way an applicant tracking system does: pages, contacts, glyphs, section order, text fidelity, the posting's keyword coverage. Runs after every `/apply`. | You edited the CV by hand, or want the keyword check again. |
+| `/outreach <person or Company>` | Keeps the people you're in touch with in `userdata/people/`, drafts a referral ask, intro ask, reach-out, follow-up or thank-you from facts only, and logs it once sent. That log is your weekly outreach count. Drafts only. | You know someone at a company you're going after, or someone helped and deserves a thank-you. |
 | `/sent <Company>` | Records an application going out after your yes: status, date, channel, who referred you, and a frozen copy of what you sent. Starts the follow-up clock. | You just submitted an application. |
 | `/follow-up` | Lists applications quiet 10+ days, drafts a short follow-up or a thank-you from what you actually sent, and records replies from companies. Drafts only. | `/today` says follow-ups are due, a company went quiet, or a round just ended. |
 | `/dashboard` | Browser view of your pipeline; inline status changes + notes. | You want a visual scan instead of reading meta.md files. |
