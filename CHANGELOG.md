@@ -44,7 +44,9 @@ without adopting the pipeline tracker.
 
 ---
 
-## [Unreleased]
+## [0.7.2] — 2026-11-16
+
+Tests for the fork's scripts, documented schemas, and a fail-closed Access gate for the cloud copy.
 
 ### Fixed
 - `follow-ups.py` lists due roles most recent first, as `/follow-up` says; a non-numeric `follow_ups:` no longer crashes it.
@@ -58,6 +60,7 @@ without adopting the pipeline tracker.
 ### Changed
 - Schemas document the fork's fields: `phone` (profile), `follow_ups`, `last_follow_up`, `max_stage`, plus `date_applied`, `last_inbound`, `next_event` that `/follow-up` reads.
 - `__pycache__/` is no longer committed.
+- The privacy scan reads its blocklist from the `PRIVACY_PATTERNS` repo secret instead of a list in the repo.
 
 ## [0.7.1] — 2026-11-16
 
