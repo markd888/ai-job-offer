@@ -105,11 +105,11 @@ Each agent keeps project-scoped memory at `.claude/agent-memory/<agent>/`. Revie
 
 A browser view of your pipeline that reads the same markdown files as every other skill — for scanning, not acting.
 
-![job-offer dashboard — applications grouped by status, weekly stats, and the latest daily brief in one view (example data)](docs/dashboard-preview.png)
+![job-offer dashboard on demo data: interview cards with an editable next step, today's focus, the pipeline by stage with tier filter and search, the funnel, this week's targets, coming-up events, light and dark themes](docs/dashboard-demo.gif)
 
-_Video walkthrough:_ https://github.com/user-attachments/assets/e1b39e00-d600-4ef4-bd16-ccda8025c8c4
+_Full-quality video (20 s):_ [docs/dashboard-demo.mp4](docs/dashboard-demo.mp4)
 
-Applications accordion grouped by status on the left; pipeline stats and weekly targets top right; the latest daily brief bottom right. Clicking a row opens a company drawer with research, notes, prep docs and debriefs.
+Interview cards across the top, each with its next step (click to edit). Below them, today's focus from the daily brief and the pipeline by stage with a tier filter and search; on the right, the funnel, this week's targets, coming-up events and the brief's heads-up. Clicking a row opens a company drawer with research, notes, prep docs and debriefs.
 
 ```sh
 /job-offer:dashboard    # opens a browser tab; ctrl-C to stop
