@@ -1,0 +1,102 @@
+{
+  "persona": "tests/snapshots/maya-active",
+  "role": "companies/Plaid/senior-pm-consumer-credit",
+  "posting_needs": [
+    "thin-file underwriting and risk decisions",
+    "risk-pricing trade-offs",
+    "onboarding and first-loan journey"
+  ],
+  "claims": [
+    {
+      "letter": "Plaid Consumer Credit team",
+      "source": "research-brief.md",
+      "quote": "Plaid — Senior PM, Consumer Credit"
+    },
+    {
+      "letter": "the Senior PM, Consumer Credit role",
+      "source": "research-brief.md",
+      "quote": "Plaid — Senior PM, Consumer Credit"
+    },
+    {
+      "letter": "direct-to-consumer credit",
+      "source": "research-brief.md",
+      "quote": "direct-to-consumer credit products"
+    },
+    {
+      "letter": "thin-file customers",
+      "source": "research-brief.md",
+      "quote": "thin-file, post-initial-credit users"
+    },
+    {
+      "letter": "my nine years in product",
+      "source": "cv.md",
+      "quote": "Senior PM with nine years"
+    },
+    {
+      "letter": "At Brightline Credit I led the integration of a new credit bureau into the underwriting flow.",
+      "source": "cv.md",
+      "quote": "Led the integration of a new credit bureau into the underwriting flow."
+    },
+    {
+      "letter": "It cut the decline rate by 12% on thin-file applicants while holding the default rate flat.",
+      "source": "cv.md",
+      "quote": "Cut decline rate by 12% on thin-file applicants while holding default rate flat."
+    },
+    {
+      "letter": "At NorthLoop I designed and shipped the price-test framework on our BNPL card.",
+      "source": "cv.md",
+      "quote": "Designed and shipped the price-test framework on our flagship BNPL card."
+    },
+    {
+      "letter": "Three back-to-back tests led to +18% MRR over Q3, with no measurable churn lift.",
+      "source": "cv.md",
+      "quote": "Three back-to-back tests led to +18% MRR over Q3 with no measurable churn lift."
+    },
+    {
+      "letter": "At Lumio I owned the freemium to paid conversion surface for 18 months.",
+      "source": "cv.md",
+      "quote": "Owned the freemium → paid conversion surface for 18 months."
+    },
+    {
+      "letter": "Conversion went from 4.1% to 6.8% on a base of ~200K monthly signups.",
+      "source": "cv.md",
+      "quote": "Took conversion from 4.1% to 6.8% on a base of ~200K monthly signups."
+    },
+    {
+      "letter": "I write specs, do customer calls and do my own analytics.",
+      "source": "cv.md",
+      "quote": "Write specs, do customer calls, do my own analytics."
+    },
+    {
+      "letter": "the most technical PM in the room when the engineering team is small",
+      "source": "cv.md",
+      "quote": "Comfortable being the most technical PM in the room when engineering teams are small."
+    },
+    {
+      "letter": "an 18-person team still finding PMF",
+      "source": "research-brief.md",
+      "quote": "Consumer Credit is an 18-person founder-driven bet inside."
+    },
+    {
+      "letter": "Happy to talk if there's a fit.",
+      "source": "profile.md",
+      "quote": "Low-pressure CTAs (\"happy to jump on a quick call if there's a fit\")."
+    },
+    {
+      "letter": "Maya",
+      "source": "profile.md",
+      "quote": "Sign off with first name only."
+    }
+  ],
+  "did_not_claim": [
+    "Capital Markets or rate-setting ownership: the brief says pricing is gated by Capital Markets; nothing in the CV shows owning it",
+    "Lending-book P&L or loan-servicing experience: not in the CV or profile",
+    "Deep ML or modelling work: profile's What NOT to Frame As"
+  ],
+  "framing": [
+    "Your posting asks for three things I've done before.",
+    "Underwriting first.",
+    "Then risk-pricing.",
+    "And onboarding."
+  ]
+}
