@@ -245,7 +245,7 @@ Non-obvious risks or opportunities — technical, tactical, or strategic — der
   - **Trigger B — passing without applying.** ≥3 meta.md files have `status: not_interested` AND `strategy.md ## Anti-goals` section body is empty. (User is passing on roles without applying — pattern suggests an unstated rule worth naming.) When triggered: `Passed on <N> roles without applying — there's probably a pattern worth naming. Ask job-offer:career-coach to walk you through it.`
   - **Trigger C — sunk-cost / structural rethink.** Highest-severity trigger. Suppresses A and B if it fires. Three OR-conditions, ANY one fires it:
     1. **Long search, thin pipeline.** weeks-since-`/setup` ≥ 8 (compute from the earliest `date_added` across all meta.md OR from `target_offer_date` if available) AND companies in `status: interviewing` count < 2 AND companies in `status: offer` count = 0.
-    2. **Pattern-of-rejection.** ≥3 meta.md files with `status: rejected` AND the same `rejection_stage` value (e.g. 3 rejections at `take-home`, or 3 rejections at `panel`).
+    2. **Pattern-of-rejection.** ≥3 meta.md files with `status: rejected` AND the same `rejection_stage` value (e.g. 3 rejections at `interview`, or 3 at `final`; values per `schemas/meta.md.schema.md`).
     3. **Cadence-drift escalation.** Trigger A has fired in 4+ consecutive `/today` runs (would require persistent state; if not implementable, fall back to: weeks-since-/setup ≥ 4 AND weekly targets missed by >50% for 4 weeks running).
 
     When triggered, the message must **cite specific data** (which counts, which dates, which stage) — not abstract framing. Examples:

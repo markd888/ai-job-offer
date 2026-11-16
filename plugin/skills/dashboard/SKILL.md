@@ -50,7 +50,7 @@ If the user is running this from somewhere other than their workspace root, ask 
 ## Failure modes and what to do
 
 - **Bundle missing** (`error: dashboard bundle not found`). The plugin's `dist/` is not committed or got deleted. Tell the user to reinstall the plugin; this should not happen in a clean install.
-- **Port range exhausted** (`error: no free port in 7890-7899`). Something else is using all ten ports. Suggest `--port 7900` (or higher) explicitly.
+- **Port busy** (`error: port 7890 is already in use`). The server never moves to another port. Re-run the `/api/state` check above: if it answers, the dashboard is already up — open it. If not, say what holds the port (`lsof -iTCP:7890 -sTCP:LISTEN`) and ask before stopping it.
 - **userdata not found**. The user is in the wrong directory. Ask for the workspace path.
 
 ## What this skill does NOT do

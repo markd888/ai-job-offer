@@ -14,6 +14,12 @@ Produces a single per-interview prep doc that combines: the company's signals (f
 - `<Company>` argument — required, e.g. `/interview-prep Plaid` or `/interview-prep "Plaid"`. Case-insensitive lookup against `userdata/companies/<Co>/` folder names. If no exact match, fuzzy-suggest: `No 'Plad' folder. Did you mean Plaid? (y/n)`. If multi-role company (subfolder layout), ask which role: `Plaid tracks 2 roles — pick: 1) senior-pm-consumer-credit, 2) lead-pm-risk-platform`.
 - `userdata/companies/<Co>/[<slug>/]meta.md` — frontmatter (position, tier, status, location), body.
 - `userdata/companies/<Co>/[<slug>/]research-brief.md` — Company snapshot / Why this fits / Open questions.
+- **What the employer actually read.** In the role folder, in this order — the first that exists wins:
+  1. The latest `submitted-*/` archive (written by `/job-offer:sent`): its CV markdown (or PDF), cover note and `posting.md`. This is what the interviewer has in front of them; the stories and claims in the prep doc must not contradict it.
+  2. Otherwise the role's latest `cv-*.md` dated on or before `date_applied` (or the latest at all if there's no date).
+  3. Otherwise nothing — the master CV is not a stand-in for what was sent.
+
+  Say which one you used in one line before the story picks (`Working from the CV and posting you sent on 14 Nov.` / `No archive of what you sent — using the CV drafted on 12 Nov.` / `No record of the CV you sent — prep is based on your profile only.`) and note it under the doc's header as `**Sent materials:** <archive date | cv date | none>`. When the archive has `posting.md`, prefer it over `research-brief.md` for the role's requirements — postings change or vanish after you apply.
 - `userdata/companies/<Co>/[<slug>/]interview-debrief-*.md` if present (prior rounds) — read the most recent 2; use to avoid repeating stories the user already told and to surface unanswered open questions.
 - `userdata/profile.md` — `## Positioning`, `## Proof Points`, `## Moat`, `## Tone of Voice`.
 - All `userdata/stories/*.md` — full STAR + angles + frontmatter (including `story_type` if set).
@@ -66,7 +72,7 @@ Do NOT copy the full STAR body from the universal bank into the prep doc. The pr
 
 ```markdown
 # Interview prep — <Company> / <Position>
-**Date:** <YYYY-MM-DD>  **Stage:** <stage>  **Tier:** <P0|P1|P2>
+**Date:** <YYYY-MM-DD>  **Stage:** <stage>  **Tier:** <P0|P1|P2>  **Sent materials:** <submitted-<date> | cv-<date> | none>
 
 ## Anchors
 - **Why this company:** <one sentence from research-brief.md "Why this fits", tightened.>
@@ -153,7 +159,8 @@ These are the ONLY edits /interview-prep makes outside the company folder. Prese
 
 - Never writes to `userdata/profile.md` or `userdata/strategy.md`.
 - Never edits a story's STAR body or angles — only the two frontmatter fields above.
-- Never invents company facts. If a claim isn't in `meta.md` / `research-brief.md` / debriefs, don't put it in the prep doc.
+- Never invents company facts. If a claim isn't in `meta.md` / `research-brief.md` / the archived posting / debriefs, don't put it in the prep doc.
+- Never preps a story or number that contradicts the CV the employer received. If the master CV has moved on since, flag the difference instead of silently using the newer version.
 - Never auto-invokes reviewer agents — the user can do that separately on the prep doc if they want a CPO / interview-coach lens.
 - Never deletes prior prep docs at the same company. Each round gets its own dated file.
 

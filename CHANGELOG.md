@@ -50,12 +50,19 @@ without adopting the pipeline tracker.
 - `/sent <Company>` records an application going out in one step after the user's yes: `status: applied`, `date_applied`, `channel`, optional `referred_by`, the `submitted-<date>/` archive and one History line (`plugin/scripts/record-sent.py`). Before, nothing wrote `date_applied`, so a role marked applied in chat never came up in `/follow-up`.
 - `channel` (`referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`) and `referred_by` in the meta.md schema; `validate_userdata.py` checks `channel` against the enum (rule `meta.channel-enum`).
 - `last_inbound` is written now (`plugin/scripts/record-inbound.py`): by `/today` for contact the user confirms or mentions, by `/interview-analysis` for the interview date, and by `/follow-up` when the user says a company wrote back. It only moves forward. Before, nothing wrote it, so `/today`'s active-interview rule never fired and a company that had replied could still be chased.
+- `/interview-prep` works from what the employer read: the latest `submitted-*/` archive (CV and posting as sent), else the CV dated on or before `date_applied`, and says which it used (`**Sent materials:**` in the doc header). `interviewer-simulator` drills the sent CV too.
+- `/help`, `plugin/README.md` and `references/recommended-flow.md` list `/ats-check`, `/sent` and `/follow-up`; end-of-skill nudges can suggest them (record a sent application, chase a quiet one, re-check an edited CV, thank an interviewer). `tests/test_help_card.py` fails when a skill ships without a help-card entry.
+- `date_rejected`, `rejection_stage`, `rejection_note` and `date_not_interested` are documented in the meta.md schema.
 
 ### Changed
 - One quiet-application rule: `/today` drops its own 14-day "Chase or close" rule and "stale applied" heads-up and uses `follow-ups.py` (10 days since the latest of `date_applied`, `last_inbound`, `last_follow_up`) for both following up and closing.
 - `record-sent.py` and `record-inbound.py` share `plugin/scripts/metafile.py` for frontmatter edits.
 - `/apply` no longer archives anything or writes to `meta.md`; when the application goes out it hands over to `/sent`.
 - `archive-application.py` exposes `archive()` for `record-sent.py` and takes `--no-history`.
+
+### Fixed
+- The dashboard server binds exactly the port it's given (7890) and stops with a clear message when it's busy, instead of silently moving to 7891–7899 and leaving two dashboards; the `/dashboard` skill's port-range text is gone.
+- `recommended-flow.md` used `status: interview` and `to apply`, which aren't status values.
 
 ## [0.7.2] — 2026-11-16
 
