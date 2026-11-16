@@ -1,4 +1,4 @@
-.PHONY: demo demo-snapshot demo-build demo-preview demo-preview-build dashboard-build sync-sweep check-sweep-sync rebase-fixtures check-fixture-freshness
+.PHONY: privacy-check demo demo-snapshot demo-build demo-preview demo-preview-build dashboard-build sync-sweep check-sweep-sync rebase-fixtures check-fixture-freshness
 
 # Build the GitHub Pages demo bundle and stage it under docs/, then restore
 # plugin/dashboard/dist/ to the live (non-demo) build so the plugin's shipped
@@ -88,3 +88,8 @@ rebase-fixtures:
 # Deliberately not a CI gate: it would go red on a repo nobody touched this week.
 check-fixture-freshness:
 	@python3 scripts/rebase_fixture_dates.py check
+
+# Same scan CI runs, against your local blocklist (.privacy-patterns.local or
+# PRIVACY_PATTERNS_FILE). The list itself never goes into the repo.
+privacy-check:
+	./scripts/check_demo_privacy.sh .
