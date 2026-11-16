@@ -1,4 +1,4 @@
-# job-offer
+# ai-job-offer
 
 Mark Dragunov's version of [pm-job-search](https://github.com/archugunov/pm-job-search) by [@archugunov](https://github.com/archugunov) (MIT), forked from 0.6.0. On top of the original it adds:
 
