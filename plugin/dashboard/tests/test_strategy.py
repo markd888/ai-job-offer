@@ -50,3 +50,20 @@ def test_mayas_shipped_strategy_parses_with_leading_html_comment():
     s = read_strategy(maya_root)
     assert s["target_offer_date"] == "2026-08-01"
     assert s["weekly_targets"] == {"warm_outreach": 5, "applications": 3}
+
+
+def test_closed_search_fields_pass_through(tmp_path: Path):
+    """/wrap-up writes these; the dashboard shows a banner and hides targets."""
+    (tmp_path / "strategy.md").write_text(
+        "---\ntarget_offer_date: 2026-10-17\nweekly_targets:\n  applications: 3\n"
+        "search_state: dormant\nsearch_closed: 2026-08-10\n"
+        "accepted_offer: \"Lendable — Head of Product, Consumer Credit\"\nmarket_check: off\n---\n")
+    s = read_strategy(tmp_path)
+    assert s["search_state"] == "dormant"
+    assert s["search_closed"] == "2026-08-10"
+    assert s["accepted_offer"] == "Lendable — Head of Product, Consumer Credit"
+    assert "market_check" not in s
+
+
+def test_active_search_has_no_state_keys(userdata: Path):
+    assert "search_state" not in read_strategy(userdata)

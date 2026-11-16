@@ -115,6 +115,7 @@ export function App() {
   } else if (!state) {
     body = <Loader />;
   } else {
+    const dormant = state.strategy.search_state === "dormant";
     body = (
       <div className="jst-grid">
         <div className="jst-area-active">
@@ -125,7 +126,7 @@ export function App() {
         </div>
         <Rail>
           <MiniFunnel companies={state.companies} byChannel={state.funnel_by_channel} />
-          <WeekProgress strategy={state.strategy} weeklyProgress={state.weekly_progress} />
+          {!dormant && <WeekProgress strategy={state.strategy} weeklyProgress={state.weekly_progress} />}
           <ComingUp companies={state.companies} onOpen={setOpenPosition} />
           <HeadsUp brief={state.latest_brief} />
         </Rail>
@@ -144,7 +145,14 @@ export function App() {
         </Box>
       )}
       <div className="jst-page">
-        <TopBar weekDay={state?.weekly_progress.window_days} offerDate={state?.strategy.target_offer_date} />
+        {state?.strategy.search_state === "dormant" ? (
+          <>
+            <TopBar />
+            <ClosedBanner closed={state.strategy.search_closed} offer={state.strategy.accepted_offer} />
+          </>
+        ) : (
+          <TopBar weekDay={state?.weekly_progress.window_days} offerDate={state?.strategy.target_offer_date} />
+        )}
         {body}
       </div>
       <CompanyDrawer
@@ -157,6 +165,19 @@ export function App() {
         link={openPosition?.link}
       />
     </>
+  );
+}
+
+// Shown while strategy.md says search_state: dormant (/wrap-up after an
+// accepted offer). Targets and the offer countdown are hidden; the pipeline
+// stays readable.
+function ClosedBanner({ closed, offer }: { closed?: string; offer?: string }) {
+  return (
+    <div className="jst-closed" role="status">
+      <strong>Search closed{closed ? ` ${humanizeIsoDates(closed)}` : ""}</strong>
+      {offer ? <> — you accepted {offer}.</> : "."} Daily nudges and targets are off. To start again,
+      ask Claude to reopen your search (<code>/job-offer:wrap-up --reopen</code>).
+    </div>
   );
 }
 

@@ -18,6 +18,9 @@ Architecture lifted from the predecessor workflow with two changes: storage is m
   - `--discovery-only` / `--recheck-only` — skip the other phase.
   - `--companies <Co1,Co2>` — when combined with `--recheck-only`, scope the recheck.
   - `--with-playwright` — use Playwright MCP for link-liveness verification in Phase 2. If the MCP isn't installed, fall back gracefully and note `link_verified: false`.
+  - `--market-check` — the light quarterly look for a closed search (below).
+
+**Closed search.** If `search_state: dormant` in `userdata/strategy.md` (set by `/job-offer:wrap-up`), don't sweep. Without `--market-check`, say in one line that the search is closed and offer `/job-offer:wrap-up --reopen`; stop. With `--market-check`: run only the Recheck over companies with `monitoring: true` or a P0 role, in the main conversation (no Discovery, no subagents), file nothing, list what's open in at most five lines (`- <Company> — <Position> — <url>`), then set `last_market_check: <today>` in `strategy.md`'s frontmatter and say so in one clause. The seen-ledger is still updated, so the same roles don't resurface after a reopen.
 
 If `userdata/profile.md` is missing, tell the user to run `/setup` first; do not proceed.
 

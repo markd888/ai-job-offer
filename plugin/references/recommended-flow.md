@@ -24,7 +24,7 @@ setup → job-search → dashboard → today (daily, ongoing)
                             interview-analysis (after the interview)
 
 story-builder runs ad-hoc, whenever the user wants to capture a new STAR story or fill a gap.
-evaluate-offer runs when an offer arrives.
+evaluate-offer runs when an offer arrives; wrap-up closes the search once one is accepted (and reopens it later).
 ats-check also runs on its own after a hand-edited CV.
 career-coach (agent, dispatched by Claude — not a slash command) provides on-demand reflection, positioning, anti-goals, and offer-evaluation conversation.
 integrations runs once during onboarding (or whenever wiring changes).
@@ -36,6 +36,8 @@ When a skill finishes, look at current filesystem and journal state, then pick t
 
 | Current state | Suggested next step | Wording hint |
 |---|---|---|
+| `strategy.md` has `search_state: dormant` (closed by `/wrap-up`) | No nudge — the search is closed | Only if the user asks for something search-related: "Your search is closed — want to reopen it? (/job-offer:wrap-up --reopen)" |
+| A role just moved to `offer` and the user says they accepted it | `/job-offer:wrap-up` | "Congratulations. Want to close the search properly — withdraw from the others, thank the people who helped, and turn the nudges off?" |
 | `userdata/profile.md` just written, no companies in `userdata/companies/` | `/job-offer:job-search` | "Run /job-offer:job-search now to seed your applications list." |
 | `/apply` just built a CV and the role folder has no `cover-*.md` | `/job-offer:cover-letter <Co>` | "Want a cover letter for <Co> too, or is the CV enough?" |
 | `/apply` or `/cover-letter` just finished, or the user says they're about to send it | Nudge in chat | "Tell me once it's sent and I'll record it." |
