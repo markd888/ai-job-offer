@@ -62,7 +62,7 @@ Five phases, plus what runs alongside them.
 2. **Discover & score.** `/job-offer:job-search` runs a weekly sweep — parallel subagents recheck your P0/P1 companies via ATS APIs and discover new roles via scoped search. `/job-offer:evaluate-position <url>` scores one-off postings. Both write a company folder, a tier score, and a 200-word research brief.
 3. **Apply.** `/job-offer:apply <Company>` tailors your master CV for one role, and `/job-offer:cover-letter <Company>` writes a short letter to go with it when one is needed. Every claim traces to your CV, your profile, or your own answers — they never invent facts.
 4. **Interview.** `/job-offer:interview-prep <Company>` adapts stories from your bank for a specific round. Rehearse with `job-offer:interviewer-simulator`, debrief with `/job-offer:interview-analysis`.
-5. **Decide.** `/job-offer:evaluate-offer` sense-checks an offer or compares two — verdict, comp shape, archetype fit, negotiation moves.
+5. **Decide.** `/job-offer:evaluate-offer` sense-checks an offer or compares two — verdict, comp shape, archetype fit, negotiation moves. Once you accept, `/job-offer:wrap-up` closes the search properly and turns the nudges off.
 
 Alongside: `/job-offer:today` (morning brief), `job-offer:career-coach` (anytime you're stuck), `/job-offer:dashboard` (visual pipeline), `/job-offer:story-builder` (your STAR-story bank).
 
@@ -83,6 +83,7 @@ Alongside: `/job-offer:today` (morning brief), `job-offer:career-coach` (anytime
 | `/job-offer:case-practice [Company]` | Rapid-recognition case drill. Every pick scored with the failure mode it demonstrates, tracked against an 80% readiness gate. |
 | `/job-offer:interview-analysis` | Post-interview debrief from a transcript. Anchors findings to quotes: what landed, what didn't, deltas vs your prep. |
 | `/job-offer:evaluate-offer` | Sense-check an offer or compare two. Verdict, comp shape, archetype fit, anti-pattern scan, negotiation moves. |
+| `/job-offer:wrap-up` | Close the search after you accept an offer: withdrawals, thank-yous, a retrospective from your own numbers, then quiet mode. Every step waits for your yes; `--reopen` starts again. |
 | `/job-offer:integrations` | Probes for Granola / Calendar / Gmail MCPs and wires the ones you have. Optional — the plugin works fine without them. |
 
 ## Agents

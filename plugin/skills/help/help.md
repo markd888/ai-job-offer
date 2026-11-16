@@ -16,7 +16,7 @@ Senior PM, lead PM, or head of product running an active search. A different rol
 | 2 | Discover & score | `/job-offer:job-search` · `/job-offer:evaluate-position <url>` |
 | 3 | Apply | `/job-offer:apply <Company>` · `/job-offer:ats-check <Company>` · `/job-offer:cover-letter <Company>` · `/job-offer:outreach <person or Company>` · `/job-offer:sent <Company>` · `/job-offer:follow-up` |
 | 4 | Interview | `/job-offer:story-builder` · `/job-offer:interview-prep <Company>` · `/job-offer:case-practice` · `job-offer:interviewer-simulator` · `/job-offer:interview-analysis` |
-| 5 | Decide | `/job-offer:evaluate-offer` |
+| 5 | Decide & close | `/job-offer:evaluate-offer` · `/job-offer:wrap-up` |
 
 ## Running alongside
 
@@ -27,7 +27,7 @@ Senior PM, lead PM, or head of product running an active search. A different rol
 | `/job-offer:dashboard` | When you want a visual scan of the pipeline. |
 | `/job-offer:integrations` | At setup, or after installing a new MCP server. |
 
-## Skills (18)
+## Skills (19)
 
 Reference
 
@@ -71,6 +71,7 @@ Offer decision
 | Skill | What it does | Use when |
 |---|---|---|
 | `/evaluate-offer` | Sense-check verdict, comp shape, archetype fit, anti-pattern scan, 3–5 negotiation moves. | You have an offer (or two) to weigh. |
+| `/wrap-up` | Closes the search after you accept: withdrawal drafts for every open application, thank-yous for the people who helped, a retrospective with your own numbers, story-bank and CV updates, then quiet mode. Each step waits for your yes; `--reopen` starts again. | You've accepted an offer — or you're looking again. |
 
 ## Agents (6)
 

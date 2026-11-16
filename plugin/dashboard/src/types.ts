@@ -38,6 +38,9 @@ export interface WeeklyTargets {
 export interface Strategy {
   target_offer_date?: string;
   weekly_targets: WeeklyTargets;
+  search_state?: "active" | "dormant"; // written by /wrap-up
+  search_closed?: string;
+  accepted_offer?: string;
 }
 
 export interface DailyBrief {

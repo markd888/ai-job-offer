@@ -173,6 +173,15 @@ body {
   gap: var(--jst-s1) var(--jst-s3);
   min-height: var(--jst-hit);
 }
+.jst-closed {
+  margin: var(--jst-s2) 0 var(--jst-s4);
+  padding: var(--jst-s3) var(--jst-s4);
+  border-radius: var(--jst-r-card);
+  background: var(--jst-accent-bg);
+  color: var(--jst-accent-fg);
+  font-size: var(--jst-fs-sm);
+}
+.jst-closed code { font-size: 0.95em; }
 .jst-topbar-title {
   margin: 0 auto 0 0;
   font-family: var(--jst-serif);

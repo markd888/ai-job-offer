@@ -134,6 +134,15 @@ def _check_strategy(root: Path, p: Path) -> list[Finding]:
     if tod and tod != "null" and not DATE_RE.match(tod):
         out.append(Finding(rel, "strategy.date-format",
                            f"target_offer_date '{tod}' is not YYYY-MM-DD or null"))
+    state = fm.get("search_state", "")
+    if state and state not in ("active", "dormant"):
+        out.append(Finding(rel, "strategy.search-state-enum", f"search_state '{state}' not in enum (active, dormant)"))
+    for key in ("search_closed", "search_reopened"):
+        v = fm.get(key, "")
+        if v and not DATE_RE.match(v):
+            out.append(Finding(rel, "strategy.date-format", f"{key} '{v}' is not YYYY-MM-DD"))
+    if fm.get("market_check") and fm["market_check"] not in ("quarterly", "off"):
+        out.append(Finding(rel, "strategy.search-state-enum", f"market_check '{fm['market_check']}' not in enum (quarterly, off)"))
     if "target_date" in fm:
         out.append(Finding(rel, "strategy.forbidden-key",
                            "'target_date:' found — schema key is 'target_offer_date:'"))

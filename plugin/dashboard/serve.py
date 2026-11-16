@@ -363,6 +363,10 @@ def read_strategy(userdata_root: Path) -> dict[str, Any]:
     out: dict[str, Any] = {"weekly_targets": weekly}
     if "target_offer_date" in fm:
         out["target_offer_date"] = fm["target_offer_date"]
+    # Written by /wrap-up: a closed search shows a banner instead of targets.
+    for key in ("search_state", "search_closed", "accepted_offer"):
+        if fm.get(key):
+            out[key] = fm[key]
     return out
 
 

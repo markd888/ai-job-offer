@@ -18,7 +18,7 @@ Maps to the five phases of a senior-PM search.
 
 4. **Interview.** `/job-offer:interview-prep <Company>` adapts 3-5 stories from your bank for a specific round — `--stage` shapes the prep, late rounds add founder-vetting questions. Rehearse with `job-offer:interviewer-simulator` (mock round, single-question deep-dive, or pressure-test). Debrief with `/job-offer:interview-analysis` — quotes the transcript, flags what landed, names deltas vs your prep.
 
-5. **Decide on the offer.** `/job-offer:evaluate-offer` sense-checks the offer (or compares two) against your profile, anti-goals, and the senior-PM archetype/anti-pattern references. Verdict, comp shape, archetype fit, named-anti-pattern scan, 3-5 negotiation moves. Always pairs with a "what would I regret in 2 years?" handoff to the coach.
+5. **Decide on the offer.** `/job-offer:evaluate-offer` sense-checks the offer (or compares two) against your profile, anti-goals, and the senior-PM archetype/anti-pattern references. Verdict, comp shape, archetype fit, named-anti-pattern scan, 3-5 negotiation moves. Always pairs with a "what would I regret in 2 years?" handoff to the coach. Once you accept, `/job-offer:wrap-up` withdraws from the rest, thanks the people who helped, writes a retrospective and switches the plugin to quiet.
 
 **Always running alongside:**
 
@@ -56,7 +56,7 @@ cd <your-workspace>
 # ask job-offer:career-coach anytime — stuck, got an offer, or want to sharpen your positioning / outreach.
 ```
 
-## The workflow — 18 skills
+## The workflow — 19 skills
 
 **Reference:**
 
@@ -94,6 +94,7 @@ cd <your-workspace>
 | `/job-offer:case-practice [Company]` | Rapid-recognition case drill. Multiple-choice scenarios across the MC-able case types (product sense, metric movement, metric tree, prioritisation, behavioural-signal); each pick scored with the specific failure mode it demonstrates, tracked against an 80% readiness gate. Optional `<Company>` themes the products and weights the mix toward that company's likely rounds. |
 | `/job-offer:interview-analysis` | Post-interview debrief from a pasted transcript or `--from-file`. Anchors findings to transcript quotes: what landed, what didn't, interviewer signals, deltas vs the prep, recommended updates. Auto-pulls from Granola when wired. |
 | `/job-offer:evaluate-offer` | Sense-check an offer (or compare two) against your profile + anti-goals + the senior-PM archetype/anti-pattern references. Verdict, comp shape, role-shape re-check, archetype fit, named-anti-pattern scan, weighted decision factors, downside scenario, 3-5 specific negotiation moves to ask for. Always pairs with a "what would I regret in 2 years?" handoff to the coach. |
+| `/job-offer:wrap-up` | Close the search after an accepted offer, one confirmed step at a time: withdrawal drafts for every role still in process (marked `not_interested` on a yes), thank-yous to referrers and helpers, `outputs/retro-<date>.md` with time to offer, the funnel by channel and where rejections clustered, story-bank and master-CV proposals, then `search_state: dormant` — `/today`, `/job-search` and the dashboard go quiet (optional quarterly market check). `--reopen` undoes it. Drafts only. |
 
 **Optional — wire in external tools:**
 

@@ -9,6 +9,14 @@ Produce a short (~half a screen) snapshot that combines: where the user is again
 
 **Voice:** all chat output and drafted content (the daily brief, summary lines, warnings) follows `${CLAUDE_PLUGIN_ROOT}/TONE.md`.
 
+## Closed search (check first)
+
+Read `search_state` in `userdata/strategy.md`'s frontmatter. If it is `dormant` (set by `/job-offer:wrap-up` after an accepted offer), do **none** of the rest of this skill — no input phase, no brief, no applications.md, no weekly reflection. Print one line instead:
+
+> Your search is closed — you accepted <accepted_offer> on <search_closed>. Say "reopen my search" to start again.
+
+One exception: if `market_check: quarterly` and 90+ days have passed since the later of `search_closed` and `last_market_check`, add `It's been a quarter — want a quick look at the companies you were watching? (/job-offer:job-search --market-check)`. Nothing else. Absent or `active` → carry on below.
+
 ## Input phase (runs before brief generation)
 
 Capture fresh facts since the last journal entry. Each confirmed fact gets appended to `userdata/journal.md` and — when it has structured implications — pushed to the relevant `userdata/companies/<Co>/meta.md`. Then the output phase runs against the just-written state.
