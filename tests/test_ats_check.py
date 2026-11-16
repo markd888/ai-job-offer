@@ -21,7 +21,7 @@ canvas = pytest.importorskip("reportlab.pdfgen.canvas")
 from reportlab.lib.pagesizes import A4  # noqa: E402
 
 CV_MD = """# ALEX EXAMPLE
-Lisbon, Portugal | alex@example.com | +34 600 111 222
+Lisbon, Portugal | alex@example.com | +351 912 111 222
 
 ## PROFESSIONAL SUMMARY
 Senior product manager for payment orchestration and PSP integrations.
@@ -78,7 +78,7 @@ def rows(stdout: str) -> dict[str, bool]:
 def test_clean_cv_passes_every_hard_check(cv, tmp_path):
     pdf, md = cv
     report = tmp_path / "ats-check-2026-11-16.md"
-    res = check(pdf, "--md", md, "--phone", "+34 600 111 222", "--out", report)
+    res = check(pdf, "--md", md, "--phone", "+351 912 111 222", "--out", report)
     assert res.returncode == 0, res.stdout + res.stderr
     assert rows(res.stdout) == {"pages": True, "contacts": True, "glyphs": True, "order": True, "fidelity": True}
     assert "PASS" in res.stdout
@@ -87,7 +87,7 @@ def test_clean_cv_passes_every_hard_check(cv, tmp_path):
 
 def test_keyword_coverage_handles_plural_and_hyphen_variants(cv):
     pdf, md = cv
-    res = check(pdf, "--md", md, "--phone", "+34600111222",
+    res = check(pdf, "--md", md, "--phone", "+351912111222",
                 "--keywords", "PSP integration, approval rate, SQL, payment-orchestration, Kubernetes")
     assert "Keyword coverage: 4/5" in res.stdout
     assert "Missing: Kubernetes" in res.stdout
@@ -98,15 +98,15 @@ def test_two_pages_fail(cv, tmp_path):
     _, md = cv
     lines = md_lines(CV_MD)
     pdf = draw_pdf(tmp_path / "cv.pdf", [lines[:6], lines[6:]])
-    res = check(pdf, "--md", md, "--phone", "+34 600 111 222")
+    res = check(pdf, "--md", md, "--phone", "+351 912 111 222")
     assert res.returncode == 1
     assert rows(res.stdout)["pages"] is False
-    assert check(pdf, "--md", md, "--phone", "+34 600 111 222", "--pages", "2").returncode == 0
+    assert check(pdf, "--md", md, "--phone", "+351 912 111 222", "--pages", "2").returncode == 0
 
 
 def test_phone_must_match_the_expected_number(cv):
     pdf, md = cv
-    res = check(pdf, "--md", md, "--phone", "+34 699 999 999")
+    res = check(pdf, "--md", md, "--phone", "+351 919 999 999")
     assert res.returncode == 1
     assert rows(res.stdout)["contacts"] is False
     assert "MISSING" in res.stdout
@@ -116,7 +116,7 @@ def test_phone_defaults_to_profile_md(cv, tmp_path):
     _, md = cv
     role = tmp_path / "userdata" / "companies" / "Paycorp"
     role.mkdir(parents=True)
-    (tmp_path / "userdata" / "profile.md").write_text('---\nname: Alex\nphone: "+34 600 111 222"\n---\n')
+    (tmp_path / "userdata" / "profile.md").write_text('---\nname: Alex\nphone: "+351 912 111 222"\n---\n')
     pdf = draw_pdf(role / "cv.pdf", [md_lines(CV_MD)])
     assert check(pdf, "--md", md).returncode == 0
 
@@ -127,7 +127,7 @@ def test_phone_defaults_to_profile_md(cv, tmp_path):
 
 def test_missing_email_fails_contacts(tmp_path):
     lines = [l.replace("alex@example.com", "email on request") for l in md_lines(CV_MD)]
-    res = check(draw_pdf(tmp_path / "cv.pdf", [lines]), "--phone", "+34 600 111 222")
+    res = check(draw_pdf(tmp_path / "cv.pdf", [lines]), "--phone", "+351 912 111 222")
     assert rows(res.stdout)["contacts"] is False
 
 
@@ -135,7 +135,7 @@ def test_text_drawn_as_shapes_fails_fidelity(cv, tmp_path):
     _, md = cv
     # The header survives; the bullets were "printed" as images, so their words are gone.
     kept = [l for l in md_lines(CV_MD) if not l.startswith(("Unified", "Built", "Senior product"))]
-    res = check(draw_pdf(tmp_path / "cv.pdf", [kept]), "--md", md, "--phone", "+34 600 111 222")
+    res = check(draw_pdf(tmp_path / "cv.pdf", [kept]), "--md", md, "--phone", "+351 912 111 222")
     assert res.returncode == 1
     assert rows(res.stdout)["fidelity"] is False
 
@@ -145,7 +145,7 @@ def test_jd_terms_are_suggested_not_required(cv, tmp_path):
     jd = tmp_path / "posting.md"
     jd.write_text("We need fraud prevention experience. Fraud prevention is core. "
                   "Chargebacks and chargebacks again. PSP integrations matter.\n")
-    res = check(pdf, "--md", md, "--phone", "+34600111222", "--jd", jd)
+    res = check(pdf, "--md", md, "--phone", "+351912111222", "--jd", jd)
     assert res.returncode == 0
     assert "fraud prevention" in res.stdout.split("suggestions)")[1]
 
@@ -164,7 +164,7 @@ def ats(monkeypatch, tmp_path, capsys):
     def go(text: str, pages: int = 1) -> tuple[int, dict[str, bool]]:
         monkeypatch.setattr(mod, "extract", lambda _pdf: (text, pages, "fake"))
         monkeypatch.setattr(sys, "argv", ["ats-check.py", str(tmp_path / "cv.pdf"), "--md", str(md),
-                                          "--phone", "+34 600 111 222"])
+                                          "--phone", "+351 912 111 222"])
         code = mod.main()
         return code, rows(capsys.readouterr().out)
 

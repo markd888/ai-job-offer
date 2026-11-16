@@ -92,7 +92,7 @@ HAS_CARLITO = any(os.path.exists(d + "Carlito-Regular.ttf") for d in FONT_DIRS)
 
 CV_MD = """<!-- tailored for Paycorp -->
 # ALEX EXAMPLE
-Lisbon, Portugal | alex@example.com | +34 600 111 222 | linkedin.com/in/alex-example
+Lisbon, Portugal | alex@example.com | +351 912 111 222 | linkedin.com/in/alex-example
 
 ## PROFESSIONAL SUMMARY
 Senior product manager with **seven years** in payment orchestration, PSP integrations and checkout.
@@ -131,7 +131,7 @@ def test_cv_build_output_passes_the_ats_check(tmp_path):
     assert built.returncode == 0, built.stderr
     assert pdf.read_bytes().startswith(b"%PDF")
 
-    res = run("ats-check.py", pdf, "--md", md, "--phone", "+34 600 111 222",
+    res = run("ats-check.py", pdf, "--md", md, "--phone", "+351 912 111 222",
               "--keywords", "PSP integrations, reconciliation, SQL, WooCommerce")
     assert res.returncode == 0, res.stdout
     assert "PASS" in res.stdout and "Keyword coverage: 4/4" in res.stdout
