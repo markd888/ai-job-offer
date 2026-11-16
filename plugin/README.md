@@ -79,6 +79,7 @@ cd <your-workspace>
 | `/job-offer:evaluate-position <url-or-paste>` | Score a posting against your tier rubric with company-shape adjustment. Hard-filter + anti-goal gates, posting-liveness check, user-override. Writes the company folder (meta + ~200-word research brief). |
 | `/job-offer:job-search` | Weekly sweep. Parallel subagents recheck your P0/P1 companies via public ATS APIs (Ashby / Greenhouse / Lever) and discover new roles via `site:`-scoped search. Scores and files results via `/evaluate-position`. Optional `--with-playwright` for link verification. |
 | `/job-offer:apply <Company>` | Tailor your master CV (userdata/cv.md) for one role at <Company>. Reads profile.md + the company's research brief, asks up to 5 clarifying questions upfront, then drafts companies/<Co>/[<slug>/]cv-<date>.md. CV-only — cover note + outreach are user-driven follow-ups. |
+| `/job-offer:sent <Company>` | Record an application going out, after your yes: status, date, channel (referral / cold / recruiter / LinkedIn / company site / other), who referred you, and a frozen copy of the CV, cover note, ATS check and posting in `submitted-<date>/`. Starts the follow-up clock. |
 
 **Interview cluster:**
 

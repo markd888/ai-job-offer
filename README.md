@@ -4,7 +4,7 @@ Mark Dragunov's version of [pm-job-search](https://github.com/archugunov/pm-job-
 
 - **CV to PDF from markdown** (`plugin/scripts/cv-build.py`, reportlab + Carlito), plus a matching cover-letter builder. `/job-offer:apply` builds the PDF right after drafting the CV.
 - **ATS check** (`/job-offer:ats-check`): reads the PDF's text layer the way an applicant tracking system does and checks pages, contacts, glyphs, section order, extraction fidelity and keyword coverage. Runs after every CV build.
-- **Archive of what was sent** (`plugin/scripts/archive-application.py`): freezes the CV, cover note, ATS check and posting when an application goes out.
+- **Recording what was sent** (`/job-offer:sent`, `plugin/scripts/record-sent.py`): one step after your yes sets the status, date and channel (and who referred you) and freezes the CV, cover note, ATS check and posting in `submitted-<date>/`.
 - **Follow-ups** (`/job-offer:follow-up`, `plugin/scripts/follow-ups.py`): lists applications quiet for 10+ days and drafts a follow-up or a thank-you; `/job-offer:today` flags what's due.
 - **Reworked dashboard**: goals from `strategy.md`, interviews above today's focus, a read-only cloud copy on Cloudflare Workers. Always on `http://localhost:7890`, reused if it's already running.
 

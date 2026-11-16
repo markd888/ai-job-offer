@@ -30,7 +30,7 @@ In the role folder, in this order:
 1. `submitted-*/` — the CV, cover note and posting exactly as sent. This is the only source of claims.
 2. If there's no archive: the role's `cv-*.md` dated on or before `date_applied`. Say once that the draft is based on the CV on file, not a frozen copy.
 3. If neither exists (most imported history): no claims about experience — a plain two-line check-in.
-4. `meta.md` and `journal.md` lines tagged `[<Company>]` for the contact's name, the channel (email, LinkedIn, Telegram, ATS) and anything already said. A referral or recruiter beats a generic inbox.
+4. `meta.md` (`channel`, `referred_by`, both written by `/job-offer:sent`) and `journal.md` lines tagged `[<Company>]` for the contact's name, the channel (email, LinkedIn, Telegram, ATS) and anything already said. A referral or recruiter beats a generic inbox.
 
 ## Step 3 — draft
 

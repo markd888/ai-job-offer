@@ -9,12 +9,14 @@ not from whatever the CV became later.
 
 Usage:
   python3 -I archive-application.py <role-dir> [--posting posting.md]
-      [--channel "company site"] [--date YYYY-MM-DD] [--force]
+      [--channel company-site] [--date YYYY-MM-DD] [--force] [--no-history]
 
 <role-dir> is the folder holding the role's meta.md. --posting is a file with
 the posting text (Claude saves it from the fetched job description). Without it,
-the manifest records the link and says the text wasn't captured. Status and
-date_applied are left to the skills that own them.
+the manifest records the link and says the text wasn't captured. Status,
+date_applied and channel are written by record-sent.py (/sent), which calls
+archive() and writes one History line for both; --no-history skips this
+script's own line.
 """
 from __future__ import annotations
 
@@ -41,23 +43,27 @@ def sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()[:12]
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("role_dir", type=Path)
-    ap.add_argument("--posting", type=Path, help="file with the posting text")
-    ap.add_argument("--channel", default="", help='how it was sent, e.g. "company site", "LinkedIn", "referral"')
-    ap.add_argument("--date", default=date.today().isoformat())
-    ap.add_argument("--force", action="store_true", help="replace an existing archive for this date")
-    a = ap.parse_args()
+class ArchiveError(Exception):
+    pass
 
-    role = a.role_dir
+
+def has_cv(role: Path) -> bool:
+    return bool(latest(role, "*CV*.pdf") or latest(role, "cv-*.md"))
+
+
+def archive(role: Path, posting: Path | None, channel: str, day: str, force: bool) -> tuple[Path, list[str], str]:
+    """Copy what was sent into <role>/submitted-<day>/ and write its manifest.
+
+    Returns (archive folder, manifest rows, note about the posting). Raises
+    ArchiveError when there is no meta.md, no CV, or an archive for that day
+    already exists and force is off. Never touches meta.md."""
     meta_path = role / "meta.md"
     if not meta_path.is_file():
-        sys.exit(f"No meta.md in {role}")
+        raise ArchiveError(f"No meta.md in {role}")
     meta = meta_path.read_text()
-    out = role / f"submitted-{a.date}"
-    if out.exists() and not a.force:
-        sys.exit(f"{out.name} already exists; pass --force to replace it")
+    out = role / f"submitted-{day}"
+    if out.exists() and not force:
+        raise ArchiveError(f"{out.name} already exists; pass --force to replace it")
 
     picks = {
         "CV (PDF)": latest(role, "*CV*.pdf"),
@@ -67,7 +73,7 @@ def main() -> int:
         "ATS check": latest(role, "ats-check-*.md"),
     }
     if not picks["CV (PDF)"] and not picks["CV (markdown)"]:
-        sys.exit(f"No CV found in {role}; build it first")
+        raise ArchiveError(f"No CV found in {role}; build it first")
 
     if out.exists():
         shutil.rmtree(out)
@@ -80,9 +86,9 @@ def main() -> int:
 
     link = field(meta, "link")
     posting_note = ""
-    if a.posting and a.posting.is_file():
-        body = a.posting.read_text()
-        (out / "posting.md").write_text(f"<!-- captured {a.date} from {link or 'pasted text'} -->\n\n{body}")
+    if posting and posting.is_file():
+        body = posting.read_text()
+        (out / "posting.md").write_text(f"<!-- captured {day} from {link or 'pasted text'} -->\n\n{body}")
         rows.append(f"| Posting | `posting.md` | {sha(out / 'posting.md')} |")
     else:
         posting_note = "\nPosting text was not captured; only the link is recorded.\n"
@@ -90,9 +96,9 @@ def main() -> int:
     manifest = [
         f"# Submitted — {field(meta, 'company')}, {field(meta, 'position')}",
         "",
-        f"- Date: {a.date}",
+        f"- Date: {day}",
         f"- Link: {link or '—'}",
-        f"- Channel: {a.channel or '—'}",
+        f"- Channel: {channel or '—'}",
         "",
         "| What | File | sha256 |",
         "|---|---|---|",
@@ -100,13 +106,35 @@ def main() -> int:
         posting_note,
     ]
     (out / "manifest.md").write_text("\n".join(manifest).rstrip() + "\n")
+    return out, rows, posting_note
 
-    line = f"- {a.date}: submitted materials archived in {out.name}/" + (f" ({a.channel})" if a.channel else "")
+
+def append_history(meta_path: Path, line: str) -> None:
+    meta = meta_path.read_text()
     if "## History" in meta:
         meta = meta.rstrip("\n") + "\n" + line + "\n"
     else:
         meta = meta.rstrip("\n") + "\n\n## History\n" + line + "\n"
     meta_path.write_text(meta)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("role_dir", type=Path)
+    ap.add_argument("--posting", type=Path, help="file with the posting text")
+    ap.add_argument("--channel", default="", help="how it was sent, e.g. company-site, linkedin, referral")
+    ap.add_argument("--date", default=date.today().isoformat())
+    ap.add_argument("--force", action="store_true", help="replace an existing archive for this date")
+    ap.add_argument("--no-history", action="store_true", help="don't append a line to ## History")
+    a = ap.parse_args()
+
+    try:
+        out, rows, posting_note = archive(a.role_dir, a.posting, a.channel, a.date, a.force)
+    except ArchiveError as e:
+        sys.exit(str(e))
+    if not a.no_history:
+        append_history(a.role_dir / "meta.md", f"- {a.date}: submitted materials archived in {out.name}/"
+                       + (f" ({a.channel})" if a.channel else ""))
 
     print(f"Archived {len(rows)} file(s) to {out}")
     for r in rows:

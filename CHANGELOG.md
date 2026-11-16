@@ -44,6 +44,16 @@ without adopting the pipeline tracker.
 
 ---
 
+## [Unreleased]
+
+### Added
+- `/sent <Company>` records an application going out in one step after the user's yes: `status: applied`, `date_applied`, `channel`, optional `referred_by`, the `submitted-<date>/` archive and one History line (`plugin/scripts/record-sent.py`). Before, nothing wrote `date_applied`, so a role marked applied in chat never came up in `/follow-up`.
+- `channel` (`referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`) and `referred_by` in the meta.md schema; `validate_userdata.py` checks `channel` against the enum (rule `meta.channel-enum`).
+
+### Changed
+- `/apply` no longer archives anything or writes to `meta.md`; when the application goes out it hands over to `/sent`.
+- `archive-application.py` exposes `archive()` for `record-sent.py` and takes `--no-history`.
+
 ## [0.7.2] — 2026-11-16
 
 Tests for the fork's scripts, documented schemas, and a fail-closed Access gate for the cloud copy.

@@ -128,16 +128,11 @@ Use a Python that has `reportlab` and `pypdf` (a workspace venv such as `.claude
 
 If no Python with `reportlab` and `pypdf` is available, or `cv-build.py` stops on a missing Carlito font, don't improvise another PDF route: keep the tailored markdown, say in one line that the PDF and ATS check were skipped and what to install (`pip install -r ${CLAUDE_PLUGIN_ROOT}/scripts/requirements.txt`, plus the Carlito font), and carry on with the output below, replacing the ATS check line with `ATS check: skipped — <reason>`.
 
+A cover letter PDF in the same look: `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/cover-letter-build.py" <letter.md> <out.pdf> --cv <cv-md>`.
+
 ### When the application goes out
 
-When the user says it was sent (status → `applied`), save the posting text to a temp file and freeze what was sent:
-
-```sh
-python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/archive-application.py" <role folder> --posting <file> \
-  --channel "<company site|LinkedIn|referral|email>"
-```
-
-It copies the CV, cover note, ATS check and posting into `submitted-<date>/`; interview prep and `/job-offer:follow-up` work from that copy. A cover letter PDF in the same look: `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/cover-letter-build.py" <letter.md> <out.pdf> --cv <cv-md>`.
+Not this skill's job. When the user says it was sent — in this conversation or later — hand over to `/job-offer:sent <Company>`, which records status, date and channel and freezes what was sent in `submitted-<date>/` after a yes. Interview prep and `/job-offer:follow-up` work from that copy.
 
 ### Re-run behavior
 
@@ -160,7 +155,9 @@ Template:
 >
 > ATS check: <passes | fixed <checks>>; keywords <n>/<m> covered.
 >
-> Open the file and edit anything that doesn't sound like you before you send it. <Closing question — one only, per TONE Rule A — typically: "Want me to draft a short cover note next?">
+> Open the file and edit anything that doesn't sound like you before you send it. <Closing question — one only, per TONE Rule A — typically: "Want me to draft a short cover note next?", or, when the user is about to send it now: "Tell me once it's sent and I'll record it.">
+
+When the user then says it went out, run `/job-offer:sent <Company>`.
 
 Rules:
 - Plain prose opener and closer.
@@ -185,7 +182,7 @@ If WebFetch was tried via `--from-url` and fell back to research-brief, add a se
 ## What /apply never does
 
 - Never invents facts, dates, metrics, technologies, team sizes, or project outcomes. If a JD keyword has no supporting evidence, surface it in the chat output, never in the CV.
-- Never touches `meta.md` — no status flip, no date update, nothing. Status transitions stay user-driven, consistent with `/evaluate-position` and `/interview-prep`.
+- Never touches `meta.md` — no status flip, no date update, no History line, nothing. Recording the application is `/job-offer:sent`'s job, after the user's yes.
 - Never edits `userdata/cv.md` (the master) or `userdata/profile.md`. Read-only on both.
 - Never writes a cover note or outreach message. Suggests them as next steps in chat output.
 - Never deletes prior `cv-*.md` files. Each re-run produces a new dated/versioned file.
