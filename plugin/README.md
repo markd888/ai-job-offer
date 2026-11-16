@@ -46,7 +46,7 @@ The one exception is output that has to leave as a file: the CV and cover-letter
 
 ```sh
 # inside Claude Code, in any workspace:
-/plugin marketplace add https://github.com/archugunov/pm-job-search.git
+/plugin marketplace add https://github.com/markd888/ai-job-offer.git
 /plugin install job-offer@job-offer
 
 cd <your-workspace>
