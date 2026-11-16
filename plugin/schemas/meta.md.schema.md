@@ -34,6 +34,12 @@ These are commonly present and read by some skills; absence is allowed but flagg
 - **`monitoring`** — boolean, `true` for companies the user wants to be re-checked on `/job-search` runs even when no role is active.
 - **`source`** — discovery source. Examples: `discovery`, `recheck`, `user`, `evaluate-position`.
 - **`location`** — optional one-line location/remote flag.
+- **`date_applied`** — date the application went out. ISO 8601. Read by `/today` and `/follow-up`.
+- **`last_inbound`** — date of the most recent message from the company. ISO 8601. Read by `/today` and `/follow-up`.
+- **`next_event`** — free-form upcoming interview or call, written by `/today`. `/follow-up` skips `interviewing` roles that have one.
+- **`follow_ups`** — integer, follow-ups sent for this application (0–2). Written by `/follow-up` only after the user confirms one went out; thank-you notes don't count.
+- **`last_follow_up`** — date of the most recent follow-up. ISO 8601. Written by `/follow-up`; restarts the 10-day quiet clock.
+- **`max_stage`** — deepest stage the application reached: `application`, `screening`, `interview` or `final`. Read by the dashboard funnel and process goal; absent means `screening` for `interviewing` roles.
 
 ## Forbidden keys (sub-agent drift signals)
 

@@ -63,7 +63,10 @@ def main() -> None:
         if not dates:
             continue
         quiet = (today - max(dates)).days
-        sent = int(field(meta, "follow_ups") or 0)
+        try:
+            sent = int(field(meta, "follow_ups") or 0)
+        except ValueError:  # hand-edited junk ("one", "2?") counts as none sent
+            sent = 0
         if quiet < a.days:
             continue
         archived = any(meta_path.parent.glob("submitted-*/manifest.md"))
@@ -76,7 +79,8 @@ def main() -> None:
 
     def show(title: str, rows: list) -> None:
         print(f"## {title} ({len(rows)})")
-        for q, co, pos, st, sent, arch, folder, link in sorted(rows, reverse=True):
+        # Most recent first (least quiet), as /follow-up shows them; ties by company.
+        for q, co, pos, st, sent, arch, folder, link in sorted(rows, key=lambda r: (r[0], r[1].lower())):
             print(f"- {co} — {pos} — {st}, quiet {q}d, follow-ups {sent}/{MAX_FOLLOW_UPS}, "
                   f"{'archive' if arch else 'no archive'} — {folder} — {link or '—'}")
         print()

@@ -40,6 +40,8 @@ MCP integrations (Granola / Calendar / Gmail) plug in via `/job-offer:integratio
 
 Your repo of `.md` files is the system of record. Skills read markdown, write markdown — that's the whole contract. The `userdata/` directory is gitignored by default, so nothing leaves your machine unless you share it on purpose.
 
+The one exception is output that has to leave as a file: the CV and cover-letter PDFs and the ATS check run small Python scripts (`reportlab`, `pypdf`, the Carlito font). The markdown stays the source; the PDF is rebuilt from it. Install with `pip install -r plugin/scripts/requirements.txt`.
+
 ## Install
 
 ```sh

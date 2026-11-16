@@ -19,7 +19,7 @@ Every profile.md MUST have these top-level keys with non-empty values:
 
 ## Common optional keys (absence allowed, never flagged as drift)
 
-`city`, `timezone`, `email`, `linkedin_url`, `target_industries`, `geography`, `salary_band`, `hard_filters`, `company_shape_adjustment`, and the `## Proof Points`, `## Moat`, `## Tone of Voice`, `## What NOT to Frame As`, `## Companies of interest` body sections.
+`city`, `timezone`, `email`, `phone` (the number the CV must show — `/ats-check` fails the contacts check without it in the PDF's text), `linkedin_url`, `target_industries`, `geography`, `salary_band`, `hard_filters`, `company_shape_adjustment`, and the `## Proof Points`, `## Moat`, `## Tone of Voice`, `## What NOT to Frame As`, `## Companies of interest` body sections.
 
 ## When to update this schema
 
