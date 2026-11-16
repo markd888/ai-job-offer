@@ -124,7 +124,7 @@ export function App() {
           <TodayFocus brief={state.latest_brief} />
         </div>
         <Rail>
-          <MiniFunnel companies={state.companies} />
+          <MiniFunnel companies={state.companies} byChannel={state.funnel_by_channel} />
           <WeekProgress strategy={state.strategy} weeklyProgress={state.weekly_progress} />
           <ComingUp companies={state.companies} onOpen={setOpenPosition} />
           <HeadsUp brief={state.latest_brief} />

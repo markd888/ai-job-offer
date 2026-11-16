@@ -69,3 +69,16 @@ def test_state_endpoint_returns_weekly_progress_shape(running_server: str):
     assert 1 <= wp["window_days"] <= 7
     assert isinstance(wp["warm_outreach"], int)
     assert isinstance(wp["applications"], int)
+
+
+def test_state_endpoint_returns_funnel_by_channel(running_server: str, userdata: Path):
+    plaid = userdata / "companies" / "Plaid" / "meta.md"
+    plaid.write_text(plaid.read_text().replace("status: interviewing", "status: interviewing\nchannel: referral", 1))
+    body = _get_json(f"{running_server}/api/state")
+    fbc = body["funnel_by_channel"]
+    assert fbc["min_sample"] == 5
+    referral = next(r for r in fbc["rows"] if r["channel"] == "referral")
+    assert referral["applied"] == 1 and referral["screening"] == 1 and referral["small_sample"] is True
+    plaid_record = next(c for c in body["companies"] if c["company"] == "Plaid")
+    assert plaid_record["channel"] == "referral"
+

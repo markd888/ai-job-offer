@@ -7,6 +7,7 @@ position: Senior PM, Consumer Credit
 link: https://example.com/plaid-jobs/senior-pm-consumer-credit
 date_added: 2026-07-08
 date_applied: 2026-07-11
+channel: recruiter
 last_inbound: 2026-07-29
 next_event: "CPO round Thu 2026-08-06 14:00"
 ---

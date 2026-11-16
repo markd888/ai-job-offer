@@ -7,6 +7,7 @@ position: Lead PM, Spend
 link: https://example.com/brex-spend
 date_added: 2026-04-30
 date_applied: 2026-05-02
+channel: linkedin
 last_inbound: 2026-05-16
 ---
 

@@ -24,7 +24,9 @@ export const STAGE_LABEL: Record<Stage, string> = {
 
 const DEPTH: Record<string, number> = { application: 0, screening: 1, interview: 2, final: 3 };
 
-/** Deepest stage a role reached, or null if it was never applied to. */
+/** Deepest stage a role reached, or null if it was never applied to.
+ * plugin/scripts/funnel.py stage_reached() is the same rule for the by-channel
+ * table, career-coach and /today — change both together. */
 export function stageReached(r: Role): Stage | null {
   if (r.status === 'offer') return 'offer';
   if (r.status === 'interviewing') return (['screening', 'screening', 'interview', 'final'] as Stage[])[DEPTH[r.max_stage ?? 'screening'] ?? 1];

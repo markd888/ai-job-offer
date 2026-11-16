@@ -7,6 +7,7 @@ position: Group PM, Card
 link: https://example.com/ramp-card
 date_added: 2026-07-26
 date_applied: 2026-07-28
+channel: company-site
 ---
 
 # Ramp

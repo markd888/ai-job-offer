@@ -57,6 +57,8 @@ without adopting the pipeline tracker.
 - `/outreach <person|Company>` drafts a referral ask (with a forwardable blurb), intro ask, reach-out, follow-up or thank-you from facts only — the person file, profile, master CV, submitted materials — and logs it after the user says it went out (`plugin/scripts/record-outreach.py`). Drafts only.
 - `/sent --referred-by` logs the referral on the referrer's people file (creating it if new) and links the role.
 - Maya's example install and the `maya-active` snapshot have three people (a former colleague at Wagestream, a referrer, Lendable's CEO); the `active-loop` harness journey ends with a referral ask.
+- Funnel by channel: `plugin/scripts/funnel.py` counts, per `channel` (`unknown` when none is recorded), how many applications reached screening, interview, final and offer, with rates only from 5 applications. `serve.py` exposes it as `funnel_by_channel` in `/api/state` (also in the cloud export and demo snapshot), and the dashboard shows it as a table under the funnel. `career-coach` quotes its output — never a withheld rate or a benchmark as the user's own — and adds a channel-mismatch calibration trigger; `/today`'s weekly-reflection offer opens with one line on the channel mix.
+- Maya's example and the `maya-active` snapshot record `channel` on every application (one left blank to show `unknown`), and Lendable's `referred_by`.
 
 ### Changed
 - Weekly outreach — in the dashboard and `/today` — is the number of `sent` reach-out / referral-ask / intro-ask / follow-up lines in people logs this ISO week. The journal keyword regex and head-count parsing (`_WARM_OUTREACH_KEYWORDS`) are gone: journal wording no longer counts. Feedback requests are still counted from the journal.

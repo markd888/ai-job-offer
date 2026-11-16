@@ -1,6 +1,7 @@
 ---
 company: ClearScore
 status: interviewing
+channel: recruiter
 tier: P1
 score: 13
 position: Lead PM, Credit Marketplace

@@ -52,10 +52,31 @@ export interface WeeklyProgress {
   window_days: number;
 }
 
+/** One row of GET /api/state's funnel_by_channel — see plugin/scripts/funnel.py. */
+export interface ChannelRow {
+  channel: string; // referral | cold | recruiter | linkedin | company-site | other | unknown
+  applied: number;
+  screening: number;
+  interview: number;
+  final: number;
+  offer: number;
+  small_sample: boolean;
+  screening_rate: number | null;
+  interview_rate: number | null;
+  final_rate: number | null;
+  offer_rate: number | null;
+}
+
+export interface FunnelByChannel {
+  min_sample: number;
+  rows: ChannelRow[];
+}
+
 export interface DashboardState {
   companies: Position[];
   strategy: Strategy;
   weekly_progress: WeeklyProgress;
+  funnel_by_channel?: FunnelByChannel; // absent in snapshots exported before 0.8
   latest_brief: DailyBrief | null;
   userdata_root: string;
 }

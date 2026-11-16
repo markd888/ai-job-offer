@@ -713,6 +713,22 @@ body {
 .jst-funnel-count { text-align: right; font-weight: 500; }
 .jst-funnel-rate { text-align: right; min-width: var(--jst-s6); color: var(--jst-muted); }
 
+/* Funnel by channel */
+.jst-channel { margin-top: var(--jst-s4); }
+.jst-channel h3 { margin: 0; }
+.jst-channel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--jst-fs-sm);
+}
+.jst-channel-table th,
+.jst-channel-table td { padding: 2px 0; text-align: right; font-weight: 400; }
+.jst-channel-table th:first-child { text-align: left; color: var(--jst-ink-2); }
+.jst-channel-table thead th { color: var(--jst-muted); font-size: var(--jst-fs-xs, 0.75rem); }
+.jst-channel-rate { color: var(--jst-muted); }
+.jst-channel-thin td { color: var(--jst-muted); }
+.jst-channel-note { margin: var(--jst-s2) 0 0; font-size: var(--jst-fs-xs, 0.75rem); color: var(--jst-muted); }
+
 .jst-bar-track {
   height: 6px;
   border-radius: var(--jst-r-pill);

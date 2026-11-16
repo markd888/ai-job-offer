@@ -7,6 +7,7 @@ position: Senior PM, Growth
 link: https://example.com/cleo-jobs/senior-pm-growth
 date_added: 2026-07-01
 date_applied: 2026-07-04
+channel: recruiter
 last_inbound: 2026-07-24
 next_event: ""
 ---

@@ -30,6 +30,7 @@ from serve import (  # noqa: E402
     collect_artifacts,
     collect_companies,
     compute_weekly_progress,
+    funnel,
     latest_brief,
     read_strategy,
 )
@@ -56,6 +57,7 @@ def export(userdata_root: Path, dist_dir: Path, out_root: Path) -> dict[str, int
         "companies": companies,
         "strategy": read_strategy(userdata_root),
         "weekly_progress": compute_weekly_progress(userdata_root, companies),
+        "funnel_by_channel": funnel.funnel_by_channel(companies),
         "latest_brief": latest_brief(userdata_root),
         # The real on-disk path means nothing in the cloud copy.
         "userdata_root": "cloud snapshot " + datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),

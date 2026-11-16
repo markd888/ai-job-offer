@@ -7,6 +7,8 @@ position: Head of Product, Consumer Credit
 link: https://example.com/lendable-jobs/head-of-product-consumer-credit
 date_added: 2026-04-08
 date_applied: 2026-04-12
+channel: referral
+referred_by: "[[Anna]]"
 last_inbound: 2026-05-15
 next_event: "Reference call Wed 2026-05-20 11:00"
 ---

@@ -7,6 +7,7 @@ position: Applied PM, Claude API
 link: https://example.com/anthropic-applied
 date_added: 2026-05-31
 date_applied: 2026-06-03
+channel: company-site
 last_inbound: 2026-06-18
 date_rejected: 2026-06-18
 ---
