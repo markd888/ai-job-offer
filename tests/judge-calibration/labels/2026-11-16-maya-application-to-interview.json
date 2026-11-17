@@ -1,0 +1,107 @@
+{
+  "run": "2026-11-16/maya-application-to-interview",
+  "labeller": null,
+  "verdicts": {
+    "lint": {
+      "judge": "FAIL",
+      "human": null,
+      "note": null
+    },
+    "groundedness": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "coherence": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "conformance": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "tone": {
+      "judge": "FAIL",
+      "human": null,
+      "note": null
+    }
+  },
+  "overall": {
+    "judge": "FAIL"
+  },
+  "findings": [
+    {
+      "rubric": "coherence",
+      "turn": 3,
+      "summary": "\"It still covers 10 of the 12 posting keywords. The two gaps are risk-pricing and personal loans, which stay out because nothing in your record backs them.\" (turn 2: \"10 of 12 posting keywords covered. The two gaps are the ones above.\" and \"Left out, nothing in your record backs them: risk-pricing, personal loans\") — Rule 3: the keyword count, the two gaps and the reason they stay out are said aga",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "coherence",
+      "turn": 12,
+      "summary": "\"The three questions about how the team runs are parked for the hiring-manager round.\" — Rule 1: \"the three questions\" uses a definite article as if the user already knows them, but no team-process questions were mentioned in turn 11 or anywhere earlier, so the user cannot tell which questions are meant.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "coherence",
+      "turn": 10,
+      "summary": "\"It won't show up on the follow-up list while that screen is pending.\" (turn 9: \"Zopa is off the quiet list and won't come up for a second nudge.\") — Rule 4: turn 9 says Zopa is permanently off the nudge list, and the next turn makes that depend on the screen still being pending. The difference is small, but it leaves the user unsure whether Zopa could come back.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 3,
+      "summary": "\"If you want it on every CV, add a `phone:` line to profile.md.\" — Internal detail leaking (low-effort-first too): it tells the user to hand-edit a raw config key instead of offering to save the number, and exposes storage syntax they had no reason to see.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 4,
+      "summary": "\"I'll record your Zopa application as sent today through their careers site, and keep a copy of today's tailored CV as the version you sent. OK?\" — A question the product should answer for itself: the user had just said \"sent it through their careers site\", so this confirmation turn adds nothing their answer didn't already settle.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 5,
+      "summary": "\"Recorded, with the CV you sent kept on file, though not the posting text itself.\" — Internal detail leaking: an unprompted aside about what is and isn't stored, the same shape as the calibration example \"same `meta.md` underneath\".",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 6,
+      "summary": "\"I'll only do that if you say yes. Which one should I draft first?\" — Rule A, one ask per message: closing out iwoca and choosing which follow-up to draft are unrelated decisions bundled into one message, and the user answered only one of them.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 9,
+      "summary": "\"Zopa still shows as applied. Should I move it to interviewing, with the screen as the next thing coming up?\" — A question the product should answer for itself: a scheduled recruiter screen settles the status, yet the user has to spend a turn (\"mark Zopa as interviewing\") saying so. This is the second time in the run, after turn 4, that an obvious update was held behind a permission question.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 11,
+      "summary": "\"Risk team dissent lowers APR on a loan book and Underwriting zero-to-one builds a lending model, and you told me to keep risk-set pricing and loans off this CV.\" — Simple language / prose too dense to skim: story titles run unmarked into the sentence, so it reads like a garbled claim rather than two named stories being set aside, inside an already heavy paragraph.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "lint",
+      "turn": 3,
+      "summary": "turn 3: lint.file-path — 'profile.md' named in user-facing text: \"…ailored CV would ask again. If you want it on every CV, add a `phone:` line to profile.md.\"",
+      "human": null,
+      "note": null
+    }
+  ],
+  "blind": null
+}

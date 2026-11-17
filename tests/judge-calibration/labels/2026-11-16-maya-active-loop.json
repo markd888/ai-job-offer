@@ -1,0 +1,79 @@
+{
+  "run": "2026-11-16/maya-active-loop",
+  "labeller": null,
+  "verdicts": {
+    "lint": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "groundedness": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "coherence": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "conformance": {
+      "judge": "FAIL",
+      "human": null,
+      "note": "judge FAIL was one-of-two: the confirmation re-run returned PASS"
+    },
+    "tone": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    }
+  },
+  "overall": {
+    "judge": "FAIL"
+  },
+  "findings": [
+    {
+      "rubric": "coherence",
+      "turn": 1,
+      "summary": "\"Monzo is also hiring three Lead PMs that look like repeats of the Lending role you're already tracking. The first one is your activation story almost word for word, at £120-140K. I left them unfiled.\" — Rule 1: Growth, Mobile and Core Banking roles are called \"repeats\" of a Lending role with no explanation of why different teams count as the same role, and the best-fitting one is left unfiled in ",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "coherence",
+      "turn": 8,
+      "summary": "the story table repeats turn 7's almost row for row (\"Activation funnel uplift | the team-vs-solo split you found in SQL\", \"Consumer credit onboarding pivot | telling a launch dip from a broken funnel\"), with only the last column renamed from \"Why here\" to \"Monzo tie\" — Rule 3: the user approved this exact table one turn earlier, so showing it again adds nothing.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "conformance",
+      "turn": 8,
+      "summary": "\"Tell me once the application's sent and I'll record it.\" — The `/interview-prep` closing is the only next step offered and mentions neither interviewer-simulator (a natural rehearsal step for a hiring-manager round) nor `/job-offer:interview-analysis` (the skill's own documented end-of-run nudge), so the required criterion \"`/interview-prep`'s closing nudge was context-aware (mentioned interviewe",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 4,
+      "summary": "\"Injected JD keywords: experimentation, conversion funnel, data analysis\" — Simple language: \"injected\" is the skill's own internal operation word, and the \"Did NOT inject (no supporting evidence)\" line beside it carries on in the same voice, so the change summary reads like a build log, not a note to the user.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 5,
+      "summary": "\"Want a cover letter for Monzo too, or is the CV enough?\" — Low-effort-first (\"stop asking after value is delivered\"): the CV is built and passes the check, and this adds an extra ask the user didn't need and then ignored.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 8,
+      "summary": "\"| 1 | Activation funnel uplift | the team-vs-solo split you found in SQL | \\\"an analyst's data rigour\\\" |\" — Restatement: the turn repeats almost the same three-row story table the user approved one turn earlier, so it adds length without adding anything new.",
+      "human": null,
+      "note": null
+    }
+  ],
+  "blind": null
+}

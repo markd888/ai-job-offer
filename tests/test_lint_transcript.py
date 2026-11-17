@@ -400,6 +400,7 @@ CORPUS_BASELINE = {
     # that was rewritten the same day, so the next sweep run should be clean.
     ("2026-08-23/maya-sweep-smoke.md", 1, "lint.file-path"),
     ("2026-08-23/maya-sweep-smoke.md", 5, "lint.file-path"),
+    ("2026-11-16/maya-application-to-interview.md", 3, "lint.file-path"),
     # 2026-08-23 cold-start: turns 1-19 are clean. The only findings are /today
     # naming the two files it had just written, which the SKILL.md rule added
     # after this run now forbids. Two findings, one turn, one tuple.

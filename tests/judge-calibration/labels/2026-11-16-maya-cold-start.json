@@ -1,0 +1,86 @@
+{
+  "run": "2026-11-16/maya-cold-start",
+  "labeller": null,
+  "verdicts": {
+    "lint": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "groundedness": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "coherence": {
+      "judge": "PASS",
+      "human": null,
+      "note": null
+    },
+    "conformance": {
+      "judge": "FAIL",
+      "human": null,
+      "note": "judge FAIL was one-of-two: the confirmation re-run returned PASS"
+    },
+    "tone": {
+      "judge": "FAIL",
+      "human": null,
+      "note": null
+    }
+  },
+  "overall": {
+    "judge": "FAIL"
+  },
+  "findings": [
+    {
+      "rubric": "coherence",
+      "turn": 13,
+      "summary": "\"Want your daily brief to run automatically every morning?\" — Rule 1: \"your daily brief\" arrives with no prior mention or explanation, so the user is asked to automate something they have not been told exists; it only gets explained when `/job-offer:today` renders one in turn 21.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "conformance",
+      "turn": 19,
+      "summary": "\"Marked Lendable — Senior Product Manager (US Cards) as one to apply for.\" — the status-change confirmation renders the application row (company, role, new status) with no JD URL inline, which breaks the [required] journey criterion \"The chat rendering of the application row included the URL inline\" and the spec's `- <Company> — <Role> — <status> — <url>` row contract; the `/today` brief in turn 2",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 13,
+      "summary": "\"Say the word if those numbers look wrong.  Want your daily brief to run automatically every morning?\" — Rule A (one ask per message): it asks the user to check the plan numbers and decide on auto-run in the same message. These are two unrelated decisions, and the user had to answer both together in turn 14.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 14,
+      "summary": "\"What time should your daily brief run? (e.g. 9am)\" — Low-effort-first: the next turn shows the product can't schedule anything, so this question, and the yes/no before it, used up the user's turns on a setting that was never going to be applied.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 15,
+      "summary": "\"I'd set your brief to run every day at 9:00, but I can't schedule anything from this session, so that part isn't set up yet.\" — Simple language and internal detail leaking: it explains the failure in terms of the assistant's runtime (\"this session\"), which the user has no way to understand, right after asking for their preference.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 20,
+      "summary": "\"I can't keep the dashboard running from this session, so start it yourself from your job-search folder:\" — Internal detail leaking, second time: \"this session\" again describes the assistant's runtime limits instead of what the user can do.",
+      "human": null,
+      "note": null
+    },
+    {
+      "rubric": "tone",
+      "turn": 20,
+      "summary": "\"`python3 <plugin-clone>/plugin/dashboard/serve.py --userdata \\\"$(pwd)/userdata\\\" --port 7890`\" — Simple language: it gives a raw shell command with no explanation, including the plugin's install path, `$(pwd)` and command flags. That is systems vocabulary a PM running a job search has no reason to know.",
+      "human": null,
+      "note": null
+    }
+  ],
+  "blind": null
+}
