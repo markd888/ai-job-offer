@@ -46,6 +46,10 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-11-17
+
+The application loop closes end to end: record what was sent and by which channel, track the people who help, chase quiet applications from one rule, write cover letters, see the funnel by channel, and wrap up a search after an offer.
+
 ### Added
 - `/sent <Company>` records an application going out in one step after the user's yes: `status: applied`, `date_applied`, `channel`, optional `referred_by`, the `submitted-<date>/` archive and one History line (`plugin/scripts/record-sent.py`). Before, nothing wrote `date_applied`, so a role marked applied in chat never came up in `/follow-up`.
 - `channel` (`referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`) and `referred_by` in the meta.md schema; `validate_userdata.py` checks `channel` against the enum (rule `meta.channel-enum`).
