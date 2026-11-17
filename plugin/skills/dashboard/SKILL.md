@@ -100,6 +100,13 @@ now to_apply` echoes the stored value back at them; `Marked Zilch — Director o
 Product as one to apply for` says the same thing in the language they used to
 ask for it.
 
+**Keep the posting link on the line.** The confirmation names an application,
+so it carries that role's JD URL like every application row printed in chat:
+`Marked Zilch — Director of Product as one to apply for — <link>`. Read `link:`
+from the role's `meta.md`; if it is blank, leave the link off rather than
+inventing one. The user is about to act on that role, and the link is the
+thing they will want next.
+
 (Note: this nudge fires from whatever skill or context handles the status change — typically `/today` or a free-text exchange — because this file is dashboard promotion context, not a separate skill.)
 
 ## Tone

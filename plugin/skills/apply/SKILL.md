@@ -126,6 +126,8 @@ python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/ats-check.py" <pdf> --md <cv-md> \
 
 Use a Python that has `reportlab` and `pypdf` (a workspace venv such as `.claude/.venv/bin/python` if there is one). Keep the CV to one page: if it runs over, trim by relevance to this posting, then try font size 8.8. Fix every hard failure (pages, contacts, glyphs, order, fidelity) and re-run until it passes; details in `${CLAUDE_PLUGIN_ROOT}/skills/ats-check/SKILL.md`. Missing keywords are added only where the master CV or profile supports them. The contacts check reads the phone from `profile.md` (`phone:`).
 
+**A phone the user gives you here.** If the contacts check needs a phone that neither the master CV nor `profile.md` has, ask for it once and put it on this CV. Then offer to keep it: `Want me to keep that number for your next CVs too?` On a yes, write `phone: "<number>"` into `profile.md`'s frontmatter, changing nothing else, and confirm in plain words (`Saved — it'll be on every CV from now on.`). Never tell the user to edit a file or add a field themselves, and name no file or field in chat.
+
 If no Python with `reportlab` and `pypdf` is available, or `cv-build.py` stops on a missing Carlito font, don't improvise another PDF route: keep the tailored markdown, say in one line that the PDF and ATS check were skipped and what to install (`pip install -r ${CLAUDE_PLUGIN_ROOT}/scripts/requirements.txt`, plus the Carlito font), and carry on with the output below, replacing the ATS check line with `ATS check: skipped — <reason>`.
 
 A cover letter is `/job-offer:cover-letter <Company>`'s job: it reads this tailored CV, so it never claims more than the CV does, and builds its PDF in the same look.
@@ -183,7 +185,7 @@ If WebFetch was tried via `--from-url` and fell back to research-brief, add a se
 
 - Never invents facts, dates, metrics, technologies, team sizes, or project outcomes. If a JD keyword has no supporting evidence, surface it in the chat output, never in the CV.
 - Never touches `meta.md` — no status flip, no date update, no History line, nothing. Recording the application is `/job-offer:sent`'s job, after the user's yes.
-- Never edits `userdata/cv.md` (the master) or `userdata/profile.md`. Read-only on both.
+- Never edits `userdata/cv.md` (the master). Never edits `userdata/profile.md` either, with one exception: the `phone:` field, on the user's yes, as described under PDF and ATS check.
 - Never writes a cover letter or outreach message itself — `/job-offer:cover-letter` and `/job-offer:outreach` do, from the same sources. Offers them in the closing question.
 - Never deletes prior `cv-*.md` files. Each re-run produces a new dated/versioned file.
 - Never shows or hands over a PDF that fails the ATS check's hard checks.
