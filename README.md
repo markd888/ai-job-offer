@@ -1,6 +1,6 @@
 # ai-job-offer
 
-Mark Dragunov's version of [pm-job-search](https://github.com/archugunov/pm-job-search) by [@archugunov](https://github.com/archugunov) (MIT), forked from 0.6.0. On top of the original it adds:
+Mark D's version of [pm-job-search](https://github.com/archugunov/pm-job-search) by [@archugunov](https://github.com/archugunov) (MIT), forked from 0.6.0. On top of the original it adds:
 
 - **CV to PDF from markdown** (`plugin/scripts/cv-build.py`, reportlab + Carlito), plus a matching cover-letter builder. `/job-offer:apply` builds the PDF right after drafting the CV.
 - **ATS check** (`/job-offer:ats-check`): reads the PDF's text layer the way an applicant tracking system does and checks pages, contacts, glyphs, section order, extraction fidelity and keyword coverage. Runs after every CV build.
