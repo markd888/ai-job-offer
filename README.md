@@ -20,7 +20,7 @@ Built for senior PMs, lead PMs, and heads of product. Everything inside is shape
 
 ```sh
 # inside Claude Code, in any workspace:
-/plugin marketplace add https://github.com/markd888/job-offer.git
+/plugin marketplace add https://github.com/markd888/ai-job-offer.git
 /plugin install job-offer@job-offer
 
 cd <your-workspace>
@@ -47,7 +47,7 @@ Without the Python packages `/job-offer:apply` still writes the tailored CV mark
 A second, standalone plugin in this repo for people who want one job-search command and nothing else. One output: a weekly list of open product roles that match you, minus everything it already showed you. No pipeline to maintain, no tier rubric, no company folders.
 
 ```sh
-/plugin marketplace add https://github.com/markd888/job-offer.git
+/plugin marketplace add https://github.com/markd888/ai-job-offer.git
 /plugin install job-sweep@job-offer
 /job-sweep:sweep
 ```
