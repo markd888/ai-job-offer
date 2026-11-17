@@ -2,6 +2,8 @@
 
 A Claude Code plugin for senior product leaders running a job search. Finds open roles, scores fit, tracks your pipeline, runs live interview practice, and gives you an honest career coach. Markdown by default — optional browser dashboard and MCP integrations on top.
 
+This page is the detailed reference. For the overview — quick start, diagrams of the flow, where your data lives — see the [main README](../README.md).
+
 ## Who it's for
 
 If you're a senior PM, lead PM, or head of product — you're in the right place. Everything inside (scoring, pipeline, interview prep, reviewer agents) is shaped around how your search actually runs. A different role? You can fork the architecture, but the defaults will need rework.
@@ -10,11 +12,11 @@ If you're a senior PM, lead PM, or head of product — you're in the right place
 
 Maps to the five phases of a senior-PM search.
 
-1. **Set up once.** `/job-offer:setup` — nine steps, ~5-10 min. Writes your profile, strategy, and the rubric the rest of the plugin scores against. Drop a CV at `userdata/cv.md` first — now the recommended path, since setup pre-fills most answers instead of just positioning.
+1. **Set up once.** `/job-offer:setup` — nine steps, ~10-15 min. Writes your profile, strategy, and the rubric the rest of the plugin scores against. Drop a CV at `userdata/cv.md` first — now the recommended path, since setup pre-fills most answers instead of just positioning.
 
 2. **Discover & score.** `/job-offer:job-search` does a weekly sweep — parallel subagents recheck your P0/P1 companies via ATS APIs and discover new roles via scoped search. Score one-off postings ad-hoc with `/job-offer:evaluate-position <url>`. Both write the same artefacts: a company folder, a tier score, and a 200-word research brief.
 
-3. **Apply.** `/job-offer:apply <Company>` tailors your master CV for one role using the research brief — three-phase process (silent analyse → upfront Q&A capped at 5 → single-pass draft). Hard rule: every claim traces to your master CV, profile, or your own answers. Cover note + outreach are user-driven follow-ups.
+3. **Apply.** `/job-offer:apply <Company>` tailors your master CV for one role using the research brief — three-phase process (silent analyse → upfront Q&A capped at 5 → single-pass draft). Hard rule: every claim traces to your master CV, profile, or your own answers. It builds a one-page PDF and runs `/ats-check`; `/cover-letter` writes a letter when one is needed, `/outreach` asks for a referral, `/sent` records the application once it's out, and `/follow-up` drafts a nudge if it goes quiet.
 
 4. **Interview.** `/job-offer:interview-prep <Company>` adapts 3-5 stories from your bank for a specific round — `--stage` shapes the prep, late rounds add founder-vetting questions. Rehearse with `job-offer:interviewer-simulator` (mock round, single-question deep-dive, or pressure-test). Debrief with `/job-offer:interview-analysis` — quotes the transcript, flags what landed, names deltas vs your prep.
 
@@ -78,7 +80,7 @@ cd <your-workspace>
 | `/job-offer:dashboard` | Visual dashboard — pipeline view, inline status changes, quick notes per company. Reads the same md files all other skills use; writes status changes + notes back. React + Mantine, pre-built bundle, zero install. |
 | `/job-offer:evaluate-position <url-or-paste>` | Score a posting against your tier rubric with company-shape adjustment. Hard-filter + anti-goal gates, posting-liveness check, user-override. Writes the company folder (meta + ~200-word research brief). |
 | `/job-offer:job-search` | Weekly sweep. Parallel subagents recheck your P0/P1 companies via public ATS APIs (Ashby / Greenhouse / Lever) and discover new roles via `site:`-scoped search. Scores and files results via `/evaluate-position`. Optional `--with-playwright` for link verification. |
-| `/job-offer:apply <Company>` | Tailor your master CV (userdata/cv.md) for one role at <Company>. Reads profile.md + the company's research brief, asks up to 5 clarifying questions upfront, then drafts companies/<Co>/[<slug>/]cv-<date>.md. CV-only — cover note + outreach are user-driven follow-ups. |
+| `/job-offer:apply <Company>` | Tailor your master CV (userdata/cv.md) for one role at <Company>. Reads profile.md + the company's research brief, asks up to 5 clarifying questions upfront, then drafts companies/<Co>/[<slug>/]cv-<date>.md, builds the one-page PDF and runs `/ats-check`. Letters and outreach have their own skills (`/cover-letter`, `/outreach`). |
 | `/job-offer:ats-check <Company>` | Checks the CV PDF the way an applicant tracking system reads it — pages, contacts, glyphs, section order, extraction fidelity, keyword coverage against the posting. `/apply` runs it after every build. |
 | `/job-offer:cover-letter <Company>` | Short cover letter (150–250 words) answering the posting's top 2–3 needs with one proof point each. Every claim traces to the master or tailored CV, profile.md or your answers; `cover-letter-check.py` fails on any number or name it can't find there. Lists what it did NOT claim. Writes `cover-<date>.md` and the PDF; `/sent` archives both. |
 | `/job-offer:outreach <person or Company>` | People as records in `userdata/people/` (relation, channel, linked roles, a log of every ask and reply). Drafts a referral ask, warm intro ask, reach-out, follow-up or thank-you using only facts from the person file, profile, CV and what you sent; logs it once you say it went out. `/today` and the dashboard count weekly outreach from these logs. |
@@ -160,7 +162,7 @@ The dashboard is intentionally read-mostly. It writes back exactly two things: *
 ### Start / stop
 
 ```sh
-/job-offer:dashboard         # opens browser tab at http://localhost:<port>
+/job-offer:dashboard         # opens http://localhost:7890 — reuses it if already running
 # ctrl-C in the terminal to stop
 ```
 
@@ -196,7 +198,7 @@ Both personas are entirely fictional.
 
 Your `userdata/` directory is gitignored except for the example installs. Anything you put there — profile, journal, company notes — stays on your machine unless you share it on purpose.
 
-A CI workflow scans every push and PR for the plugin author's personal-data blocklist (via ripgrep). If you fork, swap the blocklist for your own terms or remove the workflow entirely — your fork, your call.
+A CI workflow scans every push and PR for personal data (via ripgrep). The blocklist isn't in the repo — it comes from the `PRIVACY_PATTERNS` repository secret. If you fork, set your own secret or remove the workflow — your fork, your call.
 
 Contributions welcome. [CONTRIBUTING.md](../CONTRIBUTING.md) covers scope, dev install, the privacy hard rule, testing conventions, and what's in scope for issues vs not.
 

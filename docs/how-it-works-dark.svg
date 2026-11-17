@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="618" viewBox="0 0 820 618" role="img" aria-labelledby="t d">
+<title id="t">How job-offer works</title>
+<desc id="d">Five phases in order — set up, find and score, apply, interview, decide — with the commands for each and what you get, plus the tools that run alongside every day.</desc>
+<text x="64.0" y="28.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#9198a1" text-anchor="start">PHASE</text>
+<text x="236.0" y="28.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#9198a1" text-anchor="start">YOU RUN</text>
+<text x="580.0" y="28.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#9198a1" text-anchor="start">YOU GET</text>
+<line x1="34" y1="70" x2="34" y2="406" stroke="#30363d" stroke-width="2"/>
+<rect x="52" y="42" width="752" height="68" rx="10" fill="#161b22" stroke="#30363d"/>
+<circle cx="34" cy="70" r="14" fill="#4493f8"/>
+<text x="34.0" y="75.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">1</text>
+<text x="64.0" y="69.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#e6edf3" text-anchor="start">Set up</text>
+<text x="64.0" y="88.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#9198a1" text-anchor="start">once · 10–15 min</text>
+<rect x="236.0" y="56.0" width="57.1" height="22" rx="6" fill="#0c2d6b"/>
+<text x="241.0" y="71.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/setup</text>
+<circle cx="583" cy="66.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="71.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">profile, strategy, scoring rubric</text>
+<circle cx="583" cy="86.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="91.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">pre-filled from your CV</text>
+<rect x="52" y="120" width="752" height="68" rx="10" fill="#161b22" stroke="#30363d"/>
+<circle cx="34" cy="148" r="14" fill="#4493f8"/>
+<text x="34.0" y="153.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">2</text>
+<text x="64.0" y="147.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#e6edf3" text-anchor="start">Find &amp; score</text>
+<text x="64.0" y="166.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#9198a1" text-anchor="start">weekly</text>
+<rect x="236.0" y="134.0" width="96.3" height="22" rx="6" fill="#0c2d6b"/>
+<text x="241.0" y="149.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/job-search</text>
+<rect x="338.4" y="134.0" width="151.3" height="22" rx="6" fill="#0c2d6b"/>
+<text x="343.4" y="149.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/evaluate-position</text>
+<circle cx="583" cy="144.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="149.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">a folder per company</text>
+<circle cx="583" cy="164.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="169.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">tier P0–P2 + research brief</text>
+<rect x="52" y="198" width="752" height="80" rx="10" fill="#161b22" stroke="#30363d"/>
+<circle cx="34" cy="226" r="14" fill="#4493f8"/>
+<text x="34.0" y="231.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">3</text>
+<text x="64.0" y="225.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#e6edf3" text-anchor="start">Apply</text>
+<text x="64.0" y="244.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#9198a1" text-anchor="start">per role</text>
+<rect x="236.0" y="212.0" width="57.1" height="22" rx="6" fill="#0c2d6b"/>
+<text x="241.0" y="227.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/apply</text>
+<rect x="299.1" y="212.0" width="88.5" height="22" rx="6" fill="#0c2d6b"/>
+<text x="304.1" y="227.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/ats-check</text>
+<rect x="393.6" y="212.0" width="112.0" height="22" rx="6" fill="#0c2d6b"/>
+<text x="398.6" y="227.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/cover-letter</text>
+<rect x="236.0" y="242.0" width="49.2" height="22" rx="6" fill="#0c2d6b"/>
+<text x="241.0" y="257.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/sent</text>
+<circle cx="583" cy="222.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="227.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">tailored CV + PDF, ATS-checked</text>
+<circle cx="583" cy="242.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="247.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">frozen copy of what you sent</text>
+<rect x="52" y="288" width="752" height="80" rx="10" fill="#161b22" stroke="#30363d"/>
+<circle cx="34" cy="316" r="14" fill="#4493f8"/>
+<text x="34.0" y="321.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">4</text>
+<text x="64.0" y="315.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#e6edf3" text-anchor="start">Interview</text>
+<text x="64.0" y="334.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#9198a1" text-anchor="start">per round</text>
+<rect x="236.0" y="302.0" width="127.8" height="22" rx="6" fill="#0c2d6b"/>
+<text x="241.0" y="317.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/interview-prep</text>
+<rect x="369.8" y="302.0" width="119.9" height="22" rx="6" fill="#0c2d6b"/>
+<text x="374.8" y="317.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/case-practice</text>
+<rect x="236.0" y="332.0" width="80.6" height="22" rx="6" fill="#0c2d6b"/>
+<text x="241.0" y="347.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">simulator</text>
+<rect x="322.6" y="332.0" width="159.2" height="22" rx="6" fill="#0c2d6b"/>
+<text x="327.6" y="347.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/interview-analysis</text>
+<circle cx="583" cy="312.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="317.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">stories adapted to the round</text>
+<circle cx="583" cy="332.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="337.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">mock rounds, quoted debrief</text>
+<rect x="52" y="378" width="752" height="68" rx="10" fill="#161b22" stroke="#30363d"/>
+<circle cx="34" cy="406" r="14" fill="#4493f8"/>
+<text x="34.0" y="411.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">5</text>
+<text x="64.0" y="405.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#e6edf3" text-anchor="start">Decide</text>
+<text x="64.0" y="424.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#9198a1" text-anchor="start">at the offer</text>
+<rect x="236.0" y="392.0" width="127.8" height="22" rx="6" fill="#0c2d6b"/>
+<text x="241.0" y="407.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/evaluate-offer</text>
+<rect x="369.8" y="392.0" width="72.8" height="22" rx="6" fill="#0c2d6b"/>
+<text x="374.8" y="407.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/wrap-up</text>
+<circle cx="583" cy="402.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="407.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">verdict + negotiation moves</text>
+<circle cx="583" cy="422.5" r="3" fill="#3fb950"/>
+<text x="593.0" y="427.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">withdrawals, thank-yous, retro</text>
+<text x="64.0" y="474.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#9198a1" text-anchor="start">ALONGSIDE, EVERY DAY</text>
+<rect x="64.0" y="486.0" width="57.1" height="22" rx="6" fill="#0c2d6b"/>
+<text x="69.0" y="501.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/today</text>
+<text x="131.1" y="501.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">morning brief, follow-ups due</text>
+<rect x="442.0" y="486.0" width="88.5" height="22" rx="6" fill="#0c2d6b"/>
+<text x="447.0" y="501.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/follow-up</text>
+<text x="540.5" y="501.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">nudge a quiet application</text>
+<rect x="64.0" y="518.0" width="80.6" height="22" rx="6" fill="#0c2d6b"/>
+<text x="69.0" y="533.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/outreach</text>
+<text x="154.6" y="533.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">referral asks, thank-yous</text>
+<rect x="442.0" y="518.0" width="88.5" height="22" rx="6" fill="#0c2d6b"/>
+<text x="447.0" y="533.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">/dashboard</text>
+<text x="540.5" y="533.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">the pipeline at a glance</text>
+<rect x="64.0" y="550.0" width="104.2" height="22" rx="6" fill="#0c2d6b"/>
+<text x="69.0" y="565.5" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#79c0ff" text-anchor="start">career-coach</text>
+<text x="178.2" y="565.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#e6edf3" text-anchor="start">when the search is stuck</text>
+<text x="64.0" y="602.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#9198a1" text-anchor="start">Everything is markdown in userdata/ on your machine. Nothing is sent or changed without your yes.</text>
+</svg>
