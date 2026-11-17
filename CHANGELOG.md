@@ -78,6 +78,7 @@ without adopting the pipeline tracker.
 - `archive-application.py` exposes `archive()` for `record-sent.py` and takes `--no-history`.
 
 ### Fixed
+- From the 2026-11-16 harness run: a status change confirmed in chat now carries the role's posting link; `/interview-prep` always closes with the after-the-call `/interview-analysis` nudge (optionally a simulator rehearsal) instead of replacing it with another question; `/apply` offers to keep a phone number the user gives for the CV (writing `phone:` to the profile on a yes) instead of telling them to edit the profile by hand.
 - The dashboard server binds exactly the port it's given (7890) and stops with a clear message when it's busy, instead of silently moving to 7891–7899 and leaving two dashboards; the `/dashboard` skill's port-range text is gone.
 - `recommended-flow.md` used `status: interview` and `to apply`, which aren't status values.
 

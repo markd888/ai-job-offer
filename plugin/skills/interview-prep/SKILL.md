@@ -184,5 +184,8 @@ Run `/interview-prep Plaid --stage cpo-round` against `userdata/examples/maya/`:
 
 After writing the prep doc to chat, compose one context-aware next-step line per `${CLAUDE_PLUGIN_ROOT}/references/recommended-flow.md`. Skip the nudge entirely if no useful next step is obvious.
 
-Typical next steps for this skill:
-- No obvious next step until the interview happens. Remind the user to log the result with `/job-offer:interview-analysis <Co>` after the interview so the debrief is captured while the transcript is fresh.
+This skill always has one: the interview itself. Close with it —
+
+- After the call, run `/job-offer:interview-analysis <Co>` so the debrief is captured while it is fresh. For a hiring-manager round or later, you can offer a rehearsal with the interviewer-simulator first (`Want a practice run of this round before the call?`).
+
+Don't replace that line with a question about something else. If the role isn't recorded as applied yet, the reminder to say when the application goes out (`/job-offer:sent`) may follow as a second clause; it never stands in for the interview nudge.
