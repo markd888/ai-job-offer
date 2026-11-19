@@ -43,35 +43,9 @@ The picture at the top is the whole plugin: five phases, the commands for each, 
 
 Each role is a folder with a `meta.md`; its `status` moves through the stages below. The skills on the arrows are what moves it — status changes only after you confirm.
 
-```mermaid
-%%{init: {"flowchart": {"wrappingWidth": 320}}}%%
-flowchart TD
-    F(["a role you might want"]) -->|"/job-search or /evaluate-position"| N["<b>new</b><br/>scored P0–P2, research brief"]
-    N -->|"you decide to go for it"| T["<b>to_apply</b>"]
-    N -.->|"not a fit"| X["<b>not_interested</b>"]
-    T -->|"/apply → /ats-check → /cover-letter"| S{{"CV + letter ready"}}
-    S -->|"/sent"| A["<b>applied</b><br/>quiet 10+ days → /follow-up drafts a nudge"]
-    A -->|"they reply"| I["<b>interviewing</b><br/>each round: /interview-prep → /interview-analysis"]
-    A -.->|"30+ days of silence, or a no"| R["<b>rejected</b>"]
-    I -.-> R
-    I -->|"offer"| O["<b>offer</b>"]
-    O -->|"/evaluate-offer → accept → /wrap-up"| W(["search closed, plugin goes quiet"])
-```
-
 ### Your daily loop
 
 `/today` starts by asking what changed — from your calendar, inbox and meeting notes if they're connected, and from you. Only what you confirm is written down; the brief is built from that.
-
-```mermaid
-%%{init: {"flowchart": {"wrappingWidth": 320}}}%%
-flowchart TD
-    S["Calendar · Gmail · Granola<br/>+ anything you tell it"] --> P["/today asks: what changed?"]
-    P --> C{"you confirm<br/>or correct"}
-    C --> W["journal.md + each role's meta.md"]
-    W --> B["daily brief: top 3 actions,<br/>follow-ups due, heads-up"]
-    B --> D["you act"]
-    D -.->|"next morning"| S
-```
 
 On the first run of each week it offers a five-minute reflection; when several weeks of numbers say the search itself isn't working, it hands you to `career-coach`.
 
