@@ -189,6 +189,8 @@ Release notes: [CHANGELOG.md](CHANGELOG.md).
 
 `userdata/` is gitignored except the fictional examples, so your profile, journal and company notes stay on your machine unless you share them on purpose.
 
+**Install count (opt-in, off unless you say yes).** `/setup` asks once whether the plugin may send a one-time anonymous install count; existing installs are asked once by `/today`. If you say yes, it sends a random ID made on your machine and the plugin version, once. Nothing else: no name, email, CV, profile, companies or journal. The server (`telemetry-worker/`) stores no IP or user agent. Turn it off with "turn off the install count", `"consent": false` in `userdata/telemetry.json`, or `JOB_OFFER_TELEMETRY=0`.
+
 CI scans every push and PR for personal data. The blocklist is personal data itself, so it isn't in the repo — it comes from the `PRIVACY_PATTERNS` repository secret (one regex per line). Forking? Set your own secret, or remove `.github/workflows/privacy-check.yml`. Locally: keep the same list in `.privacy-patterns.local` and run `make privacy-check`.
 
 ## Contributing and feedback
