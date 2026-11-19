@@ -46,6 +46,10 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+### Fixed
+
+- `freehire.py` now reads a `freehire_filters:` block whose key line carries a `# comment`; before, the whole block was reported missing.
+
 ## [0.8.1] — 2026-11-19
 
 Freehire as a `/job-search` Discovery source (#26).

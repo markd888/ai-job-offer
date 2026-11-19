@@ -255,3 +255,12 @@ def test_survivor_link_drops_utm(userdata, tmp_path):
     out = json.loads(screen(userdata, tmp_path, {"jobs": [j]}).stdout)
     assert out["survivors"][0]["link"] == "https://jobs.lever.co/acme/1"
     assert out["survivors"][0]["position"] == "Senior Product Manager"
+
+
+def test_block_with_inline_comment_on_key_line(tmp_path):
+    """A `# comment` after `freehire_filters:` (as /setup-style profiles have)
+    must not hide the block."""
+    p = tmp_path / "profile.md"
+    p.write_text(PROFILE.replace("freehire_filters:\n", "freehire_filters:   # Freehire source\n"))
+    assert fh.read_filters(p.read_text())["countries"] == ["ES"]
+    assert run("freehire.py", "filters", "--profile", p).returncode == 0

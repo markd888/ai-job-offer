@@ -88,7 +88,7 @@ def read_filters(profile_text: str) -> dict | None:
     `key: [a, b]` or `key:` followed by `- item` lines. None if absent."""
     m = re.search(r"^---\s*\n(.*?)^---\s*$", profile_text, re.S | re.M)
     fm = m.group(1) if m else ""
-    b = re.search(r"^freehire_filters:\s*\n((?:[ \t]+.*\n?|\s*\n)*)", fm, re.M)
+    b = re.search(r"^freehire_filters:[ \t]*(?:#[^\n]*)?\n((?:[ \t]+.*\n?|\s*\n)*)", fm, re.M)
     if not b:
         return None
     out: dict = {}
