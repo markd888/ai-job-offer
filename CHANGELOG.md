@@ -46,6 +46,10 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.8.3] — 2026-11-20
+
+Install count fix: opt-ins now reach the counter.
+
 ### Fixed
 
 - Install count: send a `job-offer-telemetry/<version>` User-Agent; Cloudflare rejected the default Python agent (error 1010), so no opt-in was ever counted.
