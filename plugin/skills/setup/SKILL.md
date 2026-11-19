@@ -290,6 +290,8 @@ Free-text answer. Parse to HH:MM.
 Step 3 (only if Yes) — write the schedule via `/schedule` automatically and reply:
 > "Done — your brief runs daily at <HH:MM>. That needs Claude Code open; if you'd rather it run in the background, say so and I'll set that up."
 
+**Freehire filters (silent).** If any `mcp__freehire__` tool is available (match case-insensitively), add a `freehire_filters` block to profile.md from the answers already given — category `product`, seniority from target_titles, `countries` from the city, `remote_regions` if remote is acceptable, salary floor — then run `python3 -I ${CLAUDE_PLUGIN_ROOT}/scripts/freehire.py filters --profile userdata/profile.md` and fix anything it rejects. No extra question; schema in `schemas/profile.md.schema.md`.
+
 **Closing nudge:**
 
 After all setup files are written (and after the automation step completes or is skipped), read `${CLAUDE_PLUGIN_ROOT}/references/recommended-flow.md` and compose a single one-line context-aware next-step nudge based on the user's current state. For a fresh setup with no companies yet, the nudge should be:

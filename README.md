@@ -171,6 +171,7 @@ Optional — the plugin works without any of them. Each is a prompt pattern over
 | Calendar | Upcoming interviews in the brief; new or moved events to confirm |
 | Notion | The pipeline as a database, synced on demand |
 | Playwright | Checks that postings are still live; interviewer research |
+| Freehire | Live postings from 168 ATS platforms as a `/job-search` Discovery source |
 | Slack / Telegram / Discord | `/today` digests to an accountability channel |
 
 ## Requirements

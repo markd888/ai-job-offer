@@ -27,6 +27,12 @@ people = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(people)
 PERSON_REQUIRED = ["name", "relation"]
 
+# Freehire filter rules (enums, geography) live with the Discovery code.
+_FH_PY = _PEOPLE_PY.parent / "freehire.py"
+_spec = importlib.util.spec_from_file_location("freehire", _FH_PY)
+freehire = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(freehire)
+
 STATUS_ENUM = {"new", "to_apply", "applied", "interviewing", "offer",
                "rejected", "not_interested"}
 CHANNEL_ENUM = {"referral", "cold", "recruiter", "linkedin", "company-site", "other"}
@@ -120,6 +126,9 @@ def _check_profile(root: Path, p: Path) -> list[Finding]:
         out.append(Finding(rel, "profile.required", f"missing: {', '.join(missing)}"))
     if not re.search(r"^## Positioning\s*$", text, re.MULTILINE):
         out.append(Finding(rel, "profile.positioning", "no '## Positioning' section"))
+    filters = freehire.read_filters(text)
+    if filters is not None:
+        out.extend(Finding(rel, "profile.freehire-filters", e) for e in freehire.validate(filters))
     return out
 
 
