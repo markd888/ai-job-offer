@@ -32,7 +32,8 @@ These are commonly present and read by some skills; absence is allowed but flagg
 - **`last_seen`** — date the role was most recently confirmed live (e.g. by recheck). ISO 8601.
 - **`last_activity`** — date of most recent state change. ISO 8601. Used by `/today`'s heads-up for stale-pipeline flagging.
 - **`monitoring`** — boolean, `true` for companies the user wants to be re-checked on `/job-search` runs even when no role is active.
-- **`source`** — discovery source. Examples: `discovery`, `recheck`, `user`, `evaluate-position`.
+- **`source`** — discovery source. Examples: `discovery`, `recheck`, `user`, `evaluate-position`, `freehire`.
+- **`freehire_slug`**, **`reality`** (`fresh`/`stale`), **`link_verified`** — written by `/job-search` for Freehire candidates (`references/job-search-freehire.md`).
 - **`location`** — optional one-line location/remote flag.
 - **`date_applied`** — date the application went out. ISO 8601. Written by `/sent` (or the dashboard's status dropdown); read by `/today` and `/follow-up`, which counts the quiet days from it.
 - **`channel`** — how the application went out. Enum: `referral`, `cold`, `recruiter`, `linkedin`, `company-site`, `other`. Written by `/sent`; checked by rule `meta.channel-enum`. Read by `plugin/scripts/funnel.py` for the funnel by channel (dashboard, `career-coach`, `/today`'s weekly line); a role without it counts as `unknown`.

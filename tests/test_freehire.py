@@ -207,3 +207,51 @@ def test_aggregator_copy_loses_to_ats(userdata, tmp_path):
     b = job("Proton", "Senior Product Manager", "https://freehire.me/jobs/b", "b", source="greenhouse")
     out = json.loads(screen(userdata, tmp_path, {"jobs": [a, b]}).stdout)
     assert [s["freehire_slug"] for s in out["survivors"]] == ["b"]
+
+
+# ---------- part 2: window, compare, ledger compatibility ----------
+
+def ledger(userdata, *rows):
+    (userdata / "outputs").mkdir(exist_ok=True)
+    (userdata / "outputs" / "seen-roles.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+
+
+def test_window_first_run_gap_and_cap(userdata):
+    assert fh.window(userdata, "2026-11-20") == 7
+    ledger(userdata, {"source": "freehire", "first_surfaced": "2026-11-17"},
+           {"source": "web", "first_surfaced": "2026-11-19"})
+    assert fh.window(userdata, "2026-11-20") == 4
+    assert fh.window(userdata, "2027-03-01") == 30
+
+
+def test_compare_counts_per_source(userdata):
+    ledger(userdata,
+           {"source": "freehire", "first_surfaced": "2026-11-20", "outcome": "filed", "tier": "P0"},
+           {"source": "freehire", "first_surfaced": "2026-11-20", "outcome": "filed", "tier": "P2",
+            "also_source": "web"},
+           {"source": "freehire", "first_surfaced": "2026-11-21", "outcome": "hard_dup"},
+           {"source": "web", "first_surfaced": "2026-11-20", "outcome": "gone"},
+           {"source": "web", "first_surfaced": "2026-11-20", "outcome": "filed", "tier": "P1"},
+           {"source": "web", "first_surfaced": "2026-11-01", "outcome": "gone"},
+           {"strict_key": "old line without source"})
+    r = run("freehire.py", "compare", "--userdata", userdata, "--since", "2026-11-20")
+    out = json.loads(r.stdout)
+    assert out["freehire"]["surfaced"] == 3 and out["freehire"]["P0"] == 1 and out["freehire"]["found_by_both"] == 1
+    assert out["freehire"]["hard_dup"] == 1 and out["freehire"]["dead_link_rate"] == 0.0
+    assert out["web"]["surfaced"] == 2 and out["web"]["dead_link_rate"] == 0.5
+
+
+def test_ledger_lines_in_dedup_shape_are_honoured(userdata, tmp_path):
+    """Real ledger lines carry company_key / raw_title / url_key, not company / link."""
+    ledger(userdata,
+           {"company_key": "proton", "raw_title": "Senior Product Manager", "first_surfaced": "2026-11-01"},
+           {"url_key": "https://jobs.ashbyhq.com/bvnk/1", "first_surfaced": "2026-11-01"})
+    out = json.loads(screen(userdata, tmp_path, PROBE).stdout)
+    assert {s["company"] for s in out["survivors"]} == {"Gameloft"}
+
+
+def test_survivor_link_drops_utm(userdata, tmp_path):
+    j = job("Acme Pay", "Senior Product Manager", "https://jobs.lever.co/acme/1?utm_source=freehire.me", "ap-1")
+    out = json.loads(screen(userdata, tmp_path, {"jobs": [j]}).stdout)
+    assert out["survivors"][0]["link"] == "https://jobs.lever.co/acme/1"
+    assert out["survivors"][0]["position"] == "Senior Product Manager"
