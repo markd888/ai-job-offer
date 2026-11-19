@@ -51,7 +51,7 @@ PROBE = {
         job("Jobgether", "Senior Product Manager - Fintech", "https://jobgether.com/1", "jg-1"),
         job("GemPool", "Lead Product Manager", "https://gempool.io/1", "gp-1"),
         job("Panggea", "Area Product Manager", "https://panggea.com/1", "pg-area"),
-        job("Nebius", "Senior Product Manager", "https://nebius.com/careers/9", "nb-9"),
+        job("Northwind", "Senior Product Manager", "https://northwind.example/careers/9", "nw-9"),
     ],
     "meta": {"total": 11, "ignored_params": []},
 }
@@ -60,8 +60,8 @@ PROBE = {
 @pytest.fixture
 def userdata(tmp_path):
     (tmp_path / "companies").mkdir()
-    write_meta(tmp_path / "companies" / "Nebius", company="Nebius", position="Senior Product Manager",
-               status="interviewing", link="https://nebius.com/careers/1")
+    write_meta(tmp_path / "companies" / "Northwind", company="Northwind", position="Senior Product Manager",
+               status="interviewing", link="https://northwind.example/careers/1")
     (tmp_path / "profile.md").write_text(PROFILE)
     return tmp_path
 
