@@ -10,6 +10,10 @@ to judgement:
              argument sets as JSON. Country and remote-region filters are a
              UNION on Freehire's side, so they are always emitted as separate
              calls, never one.
+  window     Print posted_within_days for this run: days since the last
+             Freehire run in the seen-ledger (7 on a first run, max 30).
+  compare    Per-source counts from the seen-ledger since a date: surfaced,
+             filed by tier, dead on fetch, duplicates, found by both.
   screen     Read saved search_jobs responses (JSON files), stop if Freehire
              ignored any parameter, then drop off-target titles, agencies and
              duplicates (within the batch and against userdata/companies).
@@ -18,6 +22,8 @@ to judgement:
 Usage:
   python3 -I freehire.py detect < tool-names.txt
   python3 -I freehire.py filters --profile userdata/profile.md [--open-within-days 7]
+  python3 -I freehire.py window --userdata userdata
+  python3 -I freehire.py compare --userdata userdata --since 2026-11-20
   python3 -I freehire.py screen --userdata userdata RESULT.json [RESULT.json ...]
 
 Exit codes: 0 ok, 1 not found / invalid filters, 3 ignored_params guard tripped.
@@ -189,6 +195,17 @@ def _url(job: dict) -> str:
     return job.get("official_job_url") or job.get("apply_url") or job.get("url") or ""
 
 
+def url_key(url: str) -> str:
+    """Same rule as references/dedup-normalization.md."""
+    u = re.split(r"[?#]", (url or "").strip().lower())[0].rstrip("/")
+    return re.sub(r"^(https?://)www\.", r"\1", u)
+
+
+def clean_link(url: str) -> str:
+    """Employer link without Freehire's tracking parameters."""
+    return re.sub(r"[?&]utm_[^&]*", "", url or "").rstrip("?&")
+
+
 def is_job_board(job: dict) -> bool:
     """True when the posting came via a job board rather than the employer's
     ATS: by Freehire's `source` field (MCP previews carry only the Freehire page
@@ -225,7 +242,7 @@ def tracked(userdata: Path) -> tuple[set, set, set]:
         if g("freehire_slug"):
             slugs.add(g("freehire_slug"))
         if g("link"):
-            links.add(g("link").split("?")[0].rstrip("/"))
+            links.add(url_key(g("link")))
     seen = userdata / "outputs" / "seen-roles.jsonl"
     if seen.exists():
         for line in seen.read_text().splitlines():
@@ -235,10 +252,13 @@ def tracked(userdata: Path) -> tuple[set, set, set]:
                 continue
             if r.get("freehire_slug"):
                 slugs.add(r["freehire_slug"])
-            if r.get("link"):
-                links.add(str(r["link"]).split("?")[0].rstrip("/"))
-            if r.get("company") and (r.get("position") or r.get("title")):
-                keys.add((norm_company(r["company"]), norm(r.get("position") or r.get("title"))))
+            for u in (r.get("url_key"), r.get("link")):
+                if u:
+                    links.add(url_key(str(u)))
+            company = r.get("company") or r.get("company_key")
+            title = r.get("position") or r.get("raw_title") or r.get("title")
+            if company and title:
+                keys.add((norm_company(company), norm(title)))
     return keys, slugs, links
 
 
@@ -256,7 +276,7 @@ def screen(jobs: list[dict], userdata: Path, allow=None, deny=None, exclude=()) 
 
     for job in jobs:
         title, company = norm(job.get("title", "")), company_key(job)
-        url = _url(job).split("?")[0].rstrip("/")
+        url = url_key(_url(job))
         if any(d in title for d in deny) or not (any(a in title for a in allow)
                                                  or any(p.search(title) for p in patterns)):
             drop("title", job); continue
@@ -274,11 +294,63 @@ def screen(jobs: list[dict], userdata: Path, allow=None, deny=None, exclude=()) 
                 drop("duplicate", job)
             continue
         best[k] = job
-    survivors = [{"company": _company(j), "title": j.get("title", ""), "freehire_slug": j.get("slug", ""),
-                  "link": _url(j), "location": j.get("location", ""), "work_mode": j.get("work_mode", ""),
+    survivors = [{"company": _company(j), "position": j.get("title", ""), "freehire_slug": j.get("slug", ""),
+                  "link": clean_link(_url(j)), "location": j.get("location", ""), "work_mode": j.get("work_mode", ""),
                   "reality": j.get("reality", ""), "source": j.get("source", "")} for j in best.values()]
     return {"survivors": survivors, "dropped": {k: len(v) for k, v in dropped.items()},
             "dropped_detail": dropped}
+
+
+# ---------- run window + source comparison ----------
+
+def _ledger(userdata: Path) -> list[dict]:
+    seen = userdata / "outputs" / "seen-roles.jsonl"
+    rows = []
+    if seen.exists():
+        for line in seen.read_text().splitlines():
+            try:
+                rows.append(json.loads(line))
+            except ValueError:
+                continue
+    return rows
+
+
+def window(userdata: Path, today: str, default: int = 7, cap: int = 30) -> int:
+    """Days since the last Freehire run (latest first_surfaced of a freehire
+    ledger line), so `posted_within_days` covers exactly the gap. Default on a
+    first run; capped so a long break doesn't page through a month."""
+    from datetime import date
+    dates = [r.get("first_surfaced", "") for r in _ledger(userdata) if r.get("source") == "freehire"]
+    dates = [d for d in dates if re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(d))]
+    if not dates:
+        return default
+    gap = (date.fromisoformat(today) - date.fromisoformat(max(dates))).days
+    return max(1, min(cap, gap + 1))
+
+
+OUTCOMES = ("filed", "hard_dup", "soft_dup", "gone", "unscored")
+
+
+def compare(userdata: Path, since: str) -> dict:
+    """Per source, from ledger lines surfaced on or after `since`: how many
+    candidates, how many filed and at which tier, how many dead on fetch
+    (`gone`), how many duplicates, and how many the other source also found."""
+    out: dict = {}
+    for r in _ledger(userdata):
+        if str(r.get("first_surfaced", "")) < since or not r.get("source"):
+            continue
+        s = out.setdefault(r["source"], {"surfaced": 0, **{o: 0 for o in OUTCOMES},
+                                         "P0": 0, "P1": 0, "P2": 0, "found_by_both": 0})
+        s["surfaced"] += 1
+        if r.get("outcome") in OUTCOMES:
+            s[r["outcome"]] += 1
+        if r.get("outcome") == "filed" and r.get("tier") in ("P0", "P1", "P2"):
+            s[r["tier"]] += 1
+        if r.get("also_source"):
+            s["found_by_both"] += 1
+    for s in out.values():
+        s["dead_link_rate"] = round(s["gone"] / s["surfaced"], 2) if s["surfaced"] else 0.0
+    return out
 
 
 # ---------- CLI ----------
@@ -298,6 +370,12 @@ def main(argv: list[str]) -> int:
     f = sub.add_parser("filters")
     f.add_argument("--profile", type=Path, required=True)
     f.add_argument("--open-within-days", type=int)
+    w = sub.add_parser("window")
+    w.add_argument("--userdata", type=Path, required=True)
+    w.add_argument("--today", default=__import__("datetime").date.today().isoformat())
+    c = sub.add_parser("compare")
+    c.add_argument("--userdata", type=Path, required=True)
+    c.add_argument("--since", required=True)
     s = sub.add_parser("screen")
     s.add_argument("--userdata", type=Path, required=True)
     s.add_argument("--profile", type=Path)
@@ -310,6 +388,13 @@ def main(argv: list[str]) -> int:
             print("Freehire MCP not connected — use WebSearch Discovery.")
             return 1
         print(prefix)
+        return 0
+
+    if a.cmd == "window":
+        print(window(a.userdata, a.today))
+        return 0
+    if a.cmd == "compare":
+        print(json.dumps(compare(a.userdata, a.since), indent=2))
         return 0
 
     profile = a.profile.read_text() if getattr(a, "profile", None) else ""

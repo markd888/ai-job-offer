@@ -1,6 +1,6 @@
 ---
 name: job-search
-description: This skill should be used when the user asks to "/job-search", "weekly job search", "find new roles", "discover postings", "recheck monitoring companies", "any new jobs at <companies>", or wants a sweep of new job postings matching their profile plus a recheck of companies they're tracking. Three-phase architecture: pre-flight extracts dedup sets from existing meta.md, Phase 1 runs Recheck-A / Recheck-B / Discovery in parallel via subagents (Recheck uses public ATS APIs — Ashby GraphQL, Greenhouse REST, Lever REST; Discovery uses site:-scoped WebSearch to skip aggregators, seeded by Companies of interest in profile.md), Phase 2 scores every surviving candidate and auto-files them directly (writes meta.md + research-brief.md with status: new, no manual pick step). Optional Playwright MCP for link-liveness verification.
+description: This skill should be used when the user asks to "/job-search", "weekly job search", "find new roles", "discover postings", "recheck monitoring companies", "any new jobs at <companies>", or wants a sweep of new job postings matching their profile plus a recheck of companies they're tracking. Three-phase architecture: pre-flight extracts dedup sets from existing meta.md, Phase 1 runs Recheck-A / Recheck-B / Discovery in parallel via subagents (Recheck uses public ATS APIs — Ashby GraphQL, Greenhouse REST, Lever REST; Discovery uses the Freehire MCP when connected and/or site:-scoped WebSearch, seeded by Companies of interest in profile.md), Phase 2 scores every surviving candidate and auto-files them directly (writes meta.md + research-brief.md with status: new, no manual pick step). Optional Playwright MCP for link-liveness verification.
 ---
 
 # /job-search — three-phase discovery and monitoring sweep
@@ -19,6 +19,7 @@ Architecture lifted from the predecessor workflow with two changes: storage is m
   - `--companies <Co1,Co2>` — when combined with `--recheck-only`, scope the recheck.
   - `--with-playwright` — use Playwright MCP for link-liveness verification in Phase 2. If the MCP isn't installed, fall back gracefully and note `link_verified: false`.
   - `--market-check` — the light quarterly look for a closed search (below).
+  - `--source freehire|web|both` — which Discovery source runs. Default: `both` when a Freehire MCP tool is available (`freehire.py detect` over the tool names, case-insensitive), else `web`. `freehire` without the MCP → say so in one line and run `web`. Anything that includes `freehire` → read `${CLAUDE_PLUGIN_ROOT}/references/job-search-freehire.md` before Phase 0 and follow it.
 
 **Closed search.** If `search_state: dormant` in `userdata/strategy.md` (set by `/job-offer:wrap-up`), don't sweep. Without `--market-check`, say in one line that the search is closed and offer `/job-offer:wrap-up --reopen`; stop. With `--market-check`: run only the Recheck over companies with `monitoring: true` or a P0 role, in the main conversation (no Discovery, no subagents), file nothing, list what's open in at most five lines (`- <Company> — <Position> — <url>`), then set `last_market_check: <today>` in `strategy.md`'s frontmatter and say so in one clause. The seen-ledger is still updated, so the same roles don't resurface after a reopen.
 
@@ -112,19 +113,20 @@ After the first run the entries remain in `profile.md` but Discovery does not
 need to re-treat them as seeds — they'll be tracked under `userdata/companies/`
 going forward.
 
-## Phase 1 — Parallel work (3 subagents, run in one message)
+## Phase 1 — Parallel work (3–4 subagents, run in one message)
 
-Unless `--no-parallel`, dispatch three Agent calls in a SINGLE message with `run_in_background: true`:
+Unless `--no-parallel`, dispatch the Agent calls in a SINGLE message with `run_in_background: true`:
 
 1. **Recheck-A** — uses the "Recheck subagent prompt" below with `{BATCH}` = `recheck_a`, `{BATCH_ID}` = `a`. Writes `/tmp/pmjs-recheck-a.json`.
 2. **Recheck-B** — same prompt, `{BATCH}` = `recheck_b`, `{BATCH_ID}` = `b`. Writes `/tmp/pmjs-recheck-b.json`.
-3. **Discovery** — uses the "Discovery subagent prompt" below with the pre-flight exclusion data and the profile-derived query bucket. Writes `/tmp/pmjs-discovery.json`.
+3. **Discovery** (source `web` or `both`) — uses the "Discovery subagent prompt" below with the pre-flight exclusion data and the profile-derived query bucket. Writes `/tmp/pmjs-discovery.json`.
+4. **Freehire** (source `freehire` or `both`) — uses the "Freehire subagent prompt" in `references/job-search-freehire.md`. Writes `/tmp/pmjs-freehire.json`.
 
-Wait for all three to finish (notifications) before moving to Phase 2. With `--no-parallel`, just run each step inline.
+Wait for all of them to finish (notifications) before moving to Phase 2. With `--no-parallel`, just run each step inline.
 
 ## Phase 2 — Score and file every surviving candidate (no manual step)
 
-1. Read all three Phase 1 output files.
+1. Read every Phase 1 output file (plus `/tmp/pmjs-freehire.json` when Freehire ran — its Phase 2 additions are in the reference).
 2. Re-read the existing companies/*/meta.md (the recheck agents may have surfaced new candidates that overlap with discovery — re-derive the exclusion set to be safe).
 3. With `--with-playwright`, verify P0/P1 candidate URLs are live (`browser_navigate` + `browser_snapshot`; expired = redirect / "no longer available" / content < ~300 chars). Without Playwright, skip verification and tag each candidate `link_verified: false`.
 
@@ -134,7 +136,7 @@ For each candidate from Phase 1 (Discovery) and the Recheck passes:
    - **Hard duplicate** (`url_key` OR `strict_key` matches): if a matching meta.md entry exists, touch its `last_seen:`. Skip filing. Do not duplicate.
    - **Soft duplicate** (`base_key` matches at the same company, but not `url_key`/`strict_key`): do NOT file. Add it to a `skipped_repeats` list (title + link) for the run summary, so the user can ask to file it if it's a genuinely distinct role. Same company + different position still reaches `/evaluate-position`'s 1→2 migration when the user opts in.
    - **New** (no match): proceed to score and file.
-2. **Record every candidate in the seen-ledger.** For each candidate evaluated in this step (filed, hard-dup, or soft-dup), if its `strict_key` is not already present in `userdata/outputs/seen-roles.jsonl`, append one line: `{"company_key": ..., "strict_key": ..., "base_key": ..., "url_key": ..., "raw_title": <original position>, "first_surfaced": <today ISO>}`. This is what stops the same role resurfacing after its folder is deleted. Append once per key — never rewrite existing lines.
+2. **Record every candidate in the seen-ledger.** For each candidate evaluated in this step (filed, hard-dup, or soft-dup), if its `strict_key` is not already present in `userdata/outputs/seen-roles.jsonl`, append one line: `{"company_key": ..., "strict_key": ..., "base_key": ..., "url_key": ..., "raw_title": <original position>, "first_surfaced": <today ISO>, "source": "freehire|web|recheck", "outcome": "filed|hard_dup|soft_dup|gone|unscored", "tier": <when filed>}`. `source`/`outcome`/`tier` feed `freehire.py compare`. This is what stops the same role resurfacing after its folder is deleted. Append once per key — never rewrite existing lines.
 3. Score each new candidate using the tier rubric in `userdata/profile.md` (same logic as `/evaluate-position`). Fetching the JD is part of scoring — a score invented without reading the posting is worthless. Handle a failed fetch by what the failure proves, not by defaulting to a stub:
 
    - **Posting confirmed gone** — the board's own public API says so (Ashby's org job list omits the ID; Greenhouse/Lever return 404 or an empty posting list), or the page renders an explicit "no longer available" / "position has been filled". **Drop it. Do not file, do not stub.** Record it in the seen-ledger so it never resurfaces. A dead posting is not a lead.
@@ -270,12 +272,14 @@ Identity keys and match rules live in `${CLAUDE_PLUGIN_ROOT}/references/dedup-no
 - Never flips `monitoring`, `status`, or any other field on existing entries — the only write to an existing meta.md is touching `last_seen:` when a dedup match is found.
 - Never rewrites the seen-ledger — it is append-only. New keys are added; existing lines are never edited or removed.
 - Never auto-applies or sends outreach.
-- Never requires Playwright. Optional only.
+- Never requires Playwright or Freehire. Both optional.
+- Never applies, saves or tracks through Freehire, and never subscribes to its alerts unasked.
 - Never invents postings, companies, positions, or links. If ATS APIs return nothing and WebSearch is thin, the run is a no-op. The Phase 2 validation gate rewrites any field a sub-agent drifted (e.g. `role:` → `position:`) rather than trusting it.
 
 ## Additional resources
 
 - **`references/ats-apis.md`** — full API specs for Ashby (GraphQL), Greenhouse (REST), Lever (REST). Slug extraction rules. Read before processing any company in a Recheck batch.
+- **`${CLAUDE_PLUGIN_ROOT}/references/job-search-freehire.md`** — the Freehire Discovery source: pre-flight filters, the subagent prompt, Phase 2 additions, source comparison. Read when `--source` includes `freehire`.
 - **`${CLAUDE_PLUGIN_ROOT}/references/site-queries.md`** — the query-bucket template, 8-10 standard queries derived from profile fields, how to mix titles × industries × geography.
 
 ## Smoke test against the Maya example

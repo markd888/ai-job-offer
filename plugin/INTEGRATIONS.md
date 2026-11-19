@@ -180,6 +180,8 @@ Country and remote-region filters are ORed by Freehire, so the script always emi
 - Title allow/deny lists drop Product Owner / BA / Agile noise; recruiter reposts and agencies are dropped.
 - Duplicates (the same role from LinkedIn and the employer's ATS) collapse to the ATS link; roles already in `companies/` or `outputs/seen-roles.jsonl` are skipped.
 
+**In `/job-search`.** With the MCP connected, `/job-search` runs Freehire alongside WebSearch (`--source both`, the default); `--source freehire` or `--source web` picks one. After a week of `both`, ask "compare sources" for surfaced / filed by tier / dead-link rate per source.
+
 **Out of scope.** Freehire's own tracking, apply and auto-apply. Markdown stays the system of record.
 
 ## Writing your own integration

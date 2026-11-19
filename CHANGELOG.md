@@ -48,7 +48,8 @@ without adopting the pipeline tracker.
 
 ### Added
 
-- `plugin/scripts/freehire.py` — Freehire Discovery groundwork (#26): case-insensitive MCP detection, `freehire_filters` in `profile.md` with enum validation (also rule `profile.freehire-filters` in `validate_userdata.py`), the `ignored_params` guard, title allow/deny, agency exclusion and dedup that prefers the employer's ATS link. `/setup` writes the filters when the MCP is connected. Wiring into `/job-search` follows separately.
+- `/job-search --source freehire|web|both` (#26, part 2): Freehire runs as a fourth parallel Discovery agent when its MCP is connected (default `both`), with filters from `profile.md`, a run window from the seen-ledger, `check_jobs_open` liveness and `get_job` for scoring. Seen-ledger lines gain `source`, `outcome` and `tier`; `freehire.py window` and `freehire.py compare` read them. Detail in `references/job-search-freehire.md`.
+- `plugin/scripts/freehire.py` — Freehire Discovery groundwork (#26): case-insensitive MCP detection, `freehire_filters` in `profile.md` with enum validation (also rule `profile.freehire-filters` in `validate_userdata.py`), the `ignored_params` guard, title allow/deny, agency exclusion and dedup that prefers the employer's ATS link. `/setup` writes the filters when the MCP is connected.
 
 ### Fixed
 
