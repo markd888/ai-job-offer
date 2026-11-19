@@ -169,3 +169,41 @@ def test_duplicate_preference_uses_source_field(userdata, tmp_path):
     b = job("Gameloft", "Senior Product Manager", "https://freehire.me/jobs/b", "b", source="workday")
     out = json.loads(screen(userdata, tmp_path, {"jobs": [a, b]}).stdout)
     assert [s["freehire_slug"] for s in out["survivors"]] == ["b"]
+
+
+def test_company_with_city_suffix_is_the_same_employer(userdata, tmp_path):
+    """The 2026-11-19 probe returned "Gameloft Lisbon" from LinkedIn and
+    "Gameloft" from the employer's ATS for one role."""
+    a = job("Gameloft Lisbon", "Lead Product Manager", "https://www.linkedin.com/jobs/view/7", "gl-li",
+            location="Lisbon, Lisbon District, Portugal")
+    b = job("Gameloft", "Lead Product Manager", "https://jobs.smartrecruiters.com/Gameloft/7", "gl-sr",
+            location="Lisbon, 11, pt")
+    out = json.loads(screen(userdata, tmp_path, {"jobs": [a, b]}).stdout)
+    assert [s["freehire_slug"] for s in out["survivors"]] == ["gl-sr"]
+    assert out["dropped"] == {"duplicate": 1}
+
+
+def test_city_word_kept_when_it_is_the_whole_name(userdata, tmp_path):
+    a = job("Lisbon", "Senior Product Manager", "https://lisbon.example/1", "b-1", location="Lisbon")
+    out = json.loads(screen(userdata, tmp_path, {"jobs": [a]}).stdout)
+    assert [s["company"] for s in out["survivors"]] == ["Lisbon"]
+
+
+@pytest.mark.parametrize("title", ["Senior PM, Payments", "Principal PM", "GPM - Checkout",
+                                   "Head of Payments Product", "Head of Product"])
+def test_pm_abbreviations_and_head_of_x_product_pass(userdata, tmp_path, title):
+    out = json.loads(screen(userdata, tmp_path, {"jobs": [job("Northwind Pay", title, "https://nw.example/1", "x")]}).stdout)
+    assert len(out["survivors"]) == 1, out["dropped_detail"]
+
+
+@pytest.mark.parametrize("title", ["Project Manager (PM)", "PMO Analyst", "Product Owner / PM"])
+def test_pm_pattern_does_not_override_deny_or_match_pmo(userdata, tmp_path, title):
+    out = json.loads(screen(userdata, tmp_path, {"jobs": [job("Northwind Pay", title, "https://nw.example/1", "x")]}).stdout)
+    assert out["survivors"] == []
+
+
+def test_aggregator_copy_loses_to_ats(userdata, tmp_path):
+    a = job("Proton", "Senior Product Manager", "https://freehire.me/jobs/a", "a", source="himalayas")
+    b = job("Proton", "Senior Product Manager", "https://freehire.me/jobs/b", "b", source="greenhouse")
+    out = json.loads(screen(userdata, tmp_path, {"jobs": [a, b]}).stdout)
+    assert [s["freehire_slug"] for s in out["survivors"]] == ["b"]

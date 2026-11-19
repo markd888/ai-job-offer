@@ -55,7 +55,16 @@ DEFAULT_DENY = ["product owner", "business analyst", "agile", "scrum master",
 # Recruiter reposts and staffing agencies: never the employer.
 AGENCIES = {"jobgether", "gempool", "hays", "randstad", "michael page", "adecco",
             "robert half", "crossover", "toptal", "turing", "andela"}
-JOB_BOARDS = ("linkedin.", "indeed.", "glassdoor.", "freehire.me")
+JOB_BOARDS = ("linkedin.", "indeed.", "glassdoor.", "freehire.me",
+              # aggregators Freehire also reads: never the employer's own ATS
+              "adzuna.", "arbeitnow.", "himalayas.", "justjoin.", "wttj.",
+              "welcometothejungle.", "spainjobs.", "jobindex.")
+# Title shapes a substring list misses: "Senior PM, Payments", "GPM",
+# "Head of Payments Product". Used only with the default allow list.
+ALLOW_PATTERNS = [re.compile(p) for p in (
+    r"\b(?:senior |lead |principal |staff |group )?g?pm\b",
+    r"\bhead of (?:\w+ ){0,3}product\b",
+)]
 
 
 # ---------- profile ----------
@@ -161,6 +170,16 @@ def norm_company(s: str) -> str:
     return " ".join(s.split())
 
 
+def company_key(job: dict) -> str:
+    """Company name for dedup: trailing words that also appear in the job's
+    location are dropped, so "Gameloft Lisbon" and "Gameloft" match."""
+    words = norm_company(_company(job)).split()
+    loc = set(norm(" ".join(str(job.get(k) or "") for k in ("location", "city", "cities"))).split())
+    while len(words) > 1 and words[-1] in loc:
+        words.pop()
+    return " ".join(words)
+
+
 def _company(job: dict) -> str:
     c = job.get("company") or job.get("company_name") or ""
     return c.get("name", "") if isinstance(c, dict) else str(c)
@@ -224,6 +243,7 @@ def tracked(userdata: Path) -> tuple[set, set, set]:
 
 
 def screen(jobs: list[dict], userdata: Path, allow=None, deny=None, exclude=()) -> dict:
+    patterns = ALLOW_PATTERNS if not allow else []
     allow = [norm(a) for a in (allow or DEFAULT_ALLOW)]
     deny = [norm(d) for d in (deny or DEFAULT_DENY)]
     excluded = {norm_company(c) for c in exclude} | AGENCIES
@@ -235,13 +255,15 @@ def screen(jobs: list[dict], userdata: Path, allow=None, deny=None, exclude=()) 
         dropped.setdefault(reason, []).append(f"{_company(job)} — {job.get('title', '')}")
 
     for job in jobs:
-        title, company = norm(job.get("title", "")), norm_company(_company(job))
+        title, company = norm(job.get("title", "")), company_key(job)
         url = _url(job).split("?")[0].rstrip("/")
-        if any(d in title for d in deny) or not any(a in title for a in allow):
+        if any(d in title for d in deny) or not (any(a in title for a in allow)
+                                                 or any(p.search(title) for p in patterns)):
             drop("title", job); continue
         if company in excluded or job.get("via_recruiter") is True:
             drop("agency", job); continue
-        if job.get("slug") in slugs or (url and url in links) or (company, title) in keys:
+        if (job.get("slug") in slugs or (url and url in links) or (company, title) in keys
+                or (norm_company(_company(job)), title) in keys):
             drop("already tracked", job); continue
         k = (company, title)
         if k in best:
