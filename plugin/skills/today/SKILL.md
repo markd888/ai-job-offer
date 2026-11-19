@@ -211,6 +211,10 @@ Each meta.md represents one `(company, position)` pair. Counts (active threads, 
 - Never writes an inferred fact the user hasn't confirmed.
 - Never writes meta.md fields beyond `next_event`, `status`, `last_inbound` and `## History`.
 
+## Install count
+
+After the brief, if `telemetry.py status` says never asked, ask once per `${CLAUDE_PLUGIN_ROOT}/references/setup-telemetry.md`.
+
 ## Smoke test
 
 Expected behaviour against Maya's example install, for debugging this skill: `${CLAUDE_PLUGIN_ROOT}/references/today-smoke-test.md`. Not needed at run time.

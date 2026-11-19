@@ -1,0 +1,10 @@
+{
+  "name": "job-offer-telemetry",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^2.0.0-rc.2",
+    "cf": "^1.0.0-rc.1",
+    "vite": "^7.3.8"
+  }
+}
