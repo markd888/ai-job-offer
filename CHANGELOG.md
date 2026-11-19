@@ -48,7 +48,7 @@ without adopting the pipeline tracker.
 
 ### Added
 
-- Opt-in anonymous install count (#32): `/setup` asks once (default No), `/today` asks installs that predate it once. With a yes, `plugin/scripts/telemetry.py` sends a random install ID and the plugin version, once. The Cloudflare Worker in `telemetry-worker/` stores no IP or user agent. Off switch: `telemetry.py opt-out` or `JOB_OFFER_TELEMETRY=0`.
+- Opt-in anonymous install count (#32): `/setup` asks once, `/today` asks installs that predate it once. With a yes, `plugin/scripts/telemetry.py` sends a random install ID and the plugin version, once. The Cloudflare Worker in `telemetry-worker/` stores no IP or user agent. Off switch: `telemetry.py opt-out` or `JOB_OFFER_TELEMETRY=0`.
 
 ### Fixed
 

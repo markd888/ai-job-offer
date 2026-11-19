@@ -273,7 +273,7 @@ user who has just answered nine questions wants roles, not a fifth conversation
 about themselves. The offer moves to `/today`, which surfaces it once the
 profile has been used in anger and the user can tell whether it is landing.
 
-**Install count.** Before the automation offer, follow `${CLAUDE_PLUGIN_ROOT}/references/setup-telemetry.md` (one opt-in question, default No).
+**Install count.** Before the automation offer, follow `${CLAUDE_PLUGIN_ROOT}/references/setup-telemetry.md` (one opt-in question).
 
 **Automation offer (split per TONE.md Rule A — one ask per message):**
 

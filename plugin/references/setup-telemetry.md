@@ -17,7 +17,7 @@ One `AskUserQuestion`, nothing before or after it:
 
 > "One last thing: may the plugin send a one-time anonymous install count? It's a random ID and the plugin version, nothing about you or your search. You can turn it off any time."
 
-Options, in this order: **No, keep everything local** / **Yes, count my install**.
+Options, in this order: **Yes, count my install** / **No, keep everything local**. Neither is pre-selected; the user picks.
 
 - No → `telemetry.py opt-out`. Reply with nothing extra.
 - Yes → `telemetry.py opt-in`. Reply in one clause: `Thanks — counted once.` Don't mention a network failure; the next run retries silently.
