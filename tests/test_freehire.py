@@ -172,21 +172,21 @@ def test_duplicate_preference_uses_source_field(userdata, tmp_path):
 
 
 def test_company_with_city_suffix_is_the_same_employer(userdata, tmp_path):
-    """The 2026-11-19 probe returned "Gameloft Barcelona" from LinkedIn and
+    """The 2026-11-19 probe returned "Gameloft Lisbon" from LinkedIn and
     "Gameloft" from the employer's ATS for one role."""
-    a = job("Gameloft Barcelona", "Lead Product Manager", "https://www.linkedin.com/jobs/view/7", "gl-li",
-            location="Barcelona, Catalonia, Spain")
+    a = job("Gameloft Lisbon", "Lead Product Manager", "https://www.linkedin.com/jobs/view/7", "gl-li",
+            location="Lisbon, Lisbon District, Portugal")
     b = job("Gameloft", "Lead Product Manager", "https://jobs.smartrecruiters.com/Gameloft/7", "gl-sr",
-            location="Barcelona, CT, es")
+            location="Lisbon, 11, pt")
     out = json.loads(screen(userdata, tmp_path, {"jobs": [a, b]}).stdout)
     assert [s["freehire_slug"] for s in out["survivors"]] == ["gl-sr"]
     assert out["dropped"] == {"duplicate": 1}
 
 
 def test_city_word_kept_when_it_is_the_whole_name(userdata, tmp_path):
-    a = job("Barcelona", "Senior Product Manager", "https://barcelona.example/1", "b-1", location="Barcelona")
+    a = job("Lisbon", "Senior Product Manager", "https://lisbon.example/1", "b-1", location="Lisbon")
     out = json.loads(screen(userdata, tmp_path, {"jobs": [a]}).stdout)
-    assert [s["company"] for s in out["survivors"]] == ["Barcelona"]
+    assert [s["company"] for s in out["survivors"]] == ["Lisbon"]
 
 
 @pytest.mark.parametrize("title", ["Senior PM, Payments", "Principal PM", "GPM - Checkout",

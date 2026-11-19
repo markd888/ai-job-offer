@@ -52,7 +52,7 @@ without adopting the pipeline tracker.
 
 ### Fixed
 
-- Freehire screening (#26): a company name with the job's city appended ("Gameloft Barcelona" from LinkedIn, "Gameloft" from the ATS) is now one employer, so the role isn't kept twice; the default title allowlist also passes `PM` / `GPM` abbreviations ("Senior PM, Payments") and "Head of <area> Product", while deny words still win; aggregator copies (Adzuna, Arbeitnow, Himalayas, Just Join IT, WTTJ, SpainJobs, Jobindex) lose to the employer's ATS link like LinkedIn does.
+- Freehire screening (#26): a company name with the job's city appended ("Gameloft Lisbon" from LinkedIn, "Gameloft" from the ATS) is now one employer, so the role isn't kept twice; the default title allowlist also passes `PM` / `GPM` abbreviations ("Senior PM, Payments") and "Head of <area> Product", while deny words still win; aggregator copies (Adzuna, Arbeitnow, Himalayas, Just Join IT, WTTJ, SpainJobs, Jobindex) lose to the employer's ATS link like LinkedIn does.
 
 ## [0.8.0] — 2026-11-17
 

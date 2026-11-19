@@ -172,7 +172,7 @@ def norm_company(s: str) -> str:
 
 def company_key(job: dict) -> str:
     """Company name for dedup: trailing words that also appear in the job's
-    location are dropped, so "Gameloft Barcelona" and "Gameloft" match."""
+    location are dropped, so "Gameloft Lisbon" and "Gameloft" match."""
     words = norm_company(_company(job)).split()
     loc = set(norm(" ".join(str(job.get(k) or "") for k in ("location", "city", "cities"))).split())
     while len(words) > 1 and words[-1] in loc:
