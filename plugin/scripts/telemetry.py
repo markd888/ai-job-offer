@@ -81,7 +81,9 @@ def ping(path: Path, today: str) -> str:
     if not url:
         return "skipped: no endpoint"
     req = urllib.request.Request(url, data=json.dumps(payload(state)).encode(),
-                                 headers={"Content-Type": "application/json"}, method="POST")
+                                 headers={"Content-Type": "application/json",
+                                          # Cloudflare rejects the default Python-urllib agent (error 1010)
+                                          "User-Agent": f"job-offer-telemetry/{version()}"}, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=4) as r:
             if r.status >= 300:

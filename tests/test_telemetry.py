@@ -19,11 +19,13 @@ from scripts_helpers import SCRIPTS
 
 class Sink(BaseHTTPRequestHandler):
     received: list = []
+    agents: list = []
     status = 204
 
     def do_POST(self):  # noqa: N802
         n = int(self.headers.get("Content-Length", 0))
         Sink.received.append(json.loads(self.rfile.read(n)))
+        Sink.agents.append(self.headers.get("User-Agent", ""))
         self.send_response(Sink.status)
         self.end_headers()
 
@@ -33,7 +35,7 @@ class Sink(BaseHTTPRequestHandler):
 
 @pytest.fixture
 def server():
-    Sink.received, Sink.status = [], 204
+    Sink.received, Sink.agents, Sink.status = [], [], 204
     srv = HTTPServer(("127.0.0.1", 0), Sink)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     yield f"http://127.0.0.1:{srv.server_port}/v1/install"
@@ -99,3 +101,9 @@ def test_unreachable_endpoint_is_silent(tmp_path):
 
 def test_no_endpoint_configured_is_a_noop(tmp_path):
     assert tel(tmp_path, "opt-in", url="") == "skipped: no endpoint"
+
+
+def test_sends_own_user_agent(tmp_path, server):
+    """Cloudflare blocks the default Python-urllib agent with error 1010."""
+    tel(tmp_path, "opt-in", url=server)
+    assert Sink.agents and Sink.agents[0].startswith("job-offer-telemetry/")
