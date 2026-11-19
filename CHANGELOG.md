@@ -46,6 +46,10 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.8.1] — 2026-11-19
+
+Freehire as a `/job-search` Discovery source (#26).
+
 ### Added
 
 - `/job-search --source freehire|web|both` (#26, part 2): Freehire runs as a fourth parallel Discovery agent when its MCP is connected (default `both`), with filters from `profile.md`, a run window from the seen-ledger, `check_jobs_open` liveness and `get_job` for scoring. Seen-ledger lines gain `source`, `outcome` and `tier`; `freehire.py window` and `freehire.py compare` read them. Detail in `references/job-search-freehire.md`.
