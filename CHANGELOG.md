@@ -46,6 +46,10 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+### Fixed
+
+- Install count: send a `job-offer-telemetry/<version>` User-Agent; Cloudflare rejected the default Python agent (error 1010), so no opt-in was ever counted.
+
 ## [0.8.2] — 2026-11-19
 
 Opt-in install count (#32) and a Freehire filters parsing fix.
