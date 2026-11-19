@@ -46,6 +46,10 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.8.2] — 2026-11-19
+
+Opt-in install count (#32) and a Freehire filters parsing fix.
+
 ### Added
 
 - Opt-in anonymous install count (#32): `/setup` asks once, `/today` asks installs that predate it once. With a yes, `plugin/scripts/telemetry.py` sends a random install ID and the plugin version, once. The Cloudflare Worker in `telemetry-worker/` stores no IP or user agent. Off switch: `telemetry.py opt-out` or `JOB_OFFER_TELEMETRY=0`.
