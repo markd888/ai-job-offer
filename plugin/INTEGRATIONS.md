@@ -155,6 +155,33 @@ The user could chain this — set up a daily reminder in their calendar that tri
 
 ---
 
+## 7. Freehire — live postings as a `/job-search` Discovery source
+
+**What it adds.** [Freehire](https://github.com/strelov1/freehire) indexes live postings crawled from company career pages on 168 ATS platforms (Workday, iCIMS, SmartRecruiters and others that the Ashby / Greenhouse / Lever recheck can't read). It's an alternative to `site:`-scoped WebSearch, which returns stale index entries and dead links.
+
+**Connect.**
+
+```sh
+claude mcp add --transport http -s user freehire https://freehire.me/api/v1/mcp
+```
+
+Public search works without signing in. The MCP is detected by tool name, case-insensitively (`mcp__freehire__` or `mcp__Freehire__`).
+
+**Filters.** `/setup` writes `freehire_filters` into `profile.md` when the MCP is connected; the shape is in `schemas/profile.md.schema.md`. Check them any time:
+
+```sh
+python3 -I plugin/scripts/freehire.py filters --profile userdata/profile.md
+```
+
+Country and remote-region filters are ORed by Freehire, so the script always emits them as two separate searches.
+
+**Guards** (`freehire.py screen`, run on saved `search_jobs` responses):
+- The keyless HTTP API doesn't reject unknown parameters, it lists them in `meta.ignored_params` and returns a broader result. Any ignored parameter stops the run (exit 3). The MCP's `search_jobs` has a typed schema, so a typo there fails at the call instead.
+- Title allow/deny lists drop Product Owner / BA / Agile noise; recruiter reposts and agencies are dropped.
+- Duplicates (the same role from LinkedIn and the employer's ATS) collapse to the ATS link; roles already in `companies/` or `outputs/seen-roles.jsonl` are skipped.
+
+**Out of scope.** Freehire's own tracking, apply and auto-apply. Markdown stays the system of record.
+
 ## Writing your own integration
 
 If you want to wire in a tool not listed above, the pattern is:

@@ -46,6 +46,10 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+### Added
+
+- `plugin/scripts/freehire.py` — Freehire Discovery groundwork (#26): case-insensitive MCP detection, `freehire_filters` in `profile.md` with enum validation (also rule `profile.freehire-filters` in `validate_userdata.py`), the `ignored_params` guard, title allow/deny, agency exclusion and dedup that prefers the employer's ATS link. `/setup` writes the filters when the MCP is connected. Wiring into `/job-search` follows separately.
+
 ## [0.8.0] — 2026-11-17
 
 The application loop closes end to end: record what was sent and by which channel, track the people who help, chase quiet applications from one rule, write cover letters, see the funnel by channel, and wrap up a search after an offer.
