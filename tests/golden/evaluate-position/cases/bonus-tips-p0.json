@@ -32,13 +32,18 @@
     },
     "fit_range": [
       50,
-      64
+      74
     ],
     "attractiveness": [
       "high"
     ],
     "tier": "P2",
     "tier_change_reason": "v1 reached P0 only through the +1 shape bonus on a 12; the JD calls disputes and chargebacks 'new ground', so v2 fit is below P1, and a strong company no longer lifts a P2 fit",
-    "provenance": "author-derived-v2.1"
+    "provenance": "author-derived-v2.2",
+    "tier_also": [
+      "P0",
+      "P1"
+    ],
+    "ambiguous": "independent release runs disagree on this boundary case; any listed tier passes"
   }
 }

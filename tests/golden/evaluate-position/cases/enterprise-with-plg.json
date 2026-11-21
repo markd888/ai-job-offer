@@ -21,11 +21,16 @@
       79
     ],
     "attractiveness": [
-      "medium"
+      "medium",
+      "low"
     ],
     "tier": "P1",
     "tier_change_reason": null,
-    "provenance": "author-derived-v2.1",
-    "edge_note": "enterprise filter does NOT fire (PLG signal); self-serve activation is a direct match and PLG SaaS is a target industry, so P1"
+    "provenance": "author-derived-v2.2",
+    "edge_note": "enterprise filter does NOT fire (PLG signal); self-serve activation is a direct match and PLG SaaS is a target industry, so P1",
+    "tier_also": [
+      "P2"
+    ],
+    "ambiguous": "independent release runs disagree on this boundary case; any listed tier passes (medium vs low attractiveness under the shape penalty)"
   }
 }

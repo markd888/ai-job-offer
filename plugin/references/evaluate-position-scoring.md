@@ -74,6 +74,12 @@ keeps transferable experience from scoring like direct experience:
 | `seniority_ownership` | Level, scope, reports, decision rights against `target_titles`. Same level → `EXPLICIT`; one level below the lowest target title → `TRANSFERABLE` at 55–65; two or more below → `CONTRADICTED`. |
 | `competitive_advantage` | What makes this user stand out for *this* posting (Moat, rare combos). |
 
+**Same function, off-target domain.** When `domain` is `WEAK` or `MISSING`
+(the industry is outside `target_industries`), the CV's direct experience of the
+function doesn't carry over whole: score `role_responsibility` as
+`TRANSFERABLE` (55–75) even if the function matches word for word, and cap
+`competitive_advantage` at 50 — the moat is domain-specific.
+
 **A role two or more levels below the target titles** (a mid-level PM post for
 a Lead/Head search) also caps `role_responsibility` at 50: owning one squad's
 backlog is not the same remit as owning the product, even when the topic matches.

@@ -25,6 +25,7 @@
     ],
     "tier": "P2",
     "tier_change_reason": null,
-    "provenance": "author-derived-v2"
+    "provenance": "author-derived-v2",
+    "edge_note": "off-target domain with no function match"
   }
 }

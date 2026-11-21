@@ -40,6 +40,7 @@
     ],
     "tier": "P2",
     "tier_change_reason": null,
-    "provenance": "author-derived-v2"
+    "provenance": "author-derived-v2",
+    "edge_note": "same function (activation) in an off-target domain: role is TRANSFERABLE and competitive advantage is capped, so fit stays below P1"
   }
 }

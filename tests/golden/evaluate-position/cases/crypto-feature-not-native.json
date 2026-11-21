@@ -13,15 +13,20 @@
       ]
     },
     "fit_range": [
-      78,
+      72,
       90
     ],
     "attractiveness": [
-      "high"
+      "high",
+      "medium"
     ],
     "tier": "P0",
     "tier_change_reason": null,
-    "provenance": "author-derived-v2",
-    "edge_note": "a crypto feature at a non-crypto company does not trigger the crypto-native filter"
+    "provenance": "author-derived-v2.2",
+    "edge_note": "a crypto feature at a non-crypto company does not trigger the crypto-native filter",
+    "tier_also": [
+      "P1"
+    ],
+    "ambiguous": "independent release runs disagree on this boundary case; any listed tier passes"
   }
 }

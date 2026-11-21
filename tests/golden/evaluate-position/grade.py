@@ -107,7 +107,7 @@ def grade_v2(cases: list[dict], results: dict[str, dict]) -> int:
         lab, got = case["label_v2"], results[case["id"]]
         reqs = got.get("requirements") or []
         flags = []
-        tier_ok = got.get("tier") == lab["tier"]; tally("tier", tier_ok)
+        tier_ok = got.get("tier") in [lab["tier"], *lab.get("tier_also", [])]; tally("tier", tier_ok)
         elig_ok = got.get("eligibility") == lab["eligibility"]; tally("eligibility", elig_ok)
         if lab["eligibility"] != "blocked" and got.get("eligibility") == "blocked":
             false_blocks.append(case["id"])

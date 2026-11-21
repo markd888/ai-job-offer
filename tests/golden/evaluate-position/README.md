@@ -15,6 +15,9 @@ longer lifts a weak fit).
 requirement must come back UNKNOWN, never FAIL), `evidence` (allowed evidence
 classes per dimension, only where the case tests it), `fit_range`,
 `attractiveness` (allowed levels), `tier`, `provenance`, optional `edge_note`.
+Optional `tier_also` + `ambiguous`: a boundary case where independent release
+runs disagreed; any listed tier passes. At most a fifth of the set may be
+ambiguous (CI enforces it) — five are, after the 2026-11-21 runs.
 
 Two layers:
 

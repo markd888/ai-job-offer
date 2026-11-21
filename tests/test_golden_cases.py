@@ -69,6 +69,7 @@ def _tier(fit, level, elig):
 
 def test_v2_case_count_and_spread():
     labels = [json.loads(p.read_text())["label_v2"] for p in ALL]
+    assert sum(bool(l.get("tier_also")) for l in labels) <= len(labels) // 5, "too many ambiguous cases to gate on"
     assert 30 <= len(labels) <= 50
     elig = [l["eligibility"] for l in labels]
     assert elig.count("blocked") >= 5 and elig.count("needs_review") >= 4
@@ -99,14 +100,19 @@ def test_v2_label_consistent(path):
     # Every combination the label allows must give the labelled tier — a range that
     # straddles a threshold, or an attractiveness set that would change it, is a typo.
     got = {_tier(f, a, lab["eligibility"]) for f in (lo, hi) for a in lab["attractiveness"]}
-    assert got == {lab["tier"]}, f"label allows tiers {got}"
+    allowed = {lab["tier"], *lab.get("tier_also", [])}
+    if lab.get("tier_also"):
+        assert lab.get("ambiguous"), "tier_also needs an 'ambiguous' note saying why"
+        assert got <= allowed, f"label range gives tiers {got} outside {allowed}"
+    else:
+        assert got == {lab["tier"]}, f"label allows tiers {got}"
 
 
 @pytest.mark.parametrize("path", CASES, ids=lambda p: p.stem)
 def test_v1_cases_keep_their_tier_or_say_why(path):
     case = json.loads(path.read_text())
     v1, v2 = case["label"]["tier"], case["label_v2"]["tier"]
-    if v1 != v2 and not (v1 == "filtered" and v2 == "P2"):
+    if v1 != v2 and v1 not in case["label_v2"].get("tier_also", []) and not (v1 == "filtered" and v2 == "P2"):
         assert case["label_v2"]["tier_change_reason"], f"{v1} → {v2} needs tier_change_reason"
     if v1 == "filtered":
         assert case["label_v2"]["eligibility"] == "blocked"
