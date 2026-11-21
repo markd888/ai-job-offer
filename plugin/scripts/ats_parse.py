@@ -23,6 +23,13 @@ import unicodedata
 
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
 PHONE = re.compile(r"\+?\d[\d\s().-]{7,}\d")
+
+
+def phones(text: str):
+    """Phone-like runs that aren't date ranges (2020 - 2023) and have 9+ digits."""
+    for m in PHONE.finditer(text):
+        if len(re.sub(r"\D", "", m.group())) >= 9 and not RANGE.fullmatch(m.group().strip()):
+            yield m
 LINKEDIN = re.compile(r"(?:https?://)?(?:[a-z]{2,3}\.)?linkedin\.com/in/[\w%-]+/?", re.I)
 MONTH = (r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?|"
          r"(?:янв|фев|мар|апр|ма[йя]|июн|июл|авг|сен|окт|ноя|дек)[а-я]*\.?")
@@ -114,13 +121,13 @@ def _candidate(head: list[str], text: str) -> dict:
     m = LINKEDIN.search(text)
     if m:
         c["linkedin"] = field(m.group(), m.group(), "high")
-    contact = next((ln for ln in lines if EMAIL.search(ln) or PHONE.search(ln)), "")
-    m = PHONE.search(contact) or PHONE.search(text)
+    contact = next((ln for ln in lines if EMAIL.search(ln) or next(phones(ln), None)), "")
+    m = next(phones(contact), None) or next(phones(text), None)
     if m:
         c["phone"] = field(m.group().strip(), m.group(), "high" if contact and m.group() in contact else "medium")
     for seg in re.split(r"\s*[|·•]\s*", contact):
         seg = seg.strip()
-        if seg and not (EMAIL.search(seg) or PHONE.search(seg) or "/" in seg or "." in seg) and re.search(r"[^\W\d]", seg):
+        if seg and not (EMAIL.search(seg) or next(phones(seg), None) or "/" in seg or "." in seg) and re.search(r"[^\W\d]", seg):
             c["location"] = field(seg, seg, "medium")
             break
     return c
@@ -130,8 +137,10 @@ def _role_line(line: str) -> tuple[str | None, str | None, str | None]:
     """(title, company, location) from 'Title | Company — Place' or 'Title at Company'."""
     rest = RANGE.sub("", line).strip(" |,–—-")
     loc = None
-    if " — " in rest:
-        rest, loc = rest.rsplit(" — ", 1)
+    for sep in (" — ", " – ", " - "):
+        if sep in rest and (sep == " — " or " | " in rest.split(sep)[0]):
+            rest, loc = rest.rsplit(sep, 1)
+            break
     if " | " in rest:
         title, company = rest.split(" | ", 1)
         return title.strip() or None, company.strip() or None, (loc or "").strip() or None
@@ -273,9 +282,9 @@ def parse(text: str, engine: str = "", fmt: str = "pdf", pages: int | None = Non
 def parse_md(md: str) -> dict:
     lines = md.splitlines()
     name = next((ln[2:].strip() for ln in lines if ln.startswith("# ")), None)
-    contact = next((ln for ln in lines if EMAIL.search(ln) or PHONE.search(ln)), "")
+    contact = next((ln for ln in lines if EMAIL.search(ln) or next(phones(ln), None)), "")
     loc = next((s.strip() for s in re.split(r"\s*[|·•]\s*", contact)
-                if s.strip() and not (EMAIL.search(s) or PHONE.search(s) or "/" in s or "." in s)), None)
+                if s.strip() and not (EMAIL.search(s) or next(phones(s), None) or "/" in s or "." in s)), None)
     jobs, edu, skills_lines, lang_lines, cert_lines, headings = [], [], [], [], [], []
     kind = None
     for i, ln in enumerate(lines):
@@ -309,7 +318,7 @@ def parse_md(md: str) -> dict:
             cert_lines.append(f"Group: {ln.lstrip('-* ')}")
     strip = lambda xs: [re.sub(r"[*_`]", "", x) for x in xs]  # noqa: E731
     return {"name": name, "email": (EMAIL.search(contact) or [None])[0] if contact else None,
-            "phone": (PHONE.search(contact).group().strip() if PHONE.search(contact) else None),
+            "phone": next((m.group().strip() for m in phones(contact)), None),
             "location": loc, "linkedin": (LINKEDIN.search(md).group() if LINKEDIN.search(md) else None),
             "headings": headings, "jobs": jobs, "education": edu,
             "skills": [s["value"] for s in _items(strip(skills_lines))[0]],

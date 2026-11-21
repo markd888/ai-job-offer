@@ -104,7 +104,7 @@ def test_cli_report_section_and_exit_code_unchanged(tmp_path):
     md = tmp_path / "cv.md"; md.write_text(CV_MD)
     res = run("ats-check.py", _docx(tmp_path), "--md", md, "--jd", jd, "--phone", "+351 912 111 222")
     assert res.returncode == 0, res.stdout
-    assert "## Job description matching" in res.stdout and "split from the posting by its headings" in res.stdout
+    assert "## 4. Job description matching" in res.stdout and "split from the posting by its headings" in res.stdout
     assert "| Kotlin | PREFERRED | NOT_FOUND | — |" in res.stdout
     assert "## Keyword coverage" not in res.stdout or "Covered:" in res.stdout   # legacy section kept when asked
 

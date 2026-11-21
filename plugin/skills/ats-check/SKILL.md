@@ -27,7 +27,9 @@ An ATS ranks the PDF's embedded text, not the page you see. Most rejections come
      --out <folder>/ats-check-<YYYY-MM-DD>.md
    ```
 
-   Without `--requirements`, the script splits `--jd` by the posting's own headings — rougher, but it works.
+   Without `--requirements`, the script splits `--jd` by the posting's own headings — rougher, but it works. Add `--json <tmp file>` if you need the structured result.
+
+   The report has seven sections — document integrity, parsing simulation, extraction fidelity, job description matching, readability & compatibility, recommendations, limitations — under a five-line component table (integrity, parsing completeness, extraction fidelity, requirement coverage, layout). There is no overall score; never add one up, and never let keyword coverage stand in for a broken contact block or a missing employment history.
 
    Use a Python with `pypdf` (a workspace venv such as `.claude/.venv/bin/python` if there is one), or install poppler's `pdftotext`.
 4. **Fix hard failures** before the CV is shown or sent. Exit code 1 means at least one:
@@ -36,6 +38,8 @@ An ATS ranks the PDF's embedded text, not the page you see. Most rejections come
    - `glyphs` — ligatures (ﬁ, ﬂ), `(cid:N)` codes or icon glyphs: rebuild with `cv-build.py` (reportlab + Carlito writes plain characters). CVs printed from a browser are the usual cause.
    - `order` — sections extract out of order: a multi-column layout; go single-column.
    - `fidelity` < 95% — text drawn as shapes or images; rebuild.
+
+   Warnings, fidelity rows that aren't `EXTRACTED`, and layout observations don't fail the check. Mention one only when it changes what the user should do (e.g. contacts sitting in a DOCX header, a role parsed without its dates), in the report's own words: it's what the text layer shows, not a verdict on any particular ATS.
 
    Rebuild with `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/cv-build.py" <cv-md> <out.pdf> 9 1.15`, then re-run the check.
 5. **Requirement and keyword gaps.** The report marks each requirement SUPPORTED (an experience or summary line shows it — quoted), PARTIALLY_SUPPORTED (part of it shown; only in the skills list; or only in `profile.md`), NOT_FOUND or AMBIGUOUS (nothing concrete to look for). For a partial or missing one, and for each missing keyword, look in `userdata/cv.md` and `userdata/profile.md`. If the experience is there, propose the exact line change in the posting's wording and apply it after the user says yes. If it isn't, it stays a gap — say so in one line. Never add a keyword or requirement the record doesn't support; a skills-list entry is not experience.

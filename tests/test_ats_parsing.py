@@ -160,5 +160,5 @@ def test_cli_report_has_parsing_and_fidelity_sections(tmp_path):
     md.write_text(CV_MD, encoding="utf-8")
     body = [ln.strip() for ln in TEXT.replace("\x7f\n", "").splitlines() if ln.strip()]
     res = run("ats-check.py", make_docx(tmp_path / "cv.docx", body), "--md", md, "--phone", "+351 912 111 222")
-    assert "## Parsing simulation" in res.stdout and "## Extraction fidelity" in res.stdout
+    assert "## 2. Parsing simulation" in res.stdout and "## 3. Extraction fidelity" in res.stdout
     assert "| job: Paycorp · dates | 2024 – Present | 2024 – Present | EXTRACTED |" in res.stdout
