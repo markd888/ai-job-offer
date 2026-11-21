@@ -1,0 +1,32 @@
+{
+  "id": "elig-language-unknown",
+  "synthetic": true,
+  "jd": "Lead PM — Consumer Lending, Berlin hybrid.\n\nKredo (Berlin, 70 people, Series B) runs an instalment-loan app for German consumers and is growing revenue 3x a year. We're hiring a Lead PM to own the loan-application funnel: underwriting decisions, pricing tests on APR tiers and activation of approved customers. You'll lead two PMs and report to the CPO. Hybrid in Berlin, two days a week; relocation support offered within Europe. Fluent German (C1) is required — all customer research and regulator correspondence is in German.",
+  "label_v2": {
+    "eligibility": "needs_review",
+    "must_fail": [],
+    "must_unknown": [
+      "German"
+    ],
+    "evidence": {
+      "role_responsibility": [
+        "EXPLICIT"
+      ],
+      "domain": [
+        "EXPLICIT"
+      ]
+    },
+    "fit_range": [
+      80,
+      92
+    ],
+    "attractiveness": [
+      "high",
+      "medium"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "the profile never states languages: UNKNOWN, not FAIL"
+  }
+}

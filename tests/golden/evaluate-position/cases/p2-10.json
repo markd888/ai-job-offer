@@ -16,5 +16,30 @@
     "hard_filter": null,
     "provenance": "author-derived-v1",
     "edge_note": null
+  },
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "role_responsibility": [
+        "EXPLICIT",
+        "TRANSFERABLE"
+      ],
+      "domain": [
+        "WEAK",
+        "MISSING"
+      ]
+    },
+    "fit_range": [
+      50,
+      64
+    ],
+    "attractiveness": [
+      "medium"
+    ],
+    "tier": "P2",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2"
   }
 }

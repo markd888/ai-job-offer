@@ -16,5 +16,28 @@
     "hard_filter": null,
     "provenance": "author-derived-v1",
     "edge_note": null
+  },
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "WEAK",
+        "TRANSFERABLE",
+        "MISSING"
+      ]
+    },
+    "fit_range": [
+      50,
+      64
+    ],
+    "attractiveness": [
+      "high"
+    ],
+    "tier": "P1",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "weak fit lifted one tier by a Series C 3x-growth company"
   }
 }

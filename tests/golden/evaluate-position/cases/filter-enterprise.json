@@ -10,5 +10,23 @@
     "hard_filter": "More than 500 employees AND enterprise/sales-led AND no PLG signal",
     "provenance": "author-derived-v1",
     "edge_note": null
+  },
+  "label_v2": {
+    "eligibility": "blocked",
+    "must_fail": [
+      "More than 500 employees AND enterprise/sales-led AND no PLG signal"
+    ],
+    "must_unknown": [],
+    "evidence": {},
+    "fit_range": null,
+    "attractiveness": [
+      "high",
+      "medium",
+      "low",
+      "unknown"
+    ],
+    "tier": "P2",
+    "tier_change_reason": "v2 files a blocked role as P2 instead of refusing to score; the filter still blocks",
+    "provenance": "author-derived-v2"
   }
 }

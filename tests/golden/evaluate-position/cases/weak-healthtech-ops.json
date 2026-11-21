@@ -1,0 +1,30 @@
+{
+  "id": "weak-healthtech-ops",
+  "synthetic": true,
+  "jd": "Senior PM — Clinic Scheduling, EMEA remote.\n\nCareslot (200 people, Series B) builds scheduling and rota software for private clinics across Europe. We're hiring a Senior PM to own appointment booking, clinician rota management and integrations with practice-management systems. No direct reports; you'll partner with a clinical-operations lead. Fully remote within Europe. Experience with healthcare workflows, HL7/FHIR integrations and clinical-safety standards is strongly preferred.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "MISSING",
+        "WEAK"
+      ],
+      "skills_experience": [
+        "MISSING",
+        "WEAK"
+      ]
+    },
+    "fit_range": [
+      35,
+      60
+    ],
+    "attractiveness": [
+      "medium"
+    ],
+    "tier": "P2",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2"
+  }
+}

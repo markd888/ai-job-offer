@@ -1,0 +1,31 @@
+{
+  "id": "elig-reports-unclear",
+  "synthetic": true,
+  "jd": "Head of Product — BNPL, London hybrid.\n\nTally (London, 45 people, Series A, founder-led) offers buy-now-pay-later checkout for independent UK retailers and their shoppers. We're hiring a Head of Product to build and lead the product team as we grow — the exact team shape is still being decided with the founders. You'll own the shopper app, credit decisions at checkout and pricing tests on merchant fees. Hybrid, two days a week in our Shoreditch office. Ideally you've shipped consumer-credit product and are happy being hands-on with specs and SQL.",
+  "label_v2": {
+    "eligibility": "needs_review",
+    "must_fail": [],
+    "must_unknown": [
+      "report"
+    ],
+    "evidence": {
+      "domain": [
+        "EXPLICIT"
+      ],
+      "competitive_advantage": [
+        "EXPLICIT"
+      ]
+    },
+    "fit_range": [
+      85,
+      97
+    ],
+    "attractiveness": [
+      "high"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "no report count: the >8-reports filter is UNKNOWN (missing info never FAILs)"
+  }
+}

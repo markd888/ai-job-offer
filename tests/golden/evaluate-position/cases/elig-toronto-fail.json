@@ -1,0 +1,23 @@
+{
+  "id": "elig-toronto-fail",
+  "synthetic": true,
+  "jd": "Lead PM — Rewards Card, Toronto on-site.\n\nMaple Pay (Toronto, 120 people, Series C) is a Canadian consumer-credit fintech with a fast-growing rewards card. We're hiring a Lead PM to own rewards, credit-limit increases and in-app card management, leading two PMs. The role is on-site five days a week at our Toronto headquarters and requires relocation to Canada; we sponsor work permits. You'll have shipped consumer-credit product at growth stage and be comfortable running pricing and rewards experiments with real money on the line.",
+  "label_v2": {
+    "eligibility": "blocked",
+    "must_fail": [
+      "Requires relocation outside EMEA"
+    ],
+    "must_unknown": [],
+    "evidence": {},
+    "fit_range": null,
+    "attractiveness": [
+      "high",
+      "medium",
+      "low",
+      "unknown"
+    ],
+    "tier": "P2",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2"
+  }
+}

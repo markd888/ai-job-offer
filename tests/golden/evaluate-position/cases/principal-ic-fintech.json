@@ -1,0 +1,30 @@
+{
+  "id": "principal-ic-fintech",
+  "synthetic": true,
+  "jd": "Principal PM — Credit Decisioning, EMEA remote.\n\nOakline (130 people, Series B, revenue growing 2x) builds lending infrastructure for European consumer-credit providers. We're hiring a Principal PM to set direction for our credit-decisioning product across two squads, without formal reports. Fully remote within Europe. You've shipped underwriting or credit-decision product at a fintech, can go deep with engineers on data integrations, and can run pricing and approval-rate experiments.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "EXPLICIT"
+      ],
+      "role_responsibility": [
+        "EXPLICIT",
+        "TRANSFERABLE"
+      ]
+    },
+    "fit_range": [
+      80,
+      92
+    ],
+    "attractiveness": [
+      "medium",
+      "high"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2"
+  }
+}

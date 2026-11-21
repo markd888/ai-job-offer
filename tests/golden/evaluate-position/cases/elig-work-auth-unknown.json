@@ -1,0 +1,28 @@
+{
+  "id": "elig-work-auth-unknown",
+  "synthetic": true,
+  "jd": "Head of Product — Credit Cards, Dublin hybrid.\n\nShamrock Credit (Dublin, 55 people, Series A, founder-led) is launching a credit-builder card for Irish consumers who are new to credit. We're hiring our first Head of Product to own the card product end to end — underwriting, pricing experiments and activation — leading two PMs and reporting to the CEO. Hybrid, three days a week in our Dublin office; we offer relocation within Europe. Candidates must already have the right to work in Ireland; we are unable to sponsor visas for this role.",
+  "label_v2": {
+    "eligibility": "needs_review",
+    "must_fail": [],
+    "must_unknown": [
+      "right to work"
+    ],
+    "evidence": {
+      "domain": [
+        "EXPLICIT"
+      ]
+    },
+    "fit_range": [
+      82,
+      95
+    ],
+    "attractiveness": [
+      "high",
+      "medium"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2"
+  }
+}

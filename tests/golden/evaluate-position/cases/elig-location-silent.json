@@ -1,0 +1,28 @@
+{
+  "id": "elig-location-silent",
+  "synthetic": true,
+  "jd": "Lead PM — Growth, consumer fintech.\n\nPennyjar (60 people, Series B, 4x year-on-year revenue) builds a savings and credit-builder app for young adults. We're hiring a Lead PM to own the growth surface: the signup-to-funded-account funnel, referral loops and pricing tests on our premium tier. You'll lead two PMs and work directly with the founders, who are still close to product. We want someone who has owned a freemium-to-paid conversion funnel and run pricing experiments at a growth-stage fintech. The posting doesn't say where the team is based or whether remote is possible.",
+  "label_v2": {
+    "eligibility": "needs_review",
+    "must_fail": [],
+    "must_unknown": [
+      "relocation"
+    ],
+    "evidence": {
+      "role_responsibility": [
+        "EXPLICIT"
+      ]
+    },
+    "fit_range": [
+      82,
+      95
+    ],
+    "attractiveness": [
+      "high"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "the JD is silent on location, so the relocation filter is UNKNOWN"
+  }
+}

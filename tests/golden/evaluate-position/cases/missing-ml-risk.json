@@ -1,0 +1,31 @@
+{
+  "id": "missing-ml-risk",
+  "synthetic": true,
+  "jd": "Lead PM — Credit Risk Models, London hybrid.\n\nFernbank (London, 110 people, Series B) is a consumer-credit lender for thin-file applicants. We're hiring a Lead PM to own our underwriting decision engine and the machine-learning credit models behind it — feature pipelines, model monitoring and champion/challenger releases — working with a team of data scientists. Hybrid, two days a week. Experience shipping ML models into production decisioning is a strong plus; consumer-credit underwriting experience is essential.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "skills_experience": [
+        "MISSING",
+        "WEAK",
+        "TRANSFERABLE"
+      ],
+      "domain": [
+        "EXPLICIT"
+      ]
+    },
+    "fit_range": [
+      66,
+      79
+    ],
+    "attractiveness": [
+      "medium"
+    ],
+    "tier": "P1",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "ML is a plus the profile doesn't mention: MISSING lowers confidence, it is not a gap"
+  }
+}

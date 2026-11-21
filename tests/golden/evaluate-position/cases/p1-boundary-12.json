@@ -16,5 +16,29 @@
     "hard_filter": null,
     "provenance": "author-derived-v1",
     "edge_note": null
+  },
+  "label_v2": {
+    "eligibility": "needs_review",
+    "must_fail": [],
+    "must_unknown": [
+      "actuar"
+    ],
+    "evidence": {
+      "skills_experience": [
+        "MISSING",
+        "WEAK"
+      ]
+    },
+    "fit_range": [
+      65,
+      79
+    ],
+    "attractiveness": [
+      "medium"
+    ],
+    "tier": "P1",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "'actuarial experience essential' is mandatory but the profile is silent: UNKNOWN, never FAIL"
   }
 }

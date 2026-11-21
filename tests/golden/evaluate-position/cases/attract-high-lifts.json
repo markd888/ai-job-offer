@@ -1,0 +1,27 @@
+{
+  "id": "attract-high-lifts",
+  "synthetic": true,
+  "jd": "Senior PM — Payouts, fintech, London hybrid.\n\nSettle (London, 65 people) just closed a Series B led by a tier-one fund after growing revenue 5x in a year. It builds instant payouts for marketplaces and gig platforms. We're hiring a Senior PM to own the payout experience for recipients: onboarding, payout speed tiers and pricing on instant transfers. No direct reports, reporting to the Head of Product. Hybrid, two days a week. Fintech experience is essential; pricing-experiment experience is a big plus.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "EXPLICIT",
+        "TRANSFERABLE"
+      ]
+    },
+    "fit_range": [
+      66,
+      79
+    ],
+    "attractiveness": [
+      "high"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "P1-level fit lifted one tier by a strongly growing company"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "elig-reports-gm",
+  "synthetic": true,
+  "jd": "Head of Product — Consumer Finance, London hybrid.\n\nOrbit Money (London, 450 people, Series D) runs a consumer finance app with savings, cards and loans. We're hiring a Head of Product who will directly manage our twelve product managers and four product designers, own the product P&L and sit on the exec team as general manager of the consumer business. Hybrid, two days a week in London. Experience running a product org of this size, with budget and hiring authority, is essential.",
+  "label_v2": {
+    "eligibility": "blocked",
+    "must_fail": [
+      "More than 8 direct reports (GM scope)"
+    ],
+    "must_unknown": [],
+    "evidence": {},
+    "fit_range": null,
+    "attractiveness": [
+      "high",
+      "medium",
+      "low",
+      "unknown"
+    ],
+    "tier": "P2",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2"
+  }
+}

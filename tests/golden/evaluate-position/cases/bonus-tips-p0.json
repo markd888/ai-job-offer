@@ -16,5 +16,31 @@
     "hard_filter": null,
     "provenance": "author-derived-v1",
     "edge_note": null
+  },
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "role_responsibility": [
+        "EXPLICIT",
+        "TRANSFERABLE"
+      ],
+      "seniority_ownership": [
+        "WEAK",
+        "TRANSFERABLE"
+      ]
+    },
+    "fit_range": [
+      66,
+      80
+    ],
+    "attractiveness": [
+      "high"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "v1 shape bonus is now attractiveness: founder-led Series A self-serve lifts a Senior-level fit one tier"
   }
 }
