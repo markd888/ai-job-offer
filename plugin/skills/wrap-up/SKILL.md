@@ -51,7 +51,7 @@ For each person under **Thank**, draft a thank-you per `/job-offer:outreach`'s t
 python3 -I .../wrap-up.py facts --userdata ... --offer <offer>
 ```
 
-prints the numbers: dates and days to offer, roles by status, the funnel overall and by channel, rejections by stage with the recruiters' own words, outreach. Quote them as printed — channel rates only where the script gives one (5+ applications), never a benchmark presented as the user's.
+prints the numbers: dates and days to offer, roles by status, the funnel overall and by channel, where rejections clustered (the same `rejection-patterns.py` summary `career-coach`'s rejection review uses — by stage, predicted tier, role level and time to rejection, with only the specific reasons quoted; template rejections are counted, not quoted), outreach. Quote them as printed — channel rates only where the script gives one (5+ applications), never a benchmark presented as the user's.
 
 Ask two questions, in one message: *What would you keep doing next time? What would you skip?* Then write `userdata/outputs/retro-<YYYY-MM-DD>.md`:
 

@@ -21,7 +21,7 @@ withdraw  — status: not_interested with date_not_interested and a History
             line, for roles the user withdrew from.
 facts     — the numbers for the retrospective, as markdown: dates and time to
             offer, the funnel overall and by channel, where rejections
-            clustered (with the recruiters' notes), outreach.
+            clustered (rejection-patterns.py: stage, tier, level, speed; specific reasons only), outreach.
 close     — strategy.md gets search_state: dormant, search_closed,
             accepted_offer and market_check; the offer role gets a History
             line. /today, /job-search and the dashboard go quiet.
@@ -49,6 +49,7 @@ def _load(name: str):
 mf = _load("metafile")
 people = _load("people")
 funnel = _load("funnel")
+rp = _load("rejection-patterns")
 
 WITHDRAW = ("applied", "interviewing", "offer")
 DROP = ("new", "to_apply")
@@ -177,12 +178,8 @@ def cmd_facts(userdata: Path, offer: str, day: str) -> str:
     rejected = [f for f in fields if f["status"] == "rejected"]
     lines += ["", "## Where it stopped", ""]
     if rejected:
-        by_stage = Counter(f["rejection_stage"] or "not recorded" for f in rejected)
-        lines.append("- Rejections by stage: " + ", ".join(f"{s} {n}" for s, n in by_stage.most_common()) + ".")
-        notes = [(r, mf.field(m, "rejection_note"), mf.field(m, "rejection_stage"))
-                 for r, m in all_roles if mf.field(m, "status") == "rejected" and mf.field(m, "rejection_note")]
-        for r, note, stage in notes:
-            lines.append(f"- {r} ({stage or 'stage not recorded'}): \"{note}\"")
+        # Same numbers career-coach's rejection review quotes; only specific reasons are quoted.
+        lines.append(rp.render(rp.analyse(rp.read_roles(userdata))))
     else:
         lines.append("- No rejections recorded.")
 

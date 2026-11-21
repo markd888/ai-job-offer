@@ -1,6 +1,6 @@
 {
   "name": "job-offer",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "description": "Daily driver for a senior PM job search, based on pm-job-search 0.6.0: role discovery and scoring, tailored CVs built to PDF and checked against an ATS, follow-ups, interview prep and a pipeline dashboard. Markdown first.",
   "author": {
     "name": "Mark Dragunov"
