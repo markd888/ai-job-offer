@@ -50,6 +50,7 @@ def _sibling(name: str):
 AX = _sibling("ats_extract")
 AM = _sibling("ats_match")
 AI = _sibling("ats_integrity")
+AP = _sibling("ats_parse")
 norm, words, md_plain, covered, jd_terms = AM.norm, AM.words, AM.md_plain, AM.covered, AM.jd_terms
 _INFO: dict = {}
 
@@ -69,6 +70,25 @@ def profile_phone(start: Path) -> str:
                 m = re.search(r"^phone:\s*\"?([^\"#\n]*)", p.read_text(encoding="utf-8"), re.M)
                 return m.group(1).strip() if m else ""
     return ""
+
+
+def parse_summary(p: dict) -> list[str]:
+    """What a parser would have filled in, in a few lines."""
+    c = p["candidate"]
+    val = lambda f: f["value"] if f["value"] is not None else "—"  # noqa: E731
+    out = ["What a parser could fill in from this text (heuristic; every field may be missing):", "",
+           f"- **Contact:** name {val(c['name'])}; email {val(c['email'])}; phone {val(c['phone'])}; "
+           f"location {val(c['location'])}; LinkedIn {val(c['linkedin'])}",
+           f"- **Sections recognised:** {', '.join(p['sections']) or '—'}"]
+    jobs = p["experience"]
+    dated = sum(1 for e in jobs if e["start_date"]["value"])
+    out.append(f"- **Employment:** {len(jobs)} entr{'y' if len(jobs) == 1 else 'ies'}, {dated} with dates")
+    out += [f"  - {val(e['job_title'])} · {val(e['company'])} · "
+            f"{val(e['start_date'])} – {val(e['end_date'])}" for e in jobs]
+    out.append(f"- **Education:** {len(p['education'])} · **Skills:** {len(p['skills'])} · "
+               f"**Languages:** {len(p['languages'])} · **Certifications:** {len(p['certifications'])}")
+    out += [f"- ⚠️ {w}" for w in p["parsing_warnings"]]
+    return out
 
 
 def main() -> int:
@@ -145,6 +165,9 @@ def main() -> int:
             second = None
     warnings = AI.check(text, [h.strip() for h in re.findall(r"^##\s+(.+)$", md, re.M)], second)
 
+    parsed = AP.parse(text, engine, _INFO.get("format", "pdf"), pages)
+    fidelity_rows = AP.compare(parsed, md, text) if md else []
+
     kw = [k.strip() for k in a.keywords.split(",") if k.strip()]
     kw_hit = [k for k in kw if covered(k, text_n)]
     kw_miss = [k for k in kw if k not in kw_hit]
@@ -164,6 +187,12 @@ def main() -> int:
                   "Add a missing keyword only where the master CV or profile supports it; otherwise it stays a gap."]
     if sugg:
         lines += ["", "## Frequent posting terms not in the CV (suggestions)", "", ", ".join(sugg)]
+    lines += ["", "## Parsing simulation", "", *parse_summary(parsed)]
+    if fidelity_rows:
+        lines += ["", "## Extraction fidelity", "", "| Field | In the CV | Parsed | Status | Note |", "|---|---|---|---|---|"]
+        lines += [f"| {r['field']} | {r['expected'] if r['expected'] is not None else '—'} | "
+                  f"{r['extracted'] if r['extracted'] is not None else '—'} | {r['status']} | {r['note']} |"
+                  for r in fidelity_rows]
     if warnings:
         lines += ["", "## Warnings (don't fail the check)", ""]
         lines += [f"- **{w['check']}** — {w['detail']}" for w in warnings]
