@@ -121,3 +121,10 @@ def test_today_and_job_search_honour_a_closed_search():
     search = (ROOT / "plugin" / "skills" / "job-search" / "SKILL.md").read_text()
     assert today.index("## Closed search (check first)") < today.index("## Input phase")
     assert "search_state: dormant" in search and "--market-check" in search
+
+
+def test_facts_reports_where_rejections_clustered_from_rejection_patterns(maya):
+    res = wrap(maya, "facts", "--offer", "Lendable", "--date", "2026-08-10")
+    assert res.returncode == 0
+    stopped = res.stdout.split("## Where it stopped")[1]
+    assert "By stage reached:" in stopped and "Reasons:" in stopped
