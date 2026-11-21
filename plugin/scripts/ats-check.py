@@ -72,6 +72,16 @@ def profile_phone(start: Path) -> str:
     return ""
 
 
+def snippet(text: str, terms: list[str], width: int = 110) -> str:
+    """The part of a long evidence line around the first matched term."""
+    if len(text) <= width:
+        return text
+    low = text.lower()
+    at = min((i for i in (low.find(t.split()[0]) for t in terms if t) if i >= 0), default=0)
+    start = max(0, min(at - width // 3, len(text) - width))
+    return ("…" if start else "") + text[start:start + width].strip() + ("…" if start + width < len(text) else "")
+
+
 def parse_summary(p: dict) -> list[str]:
     """What a parser would have filled in, in a few lines."""
     c = p["candidate"]
@@ -99,6 +109,9 @@ def main() -> int:
     ap.add_argument("--jd", type=Path, help="posting text; frequent terms are reported as suggestions")
     ap.add_argument("--pages", type=int, default=1, help="expected page count (default 1)")
     ap.add_argument("--out", type=Path, help="also write the report to this file")
+    ap.add_argument("--requirements", type=Path,
+                    help="JSON list of {requirement, category, terms?} Claude extracted from the posting")
+    ap.add_argument("--profile", type=Path, help="profile.md; requirements it supports but the CV doesn't are flagged")
     ap.add_argument("--phone", default=None, help="phone that must appear (default: profile.md phone:)")
     a = ap.parse_args()
 
@@ -168,6 +181,15 @@ def main() -> int:
     parsed = AP.parse(text, engine, _INFO.get("format", "pdf"), pages)
     fidelity_rows = AP.compare(parsed, md, text) if md else []
 
+    reqs = []
+    if a.requirements and a.requirements.is_file():
+        import json
+        reqs = json.loads(a.requirements.read_text(encoding="utf-8"))
+    elif a.jd and a.jd.is_file():
+        reqs = AM.requirements_from_jd(a.jd.read_text(encoding="utf-8"))
+    prof = a.profile.read_text(encoding="utf-8") if a.profile and a.profile.is_file() else ""
+    match_rows = AM.match(reqs, parsed, prof) if reqs else []
+
     kw = [k.strip() for k in a.keywords.split(",") if k.strip()]
     kw_hit = [k for k in kw if covered(k, text_n)]
     kw_miss = [k for k in kw if k not in kw_hit]
@@ -193,6 +215,19 @@ def main() -> int:
         lines += [f"| {r['field']} | {r['expected'] if r['expected'] is not None else '—'} | "
                   f"{r['extracted'] if r['extracted'] is not None else '—'} | {r['status']} | {r['note']} |"
                   for r in fidelity_rows]
+    if match_rows:
+        cov = AM.coverage(match_rows)
+        lines += ["", "## Job description matching", "",
+                  "Requirements " + ("Claude extracted from the posting" if a.requirements else "split from the posting by its headings")
+                  + ". Covered = shown in experience or the summary; skills-list-only counts as partial.", "",
+                  " · ".join(f"{c.replace('_', ' ').lower()} {h}/{n}" for c, (h, n) in cov.items()), "",
+                  "| Requirement | Category | Status | Evidence |", "|---|---|---|---|"]
+        for r in match_rows:
+            ev = f"\"{snippet(r['evidence'], r['terms'])}\" ({r['source']})" if r["evidence"] else "—"
+            if r["note"]:
+                ev += f" — {r['note']}"
+            lines.append(f"| {r['requirement'][:90]} | {r['category']} | {r['status']} | {ev} |")
+        lines += ["", "A requirement that isn't supported stays a gap: rephrase only experience the master CV already has."]
     if warnings:
         lines += ["", "## Warnings (don't fail the check)", ""]
         lines += [f"- **{w['check']}** — {w['detail']}" for w in warnings]
