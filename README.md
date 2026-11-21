@@ -1,202 +1,256 @@
 # ai-job-offer
 
-A Claude Code plugin that runs a senior-PM job search with you — from finding roles to signing the offer. It scores fit, tailors your CV, keeps the pipeline moving, preps you for interviews and tells you honestly when the search isn't working. Everything lives in markdown files on your machine.
+[![harness-checks](https://github.com/markd888/ai-job-offer/actions/workflows/harness-checks.yml/badge.svg)](https://github.com/markd888/ai-job-offer/actions/workflows/harness-checks.yml)
+[![version](https://img.shields.io/github/v/tag/markd888/ai-job-offer?label=version&sort=semver)](CHANGELOG.md)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+**A local-first job-search workflow for senior product managers, built as a Claude Code plugin.**
+
+It takes you from finding roles to deciding on an offer: it scores each posting against your own rubric, tailors your CV without inventing facts, keeps applications from going quiet, prepares you for each interview round and tells you plainly when the search itself isn't working. Your search lives in markdown files on your machine. Nothing is sent to an employer on your behalf.
+
+[Quick start](#quick-start) · [How it works](#how-it-works) · [Your data](#your-data-and-what-leaves-your-machine) · [Skills](#skills-and-agents) · [Limitations](#known-limitations) · [Contributing](#contributing)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/how-it-works-dark.svg">
   <img alt="How job-offer works: five phases — 1 Set up (/setup), 2 Find & score (/job-search, /evaluate-position), 3 Apply (/apply, /ats-check, /cover-letter, /sent), 4 Interview (/interview-prep, /case-practice, simulator, /interview-analysis), 5 Decide (/evaluate-offer, /wrap-up) — with /today, /follow-up, /outreach, /dashboard and career-coach running alongside every day." src="docs/how-it-works-light.svg">
 </picture>
 
-Built for senior PMs, lead PMs and heads of product. Based on [pm-job-search](https://github.com/archugunov/pm-job-search) by [@archugunov](https://github.com/archugunov) — see [what this version adds](#what-this-version-adds).
+## Why it works this way
 
-**Contents:** [Quick start](#quick-start) · [How it works](#how-it-works) · [Where your data lives](#where-your-data-lives) · [Skills](#skills) · [Agents](#agents) · [Dashboard](#dashboard) · [Integrations](#integrations) · [Requirements](#requirements) · [job-sweep](#job-sweep--just-the-weekly-role-list) · [Privacy](#privacy)
+A job search is a pipeline of small decisions spread over weeks: which roles are worth it, what to say in each application, who to chase, how to prepare, when to give up on a lead. Most tools cover one step — a tracker, a CV generator, a prompt library, or a bot that applies for you. This plugin covers the whole loop and keeps you in charge of every step.
+
+- **One workflow, end to end.** Discover → evaluate → apply → interview → decide → improve, with each step reading what the previous one wrote.
+- **Your criteria, not a generic score.** Roles are scored against the rubric, hard filters and anti-goals you set in `/setup`, and you can override any score.
+- **Markdown is the system of record.** Profile, pipeline, notes and briefs are plain files you can read, edit and version yourself. The dashboard is a view over those files, not a database.
+- **No invented facts.** Every claim in a CV, letter or message traces to your master CV, your profile or your own answers.
+- **Drafts, not actions.** Follow-ups, referral asks and withdrawals are drafts you send yourself. A status changes after you confirm it.
+- **It notices when the search isn't working.** Weekly reflection, a funnel by channel and an honest `career-coach` turn your own numbers into a change of strategy.
+
+It is built for senior PMs, lead PMs and heads of product; the default rubric, archetypes and story types are tuned for that search.
 
 ## Quick start
 
-**1. Install** — inside Claude Code:
+**You need:** [Claude Code](https://docs.claude.com/en/docs/claude-code/overview). That's enough for discovery, scoring, tracking, interview prep and coaching. CV and cover-letter PDFs and the ATS check also need Python packages — see [Requirements](#requirements).
+
+**1. Install the plugin** — inside Claude Code:
 
 ```sh
 /plugin marketplace add https://github.com/markd888/ai-job-offer.git
 /plugin install job-offer@job-offer
 ```
 
-**2. Set up** — in the folder you'll run your search from. Put your CV at `userdata/cv.md` first and most answers get pre-filled.
+**2. Add your CV.** In the folder you'll run your search from, save your CV as markdown at `userdata/cv.md`. It becomes the only source of facts for tailored CVs and letters, and it lets setup pre-fill most answers.
+
+**3. Run setup** — a guided conversation of about 10–15 minutes: target titles and industries, geography, salary floor, hard filters, timeline.
 
 ```sh
-/job-offer:setup        # 10–15 min: target role, salary, hard filters, timeline
+/job-offer:setup
 ```
 
-**3. Run it daily**
+It writes `userdata/profile.md` and `userdata/strategy.md`, which every other skill reads. You can re-run it any time.
+
+**4. Find and score roles**
 
 ```sh
-/job-offer:today        # every morning: what changed, top 3 actions, follow-ups due
-/job-offer:help         # any time: a one-page map of every skill and agent
+/job-offer:job-search                         # weekly sweep: new roles that match your profile
+/job-offer:evaluate-position <posting URL>    # or score one posting you already found
 ```
 
-The pipeline, scoring, prep and coaching need nothing but Claude Code. CV PDFs and the ATS check need a small Python toolchain — see [Requirements](#requirements).
+Each role that passes your hard filters is filed under `userdata/companies/<Company>/` with a tier (P0–P2) and a short research brief.
+
+**5. Look at what it found**
+
+```sh
+/job-offer:dashboard                          # http://localhost:7890
+```
+
+Or open the company folders directly. Decide which roles to go for.
+
+**6. Apply**
+
+```sh
+/job-offer:apply <Company>                    # tailored one-page CV, built to PDF and ATS-checked
+/job-offer:sent <Company>                     # after you send it: records the date and channel, starts the follow-up clock
+```
+
+From then on, run `/job-offer:today` each morning: it asks what changed, then gives you the top three actions and any follow-ups due. `/job-offer:help` prints a one-page map of every skill.
+
+### What a result looks like
+
+This is part of a research brief from the fictional example persona in [`userdata/examples/maya/`](userdata/examples/maya/) — a senior PM in London looking at consumer fintech:
+
+```markdown
+## Why this fits
+
+**P1 — consumer-finance fit is real, role-shape less so.**
+
+- **Domain:** Consumer finance, chat-first, US/UK — matches my positioning on paper.
+- **Skills carry over:** Activation-funnel work at the SaaS unicorn (4.1% → 6.8% conversion)
+  is the same shape as what this role owns.
+- **Size:** 180 ppl is over my preferred 80-150 ceiling. Tested deliberately.
+```
+
+The same folder shows the rest of a working install: [the role's `meta.md`](userdata/examples/maya/companies/Cleo/meta.md), [interview prep](userdata/examples/maya/companies/Cleo/interview-prep-2026-05-05.md) and [a debrief](userdata/examples/maya/companies/Cleo/interview-debrief-2026-05-07-hm.md), [a tailored CV](userdata/examples/maya/companies/Lendable/cv-2026-05-18.md) and [a daily brief](userdata/examples/maya/outputs/daily-brief-2026-05-18.md).
 
 ## How it works
 
-The picture at the top is the whole plugin: five phases, the commands for each, and what runs alongside. Below — what happens to one application, and to your day.
+| Stage | What happens | Commands |
+|---|---|---|
+| **Discover** | Weekly sweep of public ATS job boards (Ashby, Greenhouse, Lever) and optional Freehire; companies you track are rechecked, roles you've already seen are skipped. | `/job-search` |
+| **Evaluate** | A posting is checked against your hard filters and anti-goals, scored on five dimensions of your rubric, tiered P0–P2, and checked for signs it's stale or dead. | `/evaluate-position` |
+| **Apply** | Your master CV is tailored to the role, built into a one-page PDF and read back the way a parser reads it; a short cover letter if needed; a frozen copy of what you sent. | `/apply`, `/ats-check`, `/cover-letter`, `/sent` |
+| **Follow up** | Applications quiet for 10+ days get a short nudge (at most two); referral asks and thank-yous are tracked per person. | `/follow-up`, `/outreach` |
+| **Interview** | Stories adapted to the round, case drills, mock interviews, and a debrief from your transcript. | `/interview-prep`, `/story-builder`, `/case-practice`, `/interview-analysis` |
+| **Decide** | A verdict on one offer or two, with negotiation moves; after you accept, withdrawals, thank-yous and a retro. | `/evaluate-offer`, `/wrap-up` |
+| **Improve** | A weekly reflection, the funnel by channel, and a coach that says when the strategy needs to change. | `/today`, `/dashboard`, `career-coach` |
 
-### One application, start to finish
+Each role is a folder with a `meta.md`. Its `status` moves `new → to_apply → applied → interviewing → offer`, or ends in `rejected` / `not_interested`; skills propose the change and you confirm it.
 
-Each role is a folder with a `meta.md`; its `status` moves through the stages below. The skills on the arrows are what moves it — status changes only after you confirm.
+## Your data and what leaves your machine
 
-### Your daily loop
-
-`/today` starts by asking what changed — from your calendar, inbox and meeting notes if they're connected, and from you. Only what you confirm is written down; the brief is built from that.
-
-On the first run of each week it offers a five-minute reflection; when several weeks of numbers say the search itself isn't working, it hands you to `career-coach`.
-
-### Ground rules every skill follows
-
-- **No invented facts.** Every claim in a CV, letter or message traces to your master CV, your profile or your own answers. `/apply` and `/cover-letter` also tell you what they chose *not* to claim.
-- **Drafts only.** Nothing is sent on your behalf — follow-ups, referral asks, withdrawals are drafts you send yourself.
-- **You confirm changes.** A status, a date or a new fact lands in your files after your yes.
-- **Honest over encouraging.** Eight weeks and one live thread? `career-coach` says the search needs a rethink, not more of the same cadence.
-
-## Where your data lives
-
-Everything is plain markdown under `userdata/` in your search folder — gitignored, readable, editable by hand.
+Everything the plugin keeps is plain markdown under `userdata/` in your search folder. The folder is gitignored by default.
 
 ```text
 userdata/
 ├── cv.md                    master CV — the only source of facts for every CV and letter
-├── profile.md               who you are, positioning, tone, what not to claim
-├── strategy.md              targets, weekly cadence, anti-goals, search_state
+├── profile.md               targets, rubric, hard filters, positioning, tone
+├── strategy.md              weekly cadence, anti-goals, search state
 ├── journal.md               dated log of everything you confirmed
-├── stories/                 STAR-story bank, each story with 3–5 angles
-├── people/                  referrers, recruiters, hiring managers + a log of every ask
-├── companies/<Company>/[<role>/]
-│   ├── meta.md              status, tier, dates, channel — the pipeline state
-│   ├── research-brief.md    200-word brief from /evaluate-position
-│   ├── cv-<date>.md + .pdf  tailored CV, ats-check-<date>.md, cover-<date>.md
-│   ├── submitted-<date>/    frozen copy of exactly what you sent
-│   ├── interview-prep-*.md  interview-debrief-*.md  notes.md
+├── stories/                 STAR-story bank
+├── people/                  referrers, recruiters, hiring managers and every ask
+├── companies/<Company>/     meta.md, research brief, tailored CVs, ATS reports,
+│                            the frozen copy of what you sent, prep and debriefs
 └── outputs/                 daily briefs, applications index, retrospective
 ```
 
-Want to see a working install first? Two fictional personas live in [`userdata/examples/`](userdata/examples/): **maya** (senior PM in London, fintech — full install) and **diego** (VP Product in Mexico City going after remote US roles — skeletal).
+Local storage doesn't mean nothing leaves your machine. Here is what does, and when:
 
-## Skills
-
-All commands are prefixed `/job-offer:` — e.g. `/job-offer:apply Acme`.
-
-| Phase | Skill | What it does |
+| What | Where it goes | When |
 |---|---|---|
-| Start | `/help` | One-page map of every skill and agent; also saved to `userdata/help.md`. |
-| | `/setup` | Nine steps → profile, strategy, workspace `CLAUDE.md`. Pre-fills from your CV; re-runnable. |
-| | `/integrations` | Finds Granola / Calendar / Gmail MCPs and wires the ones you have. Optional. |
-| Daily | `/today` | Confirms what changed, then the brief: top 3 actions, pipeline, follow-ups due, heads-up. |
-| | `/dashboard` | The pipeline in a browser at `localhost:7890`; change status and add notes inline. |
-| Find | `/job-search` | Weekly sweep: rechecks your P0/P1 companies via Ashby / Greenhouse / Lever, finds new roles, scores and files them. |
-| | `/evaluate-position <url>` | Scores one posting against your rubric — hard filters, anti-goals, liveness — and writes the company folder. |
-| Apply | `/apply <Company>` | Tailors your master CV for one role: up to five questions, one draft, a one-page PDF. |
-| | `/ats-check <Company>` | Reads the PDF the way an applicant tracking system does: pages, contacts, glyphs, section order, keyword coverage. Runs after every `/apply`. |
-| | `/cover-letter <Company>` | 150–250 words answering the posting's top 2–3 needs with one proof each; PDF in the CV's look. |
-| | `/sent <Company>` | After your yes: status, date, channel, who referred you, and a frozen copy of what you sent. Starts the follow-up clock. |
-| | `/follow-up [Company]` | Applications quiet 10+ days → a short nudge (max two), or a thank-you after a round. Records replies. |
-| | `/outreach <person or Company>` | People as records in `userdata/people/`; drafts referral asks, intros and thank-yous, logs each once sent. |
-| Interview | `/story-builder` | Your STAR-story bank; `--gap-check` finds the senior-PM story types you're missing. |
-| | `/interview-prep <Company>` | Adapts 3–5 stories to the round; `--stage` from recruiter screen to final loop or take-home. |
-| | `/case-practice [Company]` | Rapid-recognition case drill, scored by failure mode against an 80% readiness gate. |
-| | `/interview-analysis` | Debrief from a transcript (pasted, file or Granola): what landed, what didn't, quoted. |
-| Decide | `/evaluate-offer` | Verdict on one offer or two: comp shape, archetype fit, anti-patterns, 3–5 negotiation moves. |
-| | `/wrap-up` | After you accept: withdrawals, thank-yous, a retro from your own numbers, then quiet mode. `--reopen` starts again. |
+| The files and messages Claude works with | The model provider your Claude Code uses (Anthropic by default) | Always — that's how Claude Code works |
+| Search queries, posting URLs, company pages | The public web and public ATS job-board APIs | `/job-search`, `/evaluate-position`, research |
+| Search filters from your profile (titles, seniority, countries, salary floor) | [Freehire](https://freehire.me) | Only if you connect the Freehire MCP |
+| Calendar, email, meeting notes; pipeline or digests | The services you connect | Only with an MCP integration you set up |
+| A random install ID and the plugin version, once | `job-offer.mark-d.dev` | Only if you say yes to the install count in `/setup` |
+| A read-only snapshot of your role cards | Your own Cloudflare account, behind Cloudflare Access | Only if you deploy the optional cloud dashboard |
 
-Full descriptions: [`plugin/README.md`](plugin/README.md).
+Nothing is sent to an employer, recruiter or contact by the plugin. The install count stores no IP or user agent and can be turned off any time with `"consent": false` in `userdata/telemetry.json` or `JOB_OFFER_TELEMETRY=0`. The dashboard listens on `127.0.0.1` only.
 
-## Agents
+## Skills and agents
 
-Ask for them by name or in plain words ("review this case study as a CPO", "I'm stuck").
+All commands are prefixed `/job-offer:`. Full descriptions are in [`plugin/README.md`](plugin/README.md).
+
+<details>
+<summary><b>19 skills</b> — by stage</summary>
+
+| Stage | Skill | What it does |
+|---|---|---|
+| Start | `/setup` | Guided setup → profile, strategy, workspace `CLAUDE.md`. Pre-fills from your CV; re-runnable. |
+| | `/help` | One-page map of every skill and agent. |
+| | `/integrations` | Finds Granola, Calendar and Gmail MCPs and wires the ones you have. |
+| Daily | `/today` | What changed, then the brief: top three actions, pipeline, follow-ups due. |
+| | `/dashboard` | The pipeline in a browser; change status and add notes inline. |
+| Discover | `/job-search` | Weekly sweep of ATS job boards (and Freehire if connected); scores and files new roles. |
+| Evaluate | `/evaluate-position <url>` | Hard filters, anti-goals, rubric score, tier, posting liveness, research brief. |
+| Apply | `/apply <Company>` | Tailors the master CV: up to five questions, one draft, a one-page PDF. |
+| | `/ats-check <Company>` | Checks the PDF's text layer: page count, contacts, glyphs, section order, extraction fidelity, keyword coverage. |
+| | `/cover-letter <Company>` | 150–250 words answering the posting's top needs, each claim traced to the CV. |
+| | `/sent <Company>` | Records status, date, channel and referrer; freezes what you sent. |
+| | `/follow-up [Company]` | Drafts a nudge for quiet applications, or a thank-you after a round. |
+| | `/outreach <person or Company>` | Referral asks, intros and thank-yous; one record per person. |
+| Interview | `/story-builder` | STAR-story bank; `--gap-check` finds missing senior-PM story types. |
+| | `/interview-prep <Company>` | Adapts 3–5 stories to the round, from recruiter screen to final loop. |
+| | `/case-practice [Company]` | Rapid-recognition case drill against an 80% readiness gate. |
+| | `/interview-analysis` | Debrief from a transcript (pasted, file or Granola), quoted. |
+| Decide | `/evaluate-offer` | Comp shape, archetype fit, anti-patterns and 3–5 negotiation moves. |
+| | `/wrap-up` | Withdrawals, thank-yous, a retro, then quiet mode; `--reopen` resumes. |
+
+</details>
+
+**Agents** — ask for them by name or in plain words ("review this case study as a CPO", "I'm stuck"):
 
 | Agent | Use it for |
 |---|---|
-| `cpo-reviewer` | Strategy, scale, business model, judgement under uncertainty |
-| `eng-manager-reviewer` | Technical feasibility, trade-offs, working with engineers |
-| `design-manager-reviewer` | UX judgement, craft, discovery rigour |
-| `interview-coach` | Narrative, clarity, how you come across |
-| `career-coach` | Positioning, outreach, anti-goals, cadence, offers, search resets — with an honest-calibration mode |
-| `interviewer-simulator` | A full mock round, one question with escalating follow-ups, or a pressure test of your weakest story |
-
-The four reviewers share one output shape — what works, what doesn't, where it sounds weak, one rewrite — so you can run two to four on the same draft and read them as a panel. `--save <Company>` writes the review into the company folder.
+| `cpo-reviewer`, `eng-manager-reviewer`, `design-manager-reviewer`, `interview-coach` | Reviews of a case study, story or answer from four angles, in one shared format, so you can read them as a panel |
+| `interviewer-simulator` | A full mock round, or one question with escalating follow-ups |
+| `career-coach` | Positioning, outreach, cadence, offers, and resetting a search that isn't working |
 
 ## Dashboard
 
-A browser view over the same markdown files — for scanning the pipeline, not for creating anything.
+A browser view over the same markdown files, for scanning the pipeline. It writes back two things only: status changes and notes.
 
 ![job-offer dashboard on demo data: interview cards with an editable next step, today's focus, the pipeline by stage with tier filter and search, the funnel, this week's targets, coming-up events, light and dark themes](docs/dashboard-demo.gif)
 
 ```sh
-/job-offer:dashboard    # http://localhost:7890 — reused if it's already running; ctrl-C to stop
+/job-offer:dashboard    # http://localhost:7890 — reused if already running; ctrl-C to stop
 ```
 
-Interview cards on top, today's focus and the pipeline by stage below, and on the right the funnel (also split by channel once `/sent` has recorded them), this week's targets and what's coming up. Click a role for its research, notes, prep and debriefs. It writes back two things only — status changes and notes. A read-only copy for your phone can run on Cloudflare Workers behind Cloudflare Access: [`plugin/dashboard/README.md`](plugin/dashboard/README.md). Full-quality video: [docs/dashboard-demo.mp4](docs/dashboard-demo.mp4).
+A read-only copy for your phone can run on Cloudflare Workers behind Cloudflare Access — see [`plugin/dashboard/README.md`](plugin/dashboard/README.md). Full-quality video: [docs/dashboard-demo.mp4](docs/dashboard-demo.mp4).
 
 ## Integrations
 
-Optional — the plugin works without any of them. Each is a prompt pattern over an MCP server you already run; see [INTEGRATIONS.md](plugin/INTEGRATIONS.md).
+All optional; the plugin works without any of them. Each is a prompt pattern over an MCP server you already run — details in [`plugin/INTEGRATIONS.md`](plugin/INTEGRATIONS.md).
 
 | Connect | What it adds |
 |---|---|
-| Granola | Transcripts for `/interview-analysis`; recordings as things to confirm in `/today` |
-| Gmail | Recruiter replies, rejections and offers as things to confirm in `/today` |
-| Calendar | Upcoming interviews in the brief; new or moved events to confirm |
+| Granola | Interview transcripts for `/interview-analysis`; recordings to confirm in `/today` |
+| Gmail | Recruiter replies, rejections and offers to confirm in `/today` |
+| Google Calendar | Upcoming interviews in the brief; new or moved events to confirm |
+| Freehire | Live postings from company career pages as a `/job-search` source |
+| Playwright | Checks that postings are still live |
 | Notion | The pipeline as a database, synced on demand |
-| Playwright | Checks that postings are still live; interviewer research |
-| Freehire | Live postings from 168 ATS platforms as a `/job-search` Discovery source |
-| Slack / Telegram / Discord | `/today` digests to an accountability channel |
+| Slack, Telegram, Discord | `/today` digests to an accountability channel |
 
 ## Requirements
 
-| Part | Needs | Install |
-|---|---|---|
-| Pipeline, scoring, prep, coaching | Claude Code | — |
-| CV and cover-letter PDFs | Python 3.10+, `reportlab`, the Carlito font | `pip install -r plugin/scripts/requirements.txt`; Carlito from Google Fonts (macOS) or `apt install fonts-crosextra-carlito` |
-| ATS check | `pypdf` or poppler's `pdftotext` | in `requirements.txt` |
-| Follow-ups, `/sent`, archive | Python 3.10+, standard library | — |
-| Dashboard | Python 3; Node only to rebuild the bundle | — |
-| Cloud copy of the dashboard | Node, `wrangler`, Cloudflare Access | [`plugin/dashboard/README.md`](plugin/dashboard/README.md) |
-
-Without the Python packages, `/apply` still writes the tailored CV in markdown and says the PDF step was skipped.
-
-## job-sweep — just the weekly role list
-
-A second, standalone plugin in this repo for when you want one command and nothing else: a weekly list of open product roles that match you, minus everything it already showed you. No pipeline, no company folders.
+| For | You need |
+|---|---|
+| Everything except PDFs | Claude Code |
+| CV and cover-letter PDFs | Python 3 with `reportlab`, and the Carlito font |
+| ATS check | `pypdf` (or poppler's `pdftotext`) |
+| Dashboard | Python 3 (standard library) |
+| Cloud copy of the dashboard | Node, `wrangler`, a Cloudflare account with Access |
 
 ```sh
-/plugin marketplace add https://github.com/markd888/ai-job-offer.git   # skip if already added
-/plugin install job-sweep@job-offer
+pip install "reportlab>=4.0" "pypdf>=4.0"
+# Carlito: download from Google Fonts on macOS, or on Debian/Ubuntu:
+sudo apt install fonts-crosextra-carlito
+```
+
+Without them, `/apply` still writes the tailored CV in markdown and tells you the PDF step was skipped. CI runs on Python 3.12.
+
+## Known limitations
+
+- **Tuned for senior product roles.** The default rubric, archetypes and story types assume a senior PM / head of product search. Other role families need their own rubric.
+- **The ATS check is a document check.** It verifies what a parser can extract from your PDF and which posting keywords your CV covers. It does not simulate or predict any vendor's ranking.
+- **Scores are judgement, not prediction.** Tiers and briefs come from Claude reading the posting against your rubric. Check them before acting; a score is not a probability of getting an interview.
+- **CV output is one fixed format:** a single-column, one-page A4 PDF in Carlito ([#12](https://github.com/markd888/ai-job-offer/issues/12) tracks options).
+- **Discovery isn't exhaustive.** The sweep reaches public ATS boards and, with Freehire, more career pages; roles posted only on closed boards can be missed.
+- **Requires Claude Code.** There is no standalone app.
+
+## job-sweep: only the weekly role list
+
+A second, standalone plugin in this repo for one command and nothing else: a weekly list of open product roles that match you, minus everything it already showed you. No pipeline, no scoring, no company folders.
+
+```sh
+/plugin install job-sweep@job-offer     # after adding the marketplace above
 /job-sweep:sweep
 ```
 
-Move to the full plugin later and `/setup` reads your `job-sweep/profile.md`, so you won't answer the same questions twice. See [`plugin-sweep/README.md`](plugin-sweep/README.md).
+Move to the full plugin later and `/setup` reads `job-sweep/profile.md`, so you won't answer the same questions twice. See [`plugin-sweep/README.md`](plugin-sweep/README.md).
 
-## What this version adds
+## Project status
 
-Forked from pm-job-search 0.6.0 (MIT). On top of the original:
+Active, single-maintainer, versioned with [semantic versioning](https://semver.org/); release notes in [CHANGELOG.md](CHANGELOG.md). Current work is tracked in milestones: [0.8.5 — ATS compatibility and parsing](https://github.com/markd888/ai-job-offer/milestone/7), evidence-based scoring ([#37](https://github.com/markd888/ai-job-offer/issues/37)), and [0.9.0](https://github.com/markd888/ai-job-offer/milestone/2).
 
-- **Application output:** CV → one-page PDF, `/ats-check`, `/cover-letter` with a claim checker.
-- **What happens after you apply:** `/sent` records channel and referrer and freezes what you sent; `/follow-up` and `/outreach` work from that copy; people become records.
-- **Seeing what works:** the funnel by channel in the dashboard, `/today` and `career-coach`.
-- **An end state:** `/wrap-up` closes the search after an accepted offer.
-- **Dashboard:** goals from `strategy.md`, interviews first, one fixed port, a read-only cloud copy behind Cloudflare Access.
+This project started as a fork of [pm-job-search](https://github.com/archugunov/pm-job-search) 0.6.0 by [@archugunov](https://github.com/archugunov). Since then it added PDF output and the ATS check, cover letters, `/sent` with a frozen copy of each application, follow-ups and referral tracking, the funnel by channel, `/wrap-up`, Freehire discovery and a reworked dashboard.
 
-Release notes: [CHANGELOG.md](CHANGELOG.md).
+## Contributing
 
-## Privacy
+Bug reports, fixes and ideas are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers running the plugin from a clone, the test suite, and the privacy rule: no personal data in the repo, enforced by a CI scan.
 
-`userdata/` is gitignored except the fictional examples, so your profile, journal and company notes stay on your machine unless you share them on purpose.
+When you [open an issue](https://github.com/markd888/ai-job-offer/issues), include the skill you ran, what you expected and what happened — and leave out your own CV, profile or company notes; the tracker is public.
 
-**Install count (opt-in, off unless you say yes).** `/setup` asks once whether the plugin may send a one-time anonymous install count; existing installs are asked once by `/today`. If you say yes, it sends a random ID made on your machine and the plugin version, once. Nothing else: no name, email, CV, profile, companies or journal. The server (`telemetry-worker/`) stores no IP or user agent. Turn it off with "turn off the install count", `"consent": false` in `userdata/telemetry.json`, or `JOB_OFFER_TELEMETRY=0`.
-
-CI scans every push and PR for personal data. The blocklist is personal data itself, so it isn't in the repo — it comes from the `PRIVACY_PATTERNS` repository secret (one regex per line). Forking? Set your own secret, or remove `.github/workflows/privacy-check.yml`. Locally: keep the same list in `.privacy-patterns.local` and run `make privacy-check`.
-
-## Contributing and feedback
-
-[CONTRIBUTING.md](CONTRIBUTING.md) covers the dev loop, the privacy rule and testing. Found a bug or want something? [Open an issue](https://github.com/markd888/ai-job-offer/issues) with the skill you ran, what you expected and what happened.
-
-## Licence
+## License
 
 MIT — see [LICENSE](LICENSE).
