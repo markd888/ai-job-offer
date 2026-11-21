@@ -11,7 +11,8 @@ Architecture lifted from the predecessor workflow with two changes: storage is m
 
 ## Inputs
 
-- `userdata/profile.md` — `target_titles`, `target_industries`, `geography`, `hard_filters`, `tier_thresholds`.
+- `userdata/profile.md` — `target_titles`, `target_industries`, `geography`, `hard_filters` (and optional `fit_weights` / `fit_thresholds`, read by `score.py`).
+- `userdata/cv.md` — evidence for scoring.
 - All `userdata/companies/*/meta.md` AND `userdata/companies/*/*/meta.md` — needed for the exclusion sets AND for the monitoring watchlist.
 - Optional flags:
   - `--no-parallel` — run Recheck and Discovery sequentially in the main conversation, no subagents (slower but easier to debug).
@@ -137,7 +138,7 @@ For each candidate from Phase 1 (Discovery) and the Recheck passes:
    - **Soft duplicate** (`base_key` matches at the same company, but not `url_key`/`strict_key`): do NOT file. Add it to a `skipped_repeats` list (title + link) for the run summary, so the user can ask to file it if it's a genuinely distinct role. Same company + different position still reaches `/evaluate-position`'s 1→2 migration when the user opts in.
    - **New** (no match): proceed to score and file.
 2. **Record every candidate in the seen-ledger.** For each candidate evaluated in this step (filed, hard-dup, or soft-dup), if its `strict_key` is not already present in `userdata/outputs/seen-roles.jsonl`, append one line: `{"company_key": ..., "strict_key": ..., "base_key": ..., "url_key": ..., "raw_title": <original position>, "first_surfaced": <today ISO>, "source": "freehire|web|recheck", "outcome": "filed|hard_dup|soft_dup|gone|unscored", "tier": <when filed>}`. `source`/`outcome`/`tier` feed `freehire.py compare`. This is what stops the same role resurfacing after its folder is deleted. Append once per key — never rewrite existing lines.
-3. Score each new candidate using the tier rubric in `userdata/profile.md` (same logic as `/evaluate-position`). Fetching the JD is part of scoring — a score invented without reading the posting is worthless. Handle a failed fetch by what the failure proves, not by defaulting to a stub:
+3. Score each new candidate with the same procedure as `/evaluate-position`: read `${CLAUDE_PLUGIN_ROOT}/references/evaluate-position-scoring.md` once per run, fill one assessment per candidate, run `score.py compute`, and after writing `meta.md` run `score.py record` so the candidate gets the same `score-*.json`, `predicted_tier` and summary keys as an evaluated role. No user prompt per candidate — take the defaults the reference gives (a blocked candidate is not filed; record it in the seen-ledger with `outcome: skipped`). Fetching the JD is part of scoring — a score invented without reading the posting is worthless. Handle a failed fetch by what the failure proves, not by defaulting to a stub:
 
    - **Posting confirmed gone** — the board's own public API says so (Ashby's org job list omits the ID; Greenhouse/Lever return 404 or an empty posting list), or the page renders an explicit "no longer available" / "position has been filled". **Drop it. Do not file, do not stub.** Record it in the seen-ledger so it never resurfaces. A dead posting is not a lead.
    - **Fetch failed but the posting may exist** — a 403, a bot wall, a JS-only shell you cannot read, a timeout. File a stub with `tier: unscored` and a note saying why it could not be read, so the user can open it themselves.
@@ -208,10 +209,10 @@ After both phases complete:
 
 1. Read `/tmp/pmjs-recheck-a.json`, `/tmp/pmjs-recheck-b.json`, `/tmp/pmjs-discovery.json`. Every entry keys `position` (not `role`).
 2. Merge discovery + recheck-a + recheck-b into one candidate list. Dedup by `url_key` again (`${CLAUDE_PLUGIN_ROOT}/references/dedup-normalization.md`).
-3. For each candidate, run a light tier estimate: walk profile.md's `tier_weights` rubric mentally — score 1-3 per dimension based on the JD title + URL + (optionally) a lightweight WebFetch of the first 500 chars of the page. Sum, apply `tier_thresholds`, get a `P0?` / `P1?` / `P2?` / `skip?` tag.
-4. Discard `P2?` unless fewer than 3 P0/P1 total are surviving.
-5. If `--with-playwright` and Playwright MCP is available, navigate each P0?/P1? URL, check liveness (see "Playwright integration" below). Update or null the link.
-6. For each surviving candidate, apply the full auto-file logic from Phase 2 above: dedup (hard/soft) → record in the seen-ledger → score → write `meta.md` + `research-brief.md` with `status: new` → validation gate. The 1→2 folder migration for existing companies follows the same rules as `/evaluate-position`.
+3. **Pre-screen, no tier.** Drop a candidate only when the posting's own metadata shows an eligibility `FAIL` against a `hard_filters` string (e.g. on-site in another country under `no relocation`), recording it in the seen-ledger with `outcome: skipped`. Never assign a tier from the title, URL or a snippet — tiers come only from step 6's full scoring.
+4. After step 6 scores everything, file P2 candidates only if fewer than 3 P0/P1 survived; record the rest in the seen-ledger with `outcome: skipped`.
+5. If `--with-playwright` and Playwright MCP is available, navigate each candidate URL, check liveness (see "Playwright integration" below). Update or null the link.
+6. For each surviving candidate, apply the full auto-file logic from Phase 2 above: dedup (hard/soft) → record in the seen-ledger → score (`score.py compute`) → write `meta.md` + `research-brief.md` with `status: new` → `score.py record` → validation gate. The 1→2 folder migration for existing companies follows the same rules as `/evaluate-position`.
 
 ## Playwright integration (optional)
 
@@ -288,4 +289,4 @@ Identity keys and match rules live in `${CLAUDE_PLUGIN_ROOT}/references/dedup-no
 - **Second run (no new postings)**: the Phase 1 candidates all match a `strict_key` in the seen-ledger from run 1 → all hard-duplicates → "No new roles this week." A reposted Stripe Lead PM with a reworded title ("Lead PM — Growth EMEA") shares the `stripe lead product manager` base_key → surfaced under "Skipped as likely repeats", not filed as new.
 - **Recheck on Stripe**: extract slug from Stripe meta link (`example.com/stripe-jobs/...` → can't infer ATS, guess `stripe`); try Greenhouse → 200, get jobs list. Filter to PM keywords. Any new Consumer Credit role → emit candidate.
 - **Discovery**: 8-10 site:-scoped queries built from Maya's profile (`"head of product" fintech London site:ashbyhq.com`, etc.). Returns direct ATS URLs, not aggregator pages. Filter and emit candidates.
-- **Phase 2**: merge, light tier-estimate, auto-file every surviving candidate (dedup → score → write meta.md + research-brief.md with status: new). Print plain-prose run summary to chat.
+- **Phase 2**: merge, eligibility pre-screen, full scoring via `score.py`, auto-file every surviving candidate (dedup → score → write meta.md + research-brief.md with status: new). Print plain-prose run summary to chat.

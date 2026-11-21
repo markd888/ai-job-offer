@@ -221,3 +221,9 @@ One consequence worth knowing: because these files are shared, guidance in them
 must hold for both plugins. A line that assumes a pipeline tracker, a maintainer
 log, or a multi-skill flow will be wrong for `job-sweep`, which has none of those.
 Write shared guidance conditionally, or keep it in a skill-private reference.
+
+## Release checklist
+
+1. The version bump in `plugin/.claude-plugin/plugin.json` and the CHANGELOG section land in the **same PR** as the release.
+2. Before asking for a merge, check that the remote branch holds every commit: `git fetch && git log --oneline origin/main..origin/<branch>`, and that `gh pr view <n> --json commits` counts the same.
+3. After the merge: tag `vX.Y.Z` on `main`, then update the plugin.

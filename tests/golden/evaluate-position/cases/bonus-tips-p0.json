@@ -16,5 +16,34 @@
     "hard_filter": null,
     "provenance": "author-derived-v1",
     "edge_note": null
+  },
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "role_responsibility": [
+        "WEAK",
+        "TRANSFERABLE"
+      ],
+      "seniority_ownership": [
+        "TRANSFERABLE"
+      ]
+    },
+    "fit_range": [
+      50,
+      74
+    ],
+    "attractiveness": [
+      "high"
+    ],
+    "tier": "P2",
+    "tier_change_reason": "v1 reached P0 only through the +1 shape bonus on a 12; the JD calls disputes and chargebacks 'new ground', so v2 fit is below P1, and a strong company no longer lifts a P2 fit",
+    "provenance": "author-derived-v2.2",
+    "tier_also": [
+      "P0",
+      "P1"
+    ],
+    "ambiguous": "independent release runs disagree on this boundary case; any listed tier passes"
   }
 }

@@ -1,0 +1,26 @@
+{
+  "id": "attract-low-drops",
+  "synthetic": true,
+  "jd": "Lead PM — Consumer Credit Card, London hybrid.\n\nQuill Credit (London, 70 people) builds a credit card for near-prime UK consumers. We'll be upfront: we made a round of layoffs last quarter, our last funding round fell through and we are raising a bridge. We're hiring a Lead PM to own pricing experiments, underwriting flows and activation on the card, leading two PMs and reporting to the CEO. Hybrid, two days a week. Shipped consumer-credit product at growth stage is essential.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "EXPLICIT"
+      ]
+    },
+    "fit_range": [
+      82,
+      95
+    ],
+    "attractiveness": [
+      "low"
+    ],
+    "tier": "P1",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "strong fit, red-flag company: low attractiveness drops it one tier"
+  }
+}

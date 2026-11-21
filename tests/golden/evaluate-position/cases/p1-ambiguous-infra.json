@@ -16,5 +16,26 @@
     "hard_filter": null,
     "provenance": "author-derived-v1",
     "edge_note": "domain_fit frozen at 3: payments infra IS fintech per the rubric string 'B2C, consumer credit, fintech, PLG SaaS' — the deliberate judgement call this case exists to test"
+  },
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "EXPLICIT",
+        "TRANSFERABLE"
+      ]
+    },
+    "fit_range": [
+      66,
+      79
+    ],
+    "attractiveness": [
+      "medium"
+    ],
+    "tier": "P1",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2"
   }
 }

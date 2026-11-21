@@ -33,6 +33,13 @@ _spec = importlib.util.spec_from_file_location("freehire", _FH_PY)
 freehire = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(freehire)
 
+# Scoring v2 rules live with the scoring code.
+_spec = importlib.util.spec_from_file_location("scoring_schema", _PEOPLE_PY.parent / "scoring_schema.py")
+scoring = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(scoring)
+TIER_ENUM = {"P0", "P1", "P2", "unscored"}
+ELIGIBILITY_ENUM = {"eligible", "needs_review", "blocked"}
+
 STATUS_ENUM = {"new", "to_apply", "applied", "interviewing", "offer",
                "rejected", "not_interested"}
 CHANNEL_ENUM = {"referral", "cold", "recruiter", "linkedin", "company-site", "other"}
@@ -109,6 +116,26 @@ def _check_meta(root: Path, p: Path) -> list[Finding]:
         out.append(Finding(rel, "meta.link-format", f"link '{link}' is not http(s)"))
     if fm.get("channel") and fm["channel"] not in CHANNEL_ENUM:
         out.append(Finding(rel, "meta.channel-enum", f"channel '{fm['channel']}' not in enum"))
+    for key in ("tier", "predicted_tier", "tier_override"):
+        if fm.get(key) and fm[key] not in TIER_ENUM:
+            out.append(Finding(rel, "meta.tier-enum", f"{key} '{fm[key]}' not in enum"))
+    if fm.get("scoring_version") and fm["scoring_version"] not in ("1", "2"):
+        out.append(Finding(rel, "meta.scoring-version", f"scoring_version '{fm['scoring_version']}' not 1 or 2"))
+    if fm.get("eligibility") and fm["eligibility"] not in ELIGIBILITY_ENUM:
+        out.append(Finding(rel, "meta.eligibility-enum", f"eligibility '{fm['eligibility']}' not in enum"))
+    if fm.get("evidence_confidence") and fm["evidence_confidence"] not in scoring.CONFIDENCE:
+        out.append(Finding(rel, "meta.confidence-enum",
+                           f"evidence_confidence '{fm['evidence_confidence']}' not in enum"))
+    if fm.get("tier_override") and not (fm.get("override_reason") and fm.get("override_date")):
+        out.append(Finding(rel, "meta.override", "tier_override needs override_reason and override_date"))
+    for key in ("fit_score", "initial_fit_score"):
+        if fm.get(key):
+            try:
+                ok = 0 <= float(fm[key]) <= 100
+            except ValueError:
+                ok = False
+            if not ok:
+                out.append(Finding(rel, "meta.fit-score", f"{key} '{fm[key]}' is not a number 0–100"))
     present_forbidden = [k for k in META_FORBIDDEN if k in fm]
     if present_forbidden:
         out.append(Finding(rel, "meta.forbidden-key",
@@ -126,6 +153,9 @@ def _check_profile(root: Path, p: Path) -> list[Finding]:
         out.append(Finding(rel, "profile.required", f"missing: {', '.join(missing)}"))
     if not re.search(r"^## Positioning\s*$", text, re.MULTILINE):
         out.append(Finding(rel, "profile.positioning", "no '## Positioning' section"))
+    if "fit_weights" in fm or "fit_thresholds" in fm:
+        w, t = scoring.config_from_profile(text.lstrip("\ufeff")[text.lstrip("\ufeff").find("---"):])
+        out.extend(Finding(rel, "profile.fit-config", e) for e in scoring.validate_config(w or scoring.DEFAULT_WEIGHTS, t))
     filters = freehire.read_filters(text)
     if filters is not None:
         out.extend(Finding(rel, "profile.freehire-filters", e) for e in freehire.validate(filters))

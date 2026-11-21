@@ -1,0 +1,29 @@
+{
+  "id": "transferable-edtech-activation",
+  "synthetic": true,
+  "jd": "Senior PM — Activation, consumer edtech, London hybrid.\n\nLingoleap (London, 150 people, profitable) runs a language-learning app with a freemium model. We're hiring a Senior PM to own activation: the first-week learning streak, free-to-paid conversion and paywall experiments. You'll work with a pod of four engineers and a designer, no direct reports, reporting to the Group PM. Hybrid, two days a week. You've owned a freemium-to-paid funnel at scale before; edtech experience is not required.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "role_responsibility": [
+        "EXPLICIT"
+      ],
+      "domain": [
+        "TRANSFERABLE",
+        "WEAK"
+      ]
+    },
+    "fit_range": [
+      66,
+      79
+    ],
+    "attractiveness": [
+      "medium"
+    ],
+    "tier": "P1",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2"
+  }
+}

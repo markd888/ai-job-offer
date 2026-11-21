@@ -1,0 +1,29 @@
+{
+  "id": "contradicted-years",
+  "synthetic": true,
+  "jd": "Head of Product — Consumer Credit, London hybrid.\n\nHaven Credit (London, 90 people, Series B) is a consumer-credit lender with personal loans and a new credit card. We're hiring a Head of Product to lead three PMs and own the lending and card roadmap, reporting to the CEO. Hybrid, two days a week in London. Requirements: a minimum of 12 years of product management experience, of which at least five leading product teams in lending — this is a firm requirement set by our board, not a guideline.",
+  "label_v2": {
+    "eligibility": "blocked",
+    "must_fail": [
+      "12 years"
+    ],
+    "must_unknown": [],
+    "evidence": {
+      "skills_experience": [
+        "CONTRADICTED"
+      ]
+    },
+    "fit_range": [
+      60,
+      85
+    ],
+    "attractiveness": [
+      "medium",
+      "high"
+    ],
+    "tier": "P2",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "the profile says nine years: the JD's firm 12-year minimum is a FAIL and the evidence is CONTRADICTED"
+  }
+}

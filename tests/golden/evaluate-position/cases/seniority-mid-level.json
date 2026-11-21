@@ -1,0 +1,27 @@
+{
+  "id": "seniority-mid-level",
+  "synthetic": true,
+  "jd": "Product Manager — Card Activation, London hybrid.\n\nBrightcard (London, 300 people, Series C) builds a debit and credit-builder card. We're hiring a mid-level Product Manager with 3+ years' experience to own one squad's activation backlog — card ordering, first-transaction nudges and in-app onboarding — reporting to a Senior PM. Hybrid, three days a week. This is an individual-contributor role with a well-defined scope; strategy is set by the Group PM.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "seniority_ownership": [
+        "WEAK",
+        "CONTRADICTED"
+      ]
+    },
+    "fit_range": [
+      45,
+      64
+    ],
+    "attractiveness": [
+      "medium"
+    ],
+    "tier": "P2",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "two levels below the target titles; Series C, no growth signal stated → medium"
+  }
+}

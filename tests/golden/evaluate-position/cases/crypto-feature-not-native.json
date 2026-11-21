@@ -1,0 +1,32 @@
+{
+  "id": "crypto-feature-not-native",
+  "synthetic": true,
+  "jd": "Lead PM — Investing, consumer neobank, London hybrid.\n\nPocketbank (London, 140 people, Series C, profitable) is a UK neobank with current accounts, savings and a credit-builder card. We're adding stocks and, later, a small crypto-buying feature through a regulated partner — we are not a crypto company. We're hiring a Lead PM to own the investing area, leading two PMs. Hybrid, two days a week. You've shipped regulated consumer-finance product and can run pricing and activation experiments.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "EXPLICIT",
+        "TRANSFERABLE"
+      ]
+    },
+    "fit_range": [
+      72,
+      90
+    ],
+    "attractiveness": [
+      "high",
+      "medium"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2.2",
+    "edge_note": "a crypto feature at a non-crypto company does not trigger the crypto-native filter",
+    "tier_also": [
+      "P1"
+    ],
+    "ambiguous": "independent release runs disagree on this boundary case; any listed tier passes"
+  }
+}

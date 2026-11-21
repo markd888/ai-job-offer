@@ -29,6 +29,14 @@ export interface Position {
   max_stage?: string;
   /** Free-text next step for active roles, e.g. "HR screen with Ana Mon 2026-11-02 12:30". */
   next_event?: string;
+  /** "2" for roles scored by score.py; absent or "1" for v1 (3–15 `score`). */
+  scoring_version?: string;
+  /** 0–100, v2 only. Never compare with the v1 `score`. */
+  fit_score?: string;
+  eligibility?: "eligible" | "needs_review" | "blocked" | string;
+  evidence_confidence?: "high" | "medium" | "low" | string;
+  predicted_tier?: string;
+  tier_override?: string;
 }
 
 export interface WeeklyTargets {

@@ -194,7 +194,7 @@ function ActiveCard({ p, onOpen, onChange }: { p: Position; onOpen: (p: Position
           </h3>
           <p className="jst-role">{p.position}</p>
         </UnstyledButton>
-        <TierBadge tier={p.tier} />
+        <TierBadge tier={p.tier} p={p} />
       </div>
 
       <NextStep p={p} steps={steps} onSaved={onChange} />

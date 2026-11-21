@@ -1,0 +1,26 @@
+{
+  "id": "relocation-within-emea",
+  "synthetic": true,
+  "jd": "Lead PM — BNPL, Amsterdam on-site.\n\nVolta Pay (Amsterdam, 85 people, Series B, 3x growth) offers buy-now-pay-later at checkout across the Benelux. We're hiring a Lead PM to own the shopper app and credit decisions at checkout, leading two PMs. The role is on-site in Amsterdam four days a week; we offer full relocation support within Europe. You've shipped consumer-credit or BNPL product and have run pricing experiments.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "EXPLICIT"
+      ]
+    },
+    "fit_range": [
+      80,
+      93
+    ],
+    "attractiveness": [
+      "high"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "relocation inside EMEA passes the relocation filter"
+  }
+}

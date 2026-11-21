@@ -78,6 +78,10 @@ def test_attractiveness_moves_at_most_one_tier(level, tier):
     assert S.compute(a)["tier"] == tier
 
 
+def test_strong_company_does_not_lift_a_weak_fit():
+    assert S.compute(assessment(scores=(50,) * 5, level="high"))["tier"] == "P2"
+
+
 def test_attractiveness_cannot_lift_past_p0_or_below_p2():
     assert S.compute(assessment(scores=(90,) * 5, level="high"))["tier"] == "P0"
     assert S.compute(assessment(scores=(10,) * 5, level="low"))["tier"] == "P2"

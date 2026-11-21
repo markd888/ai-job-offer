@@ -16,5 +16,33 @@
     "hard_filter": null,
     "provenance": "author-derived-v1",
     "edge_note": null
+  },
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "role_responsibility": [
+        "TRANSFERABLE"
+      ],
+      "domain": [
+        "WEAK",
+        "MISSING"
+      ]
+    },
+    "fit_range": [
+      50,
+      72
+    ],
+    "attractiveness": [
+      "medium"
+    ],
+    "tier": "P2",
+    "tier_change_reason": "v1 kept P1 because the Head title scored role_fit 3; v2 scores HR-tech activation as transferable and the domain as off-target, below P1. Strong growth and the v1 shape penalty cancel to medium",
+    "provenance": "author-derived-v2.2",
+    "tier_also": [
+      "P1"
+    ],
+    "ambiguous": "independent release runs disagree on this boundary case; any listed tier passes"
   }
 }

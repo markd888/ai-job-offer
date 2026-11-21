@@ -164,8 +164,8 @@ def compute(a: dict, weights: dict | None = None, thresholds: dict | None = None
 
     Tier rule (documented in score.schema.md):
       1. fit tier from fit_score and thresholds;
-      2. attractiveness high → up one tier, low → down one, medium/unknown → none
-         (at most one step, by construction);
+      2. attractiveness high → up one tier, but only from P1 (a weak fit is never
+         lifted by a strong company); low → down one; medium/unknown → none;
       3. eligibility blocked → capped at P2 (attractiveness can't lift it past);
       4. needs_review keeps the tier and lists what's pending.
     """
@@ -176,7 +176,10 @@ def compute(a: dict, weights: dict | None = None, thresholds: dict | None = None
     status, failed, unknown = eligibility_status(a["eligibility"])
     fit_tier = tier_for(fit, t)
     level = a["attractiveness"]["level"]
-    tier = shift(fit_tier, {"high": 1, "low": -1}.get(level, 0))
+    step = {"high": 1, "low": -1}.get(level, 0)
+    if step > 0 and fit_tier == "P2":
+        step = 0
+    tier = shift(fit_tier, step)
     if status == "blocked":
         tier = "P2"
     gaps = [k for k in DIMENSIONS if dims[k]["evidence_class"] == "CONTRADICTED"]

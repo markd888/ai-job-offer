@@ -1,0 +1,26 @@
+{
+  "id": "attract-unknown",
+  "synthetic": true,
+  "jd": "Lead PM — Card Product, London hybrid.\n\nWe are a stealth-stage consumer-credit company and can't share our name, funding or team size until the interview stage. We're hiring a Lead PM to own a new credit card for thin-file UK consumers: underwriting flows, pricing experiments and activation, leading one PM. Hybrid, two days a week in central London. You've shipped consumer-credit product at a growth-stage fintech and are comfortable doing your own analytics and writing specs.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "domain": [
+        "EXPLICIT"
+      ]
+    },
+    "fit_range": [
+      82,
+      96
+    ],
+    "attractiveness": [
+      "unknown"
+    ],
+    "tier": "P0",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "no company facts: attractiveness unknown, no tier change"
+  }
+}

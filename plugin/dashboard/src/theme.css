@@ -1023,3 +1023,9 @@ body {
     -webkit-line-clamp: 2;
   }
 }
+
+/* Scoring v2: eligibility / evidence note next to the tier badge */
+.jst-tier-wrap { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.jst-tier-note { font-size: 11px; line-height: 1.4; padding: 0 6px; border-radius: 4px; white-space: nowrap; }
+.jst-tier-note-warn { background: var(--jst-warn-bg); color: var(--jst-warn-fg); }
+.jst-tier-note-muted { background: var(--jst-chip-bg); color: var(--jst-ink-2); }

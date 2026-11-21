@@ -1,0 +1,29 @@
+{
+  "id": "thin-jd",
+  "synthetic": true,
+  "jd": "Senior PM — Fintech startup.\n\nWe're an exciting, fast-moving fintech startup on a mission to change how people manage money. We're looking for a Senior Product Manager who is passionate about great products, loves working with smart people and thrives in ambiguity. You'll own an important part of our product and work closely with engineering and design. Competitive salary and equity. Location and team details to be discussed with the right candidate.",
+  "label_v2": {
+    "eligibility": "needs_review",
+    "must_fail": [],
+    "must_unknown": [
+      "relocation"
+    ],
+    "evidence": {
+      "role_responsibility": [
+        "WEAK",
+        "MISSING"
+      ]
+    },
+    "fit_range": [
+      45,
+      64
+    ],
+    "attractiveness": [
+      "unknown"
+    ],
+    "tier": "P2",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "vague JD: low confidence, location unknown"
+  }
+}

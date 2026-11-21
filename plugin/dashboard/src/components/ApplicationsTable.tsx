@@ -21,6 +21,7 @@ import { STATUS_KEYS, statusColor, statusLabel } from "../statusColors";
 import { useScrollEdges } from "../useScrollEdges";
 import { StatusSelect } from "./StatusSelect";
 import { TierBadge, isScored } from "./TierBadge";
+import { compareRoles, tierRank } from "./scoring";
 
 interface Props {
   companies: Position[];
@@ -191,7 +192,7 @@ function PositionRow({ p, onOpen, onChange }: PositionRowProps) {
 
   return (
     <div className="jst-row" onClick={() => onOpen(p)}>
-      <TierBadge tier={p.tier} />
+      <TierBadge tier={p.tier} p={p} />
       <UnstyledButton
         onClick={(e) => {
           e.stopPropagation();
@@ -390,11 +391,9 @@ function buildGroups(rows: Position[]): GroupBucket[] {
   }
   // Within each group: P0 first, then P1, P2, unscored; higher score first inside a tier.
   for (const g of ordered) {
-    g.rows.sort((a, b) => tierRank(a) - tierRank(b) || (Number(b.score) || 0) - (Number(a.score) || 0));
+    g.rows.sort(compareRoles);
   }
   return ordered;
 }
 
-export function tierRank(r: Position): number {
-  return ({ P0: 0, P1: 1, P2: 2, P3: 3 } as Record<string, number>)[r.tier] ?? 4;
-}
+export { tierRank };

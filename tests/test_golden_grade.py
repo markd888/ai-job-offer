@@ -19,6 +19,8 @@ def perfect_results():
     out = []
     for p in sorted((GOLDEN / "cases").glob("*.json")):
         case = json.loads(p.read_text())
+        if "label" not in case:
+            continue
         l = case["label"]
         out.append({"id": case["id"], "tier": l["tier"], "score": l["score"],
                     "matched_filter": l["hard_filter"]})
@@ -95,3 +97,57 @@ def test_non_list_json_results_fails_cleanly(tmp_path):
     assert code == 2
     assert "results.json" in err
     assert "dict" in err
+
+
+# ---- scoring v2 runs ---------------------------------------------------------
+QUOTE = "Designed and shipped the price-test framework"  # verbatim in the frozen profile
+
+
+def perfect_v2():
+    out = []
+    for p in sorted((GOLDEN / "cases").glob("*.json")):
+        case = json.loads(p.read_text())
+        l = case["label_v2"]
+        reqs = [{"requirement": f, "status": "FAIL", "jd_quote": "x"} for f in l["must_fail"]]
+        reqs += [{"requirement": kw, "status": "UNKNOWN", "jd_quote": "not stated"} for kw in l["must_unknown"]]
+        dims = {k: {"evidence_class": allowed[0],
+                    "evidence": [] if allowed[0] == "MISSING" else [{"quote": QUOTE, "source": "profile"}]}
+                for k, allowed in l["evidence"].items()}
+        fit = None if not l["fit_range"] else sum(l["fit_range"]) / 2
+        out.append({"id": case["id"], "eligibility": l["eligibility"], "requirements": reqs,
+                    "dimensions": dims, "attractiveness": l["attractiveness"][0],
+                    "fit_score": fit if fit is not None else 50, "tier": l["tier"]})
+    return out
+
+
+def test_v2_perfect_run_passes(tmp_path):
+    code, out = run_grade(tmp_path, perfect_v2())
+    assert code == 0, out
+    assert "scoring v2 run" in out and "tier: 32/32" in out
+
+
+def test_v2_unknown_reported_as_fail_fails(tmp_path):
+    results = perfect_v2()
+    r = next(r for r in results if any(q["status"] == "UNKNOWN" for q in r["requirements"]))
+    for q in r["requirements"]:
+        if q["status"] == "UNKNOWN":
+            q["status"] = "FAIL"
+    r["eligibility"] = "blocked"; r["tier"] = "P2"
+    code, out = run_grade(tmp_path, results)
+    assert code == 1 and "false blocks: 1" in out
+
+
+def test_v2_invented_quote_fails(tmp_path):
+    results = perfect_v2()
+    d = next(d for r in results for d in r["dimensions"].values() if d["evidence"])
+    d["evidence"][0]["quote"] = "Ran a 40-person payments org at a FTSE 100 bank"
+    code, out = run_grade(tmp_path, results)
+    assert code == 1 and "untraced quote" in out
+
+
+def test_v2_missed_fail_fails(tmp_path):
+    results = perfect_v2()
+    r = next(r for r in results if r["eligibility"] == "blocked")
+    r["requirements"] = []
+    code, out = run_grade(tmp_path, results)
+    assert code == 1 and "missed FAIL" in out

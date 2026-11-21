@@ -2,3 +2,6 @@
 # exercise exactly these; if one vanishes, the fixture rotted.
 strategy.md :: strategy.forbidden-key
 strategy.md :: strategy.required
+# numeric tiers (pre-P0/P1/P2 shape) — caught by meta.tier-enum since 0.8.5
+companies/acmecorp/meta.md :: meta.tier-enum
+companies/stalecorp/meta.md :: meta.tier-enum

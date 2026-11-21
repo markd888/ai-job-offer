@@ -1,0 +1,36 @@
+{
+  "id": "enterprise-with-plg",
+  "synthetic": true,
+  "jd": "Senior PM — Self-serve Analytics, London hybrid.\n\nMetricly (900 employees) sells a business-analytics platform. Most revenue comes from enterprise contracts closed by field sales, but we also run a free self-serve tier that anyone can sign up for, and it drives a third of new pipeline. We're hiring a Senior PM to own self-serve activation: free signup to first dashboard, upgrade prompts and in-product trials. No direct reports. Hybrid, two days a week.",
+  "label_v2": {
+    "eligibility": "eligible",
+    "must_fail": [],
+    "must_unknown": [],
+    "evidence": {
+      "role_responsibility": [
+        "EXPLICIT",
+        "TRANSFERABLE"
+      ],
+      "domain": [
+        "TRANSFERABLE",
+        "WEAK"
+      ]
+    },
+    "fit_range": [
+      65,
+      79
+    ],
+    "attractiveness": [
+      "medium",
+      "low"
+    ],
+    "tier": "P1",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2.2",
+    "edge_note": "enterprise filter does NOT fire (PLG signal); self-serve activation is a direct match and PLG SaaS is a target industry, so P1",
+    "tier_also": [
+      "P2"
+    ],
+    "ambiguous": "independent release runs disagree on this boundary case; any listed tier passes (medium vs low attractiveness under the shape penalty)"
+  }
+}

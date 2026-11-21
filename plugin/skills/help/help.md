@@ -47,7 +47,7 @@ Daily and weekly
 |---|---|---|
 | `/today` | Two-phase daily brief: catches fresh facts from Calendar/Gmail/Granola, then prints top 3 actions + pipeline + heads-up. | Starting your day. |
 | `/job-search` | Weekly sweep. Rechecks P0/P1 companies via ATS APIs, discovers new roles via scoped search. | Once a week, or any time you want fresh roles. |
-| `/evaluate-position <url-or-paste>` | Scores one posting, writes the company folder + 200-word research brief. | A single role landed in your inbox. |
+| `/evaluate-position <url-or-paste>` | Checks the posting's requirements, rates the fit against your CV with quoted evidence and the company separately, writes the company folder + 200-word research brief. | A single role landed in your inbox. |
 | `/apply <Company>` | Tailors your master CV for one role. Up to 5 clarifying questions, then a single-pass draft, built to a one-page PDF and checked by `/ats-check`. | You've decided to apply. |
 | `/ats-check <Company>` | Reads the CV PDF the way an applicant tracking system does: pages, contacts, glyphs, section order, text fidelity, the posting's keyword coverage. Runs after every `/apply`. | You edited the CV by hand, or want the keyword check again. |
 | `/cover-letter <Company>` | A 150–250-word letter answering the posting's top 2–3 needs with one proof each, every claim traced to your CV or profile; says what it did NOT claim. Builds the PDF in the CV's look. | The posting asks for a letter, or a referrer or hiring manager will read one. |
