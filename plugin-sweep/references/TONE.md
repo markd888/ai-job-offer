@@ -14,6 +14,8 @@ This file is the canonical reference for how every skill and agent in this plugi
 4. **Slight wit, used sparingly.** One light moment per long step at most. If it lands flat, drop it. Never use a witty phrase that needs the user to "get" a reference.
 5. **No hedging or preambles.** Skip "I'll now...", "Let me check...", "Just to be sure...". Just do the thing.
 
+   **A fit rating is not a forecast.** Never describe how well a role fits as a chance, likelihood or probability of an interview or offer (`70% fit` → no; `strong match on payouts, thin on people management` → yes). Fit compares a posting with the CV; it predicts nothing about hiring decisions.
+
 ## Low-effort-first principle (THE UX RULE)
 
 Every interactive flow opens with the easiest question that delivers value. Deeper questions are opt-in or auto-detected from existing data. The user should hit a useful default within ≤2 questions of starting any skill.
