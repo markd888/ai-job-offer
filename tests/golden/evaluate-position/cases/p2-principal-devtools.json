@@ -38,8 +38,9 @@
     "attractiveness": [
       "high"
     ],
-    "tier": "P1",
-    "tier_change_reason": "v1 summed business_health into a 10/15; v2 keeps fit low (P2) but a 3x-ARR, freshly funded company lifts it one tier to P1 by the attractiveness rule",
-    "provenance": "author-derived-v2"
+    "tier": "P2",
+    "tier_change_reason": null,
+    "provenance": "author-derived-v2",
+    "edge_note": "weak fit at a 3x-ARR company: a strong company never lifts a P2 fit"
   }
 }

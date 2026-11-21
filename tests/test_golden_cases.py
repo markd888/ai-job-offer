@@ -61,7 +61,9 @@ FILTERS = [
 
 
 def _tier(fit, level, elig):
-    t = S.shift(S.tier_for(fit, S.DEFAULT_THRESHOLDS), {"high": 1, "low": -1}.get(level, 0))
+    base = S.tier_for(fit, S.DEFAULT_THRESHOLDS)
+    step = {"high": 1, "low": -1}.get(level, 0)
+    t = S.shift(base, 0 if step > 0 and base == "P2" else step)
     return "P2" if elig == "blocked" else t
 
 

@@ -81,7 +81,7 @@ the company, not the candidate — `company_shape_adjustment` from v1 belongs he
 
 1. **Fit score** = Σ score × weight, weights normalised to sum 1, rounded to 0.1.
 2. **Fit tier**: `fit ≥ p0` → P0, `fit ≥ p1` → P1, else P2. Defaults `p0: 80`, `p1: 65`.
-3. **Attractiveness**: `high` up one tier, `low` down one, `medium`/`unknown` none. At most one step.
+3. **Attractiveness**: `high` up one tier, **but only from a P1 fit** — a strong company never lifts a weak (P2) fit; `low` down one from any tier; `medium`/`unknown` none. At most one step.
 4. **Blocked** → P2, whatever the fit and attractiveness (only a user override lifts it).
 5. **Needs review** keeps the tier; `pending` lists the unknown requirements.
 6. **Evidence confidence**: share of weight backed by `EXPLICIT`/`TRANSFERABLE` — ≥ 80% high, ≥ 50% medium, else low.

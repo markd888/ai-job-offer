@@ -35,9 +35,8 @@
     "attractiveness": [
       "high"
     ],
-    "tier": "P1",
-    "tier_change_reason": null,
-    "provenance": "author-derived-v2",
-    "edge_note": "weak fit lifted one tier by a Series C 3x-growth company"
+    "tier": "P2",
+    "tier_change_reason": "v1 summed business_health 3 into an 11 (P1 floor); v2 keeps the HR-tech fit below P1, and a strong company no longer lifts a P2 fit",
+    "provenance": "author-derived-v2"
   }
 }

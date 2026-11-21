@@ -7,8 +7,8 @@ never rebased, never edited without re-deriving every label).
 Each case has `label_v2` (scoring v2 — all 32). The 12 original cases also keep
 their v1 `label` as a regression subset; where the v2 tier differs, the case says
 why in `tier_change_reason` (the three filter cases become `blocked` → P2 instead
-of "not scored", and `p2-principal-devtools` moves to P1 because a 3x-ARR
-company lifts a weak fit one tier).
+of "not scored", and `p1-floor-11` drops to P2 because a strong company no
+longer lifts a weak fit).
 
 `label_v2` fields: `eligibility` (eligible / needs_review / blocked), `must_fail`
 (requirements that must come back FAIL), `must_unknown` (keywords whose
