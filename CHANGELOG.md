@@ -46,6 +46,28 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.8.7] — 2026-11-21
+
+Repository hygiene. Nothing in the plugin itself changes.
+
+### Added
+
+- `SECURITY.md` (#44):
+  - how to report a vulnerability privately (GitHub private vulnerability
+    reporting is now on);
+  - what not to post in public;
+  - the threat model in plain words: what the plugin reads and writes, and
+    what leaves your machine and when;
+  - known gaps: job postings are untrusted text with no technical
+    prompt-injection guard yet, and the cloud dashboard relies on Cloudflare
+    Access plus the Worker's JWT check.
+- Issue forms (#45):
+  - a bug report asking for the skill, plugin version and Claude Code
+    version, with a required "I removed my personal data" checkbox;
+  - a feature request;
+  - blank issues are off, and security reports point to private reporting.
+- README *Contributing* and `CONTRIBUTING.md` point to both.
+
 ## [0.8.6] — 2026-11-21
 
 ATS check becomes a compatibility and parsing simulator (#38). It shows what a

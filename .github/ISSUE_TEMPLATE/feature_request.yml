@@ -1,0 +1,30 @@
+name: Feature request
+description: Something the plugin should do, or do differently.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: This tracker is **public**. Describe your situation without your own CV, company or contact details.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you're trying to do
+      description: The job-search moment, not the solution yet.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help
+  - type: input
+    id: skill
+    attributes:
+      label: Related skill, if any
+      placeholder: /job-offer:job-search
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This request contains no personal job-search data.
+          required: true
