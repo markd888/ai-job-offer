@@ -222,8 +222,8 @@ Without them, `/apply` still writes the tailored CV in markdown and tells you th
 ## Known limitations
 
 - **Tuned for senior product roles.** The default rubric, archetypes and story types assume a senior PM / head of product search. Other role families need their own rubric.
-- **The ATS check is a document check.** It verifies what a parser can extract from your PDF and which posting keywords your CV covers. It does not simulate or predict any vendor's ranking.
-- **Scores are judgement, not prediction.** Tiers and briefs come from Claude reading the posting against your rubric. Check them before acting; a score is not a probability of getting an interview.
+- **The ATS check is a simulation, not a vendor's parser.** It shows what bounded heuristics extract from your PDF or DOCX, how the fields compare with your CV, and which posting requirements your experience shows, with quotes. It doesn't predict any ATS ranking. It can't judge depth or years of experience, and layout risks are observations from the text layer.
+- **Scores are judgement, not prediction.** The fit rating comes from Claude matching the posting's requirements to quoted lines of your CV; `scripts/score.py` does the arithmetic. Check it before acting: a fit score is not a probability of getting an interview. `funnel.py --by-tier` shows whether the predictions held up, once you have five or more applications per tier.
 - **CV output is one fixed format:** a single-column, one-page A4 PDF in Carlito ([#12](https://github.com/markd888/ai-job-offer/issues/12) tracks options).
 - **Discovery isn't exhaustive.** The sweep reaches public ATS boards and, with Freehire, more career pages; roles posted only on closed boards can be missed.
 - **Requires Claude Code.** There is no standalone app.
@@ -241,7 +241,7 @@ Move to the full plugin later and `/setup` reads `job-sweep/profile.md`, so you 
 
 ## Project status
 
-Active, single-maintainer, versioned with [semantic versioning](https://semver.org/); release notes in [CHANGELOG.md](CHANGELOG.md). Current work is tracked in milestones: [0.8.5 — ATS compatibility and parsing](https://github.com/markd888/ai-job-offer/milestone/7), evidence-based scoring ([#37](https://github.com/markd888/ai-job-offer/issues/37)), and [0.9.0](https://github.com/markd888/ai-job-offer/milestone/2).
+Active, single-maintainer, versioned with [semantic versioning](https://semver.org/); release notes in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/markd888/ai-job-offer/releases). Latest: **0.8.7** — evidence-based scoring (0.8.5), the ATS compatibility and parsing simulator (0.8.6), `SECURITY.md` and issue forms (0.8.7). Next: [0.8.8 — rejection patterns feed back into positioning](https://github.com/markd888/ai-job-offer/milestone/10) and [0.9.0 — take-home assignments](https://github.com/markd888/ai-job-offer/milestone/2).
 
 This project started as a fork of [pm-job-search](https://github.com/archugunov/pm-job-search) 0.6.0 by [@archugunov](https://github.com/archugunov). Since then it added PDF output and the ATS check, cover letters, `/sent` with a frozen copy of each application, follow-ups and referral tracking, the funnel by channel, `/wrap-up`, Freehire discovery and a reworked dashboard.
 
