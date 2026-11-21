@@ -88,7 +88,7 @@ Strategy and practice
 
 | Agent | What it does | Use when |
 |---|---|---|
-| `job-offer:career-coach` | The honest coach. Offer evaluation, positioning sharpening, anti-goals, search-strategy resets, "something feels off" diagnostics. | You're stuck, weighing something strategic, or your search itself isn't working. |
+| `job-offer:career-coach` | The honest coach. Offer evaluation, positioning sharpening, anti-goals, search-strategy resets, a monthly rejection review, "something feels off" diagnostics. | You're stuck, weighing something strategic, or your search itself isn't working. |
 | `job-offer:interviewer-simulator` | Live interview practice. Three modes: full mock round (6–10 questions + pushback), single-question deep-dive, pressure-test on one story's weak angle. | You want to rehearse, not review. |
 
 ## Recommended first week

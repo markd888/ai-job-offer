@@ -46,6 +46,33 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.8.8] — 2026-11-21
+
+Rejection patterns feed back into positioning (#11).
+
+### Added
+
+- `scripts/rejection-patterns.py` shows where rejections cluster: by stage reached, predicted tier, channel, role level and time to rejection.
+  - It compares reply rates, meaning the share of applications that got past the first stage. Most searches end mostly in rejections, so shares of rejections say little.
+  - A group is a pattern when:
+    - it has 5+ applications and half or double the overall reply rate;
+    - or it has 3+ rejections at one stage past the application;
+    - or it has 3+ rejections within a day of applying, which points to an automatic filter.
+  - Unknown and unscored groups are reported as data gaps, never as patterns.
+  - Template rejection notes are counted, and only specific reasons are quoted.
+- `career-coach` rejection review:
+  - checks each pattern against your interview debriefs, notes, ATS checks and `funnel --by-tier`;
+  - proposes at most three changes: positioning, a story to build, a `hard_filters` line for roles to stop applying to, or targets;
+  - asks about one change at a time, and writes only the ones you say yes to;
+  - records `last_rejection_review` in strategy.md.
+- `/today` offers the review once a month, after 5+ new rejections.
+
+### Changed
+
+- Coach trigger C's same-stage rule reads the script and ignores the application stage. Silence after applying isn't a stage pattern.
+- `/wrap-up`'s retrospective shows the same summary under "Where it stopped". It no longer quotes template rejections.
+- `career-coach` may edit profile.md or strategy.md in one case: a rejection-review change you said yes to.
+
 ## [0.8.7] — 2026-11-21
 
 Repository hygiene. Nothing in the plugin itself changes.

@@ -24,7 +24,7 @@ A job search is a pipeline of small decisions spread over weeks: which roles are
 - **Markdown is the system of record.** Profile, pipeline, notes and briefs are plain files you can read, edit and version yourself. The dashboard is a view over those files, not a database.
 - **No invented facts.** Every claim in a CV, letter or message traces to your master CV, your profile or your own answers.
 - **Drafts, not actions.** Follow-ups, referral asks and withdrawals are drafts you send yourself. A status changes after you confirm it.
-- **It notices when the search isn't working.** Weekly reflection, a funnel by channel and an honest `career-coach` turn your own numbers into a change of strategy.
+- **It notices when the search isn't working.** Weekly reflection, a funnel by channel, a monthly look at where rejections cluster and an honest `career-coach` turn your own numbers into a change of strategy.
 
 It is built for senior PMs, lead PMs and heads of product; the default rubric, archetypes and story types are tuned for that search.
 
@@ -102,7 +102,7 @@ The same folder shows the rest of a working install: [the role's `meta.md`](user
 | **Follow up** | Applications quiet for 10+ days get a short nudge (at most two); referral asks and thank-yous are tracked per person. | `/follow-up`, `/outreach` |
 | **Interview** | Stories adapted to the round, case drills, mock interviews, and a debrief from your transcript. | `/interview-prep`, `/story-builder`, `/case-practice`, `/interview-analysis` |
 | **Decide** | A verdict on one offer or two, with negotiation moves; after you accept, withdrawals, thank-yous and a retro. | `/evaluate-offer`, `/wrap-up` |
-| **Improve** | A weekly reflection, the funnel by channel, and a coach that says when the strategy needs to change. | `/today`, `/dashboard`, `career-coach` |
+| **Improve** | A weekly reflection, the funnel by channel, a monthly rejection review, and a coach that proposes changes (positioning, stories, roles to stop applying to) when the strategy needs one. | `/today`, `/dashboard`, `career-coach` |
 
 Each role is a folder with a `meta.md`. Its `status` moves `new → to_apply → applied → interviewing → offer`, or ends in `rejected` / `not_interested`; skills propose the change and you confirm it.
 
@@ -173,7 +173,7 @@ All commands are prefixed `/job-offer:`. Full descriptions are in [`plugin/READM
 |---|---|
 | `cpo-reviewer`, `eng-manager-reviewer`, `design-manager-reviewer`, `interview-coach` | Reviews of a case study, story or answer from four angles, in one shared format, so you can read them as a panel |
 | `interviewer-simulator` | A full mock round, or one question with escalating follow-ups |
-| `career-coach` | Positioning, outreach, cadence, offers, and resetting a search that isn't working |
+| `career-coach` | Positioning, outreach, cadence, offers, a monthly rejection review, and resetting a search that isn't working |
 
 ## Dashboard
 
@@ -224,6 +224,7 @@ Without them, `/apply` still writes the tailored CV in markdown and tells you th
 - **Tuned for senior product roles.** The default rubric, archetypes and story types assume a senior PM / head of product search. Other role families need their own rubric.
 - **The ATS check is a simulation, not a vendor's parser.** It shows what bounded heuristics extract from your PDF or DOCX, how the fields compare with your CV, and which posting requirements your experience shows, with quotes. It doesn't predict any ATS ranking. It can't judge depth or years of experience, and layout risks are observations from the text layer.
 - **Scores are judgement, not prediction.** The fit rating comes from Claude matching the posting's requirements to quoted lines of your CV; `scripts/score.py` does the arithmetic. Check it before acting: a fit score is not a probability of getting an interview. `funnel.py --by-tier` shows whether the predictions held up, once you have five or more applications per tier.
+- **Rejection patterns show where, not why.** `rejection-patterns.py` finds where rejections cluster (stage, predicted tier, role level, time to rejection). Most rejections are silence or a template, so the reason comes only from your interview debriefs and the few specific notes. Channels show up only once applications are recorded with `/sent`.
 - **CV output is one fixed format:** a single-column, one-page A4 PDF in Carlito ([#12](https://github.com/markd888/ai-job-offer/issues/12) tracks options).
 - **Discovery isn't exhaustive.** The sweep reaches public ATS boards and, with Freehire, more career pages; roles posted only on closed boards can be missed.
 - **Requires Claude Code.** There is no standalone app.
@@ -241,7 +242,7 @@ Move to the full plugin later and `/setup` reads `job-sweep/profile.md`, so you 
 
 ## Project status
 
-Active, single-maintainer, versioned with [semantic versioning](https://semver.org/); release notes in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/markd888/ai-job-offer/releases). Latest: **0.8.7** — evidence-based scoring (0.8.5), the ATS compatibility and parsing simulator (0.8.6), `SECURITY.md` and issue forms (0.8.7). Next: [0.8.8 — rejection patterns feed back into positioning](https://github.com/markd888/ai-job-offer/milestone/10) and [0.9.0 — take-home assignments](https://github.com/markd888/ai-job-offer/milestone/2).
+Active, single-maintainer, versioned with [semantic versioning](https://semver.org/); release notes in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/markd888/ai-job-offer/releases). Latest: **0.8.8** — rejection patterns feed back into positioning: a monthly review in `career-coach`, prompted by `/today`. Before it: evidence-based scoring (0.8.5), the ATS compatibility and parsing simulator (0.8.6), `SECURITY.md` and issue forms (0.8.7). Next: [0.9.0 — take-home assignments](https://github.com/markd888/ai-job-offer/milestone/2).
 
 This project started as a fork of [pm-job-search](https://github.com/archugunov/pm-job-search) 0.6.0 by [@archugunov](https://github.com/archugunov). Since then it added PDF output and the ATS check, cover letters, `/sent` with a frozen copy of each application, follow-ups and referral tracking, the funnel by channel, `/wrap-up`, Freehire discovery and a reworked dashboard.
 
