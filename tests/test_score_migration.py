@@ -121,7 +121,7 @@ def test_outcome_by_tier_prefers_prediction_and_flags_small_samples():
             [{"status": "applied", "tier": "P1"}, {"status": "new", "tier": "P2"}]
     rows = {r["tier"]: r for r in F.outcome_by_tier(roles)["rows"]}
     assert rows["P0"]["no_response"] == 5 and rows["P0"]["too_few"] is False and rows["P0"]["v1_basis"] == 0
-    assert rows["P1"]["applied"] == 1 and rows["P1"]["too_few"] is True and rows["P1"]["v1_basis"] == 1
+    assert rows["P1"]["applied"] == 1 and rows["P1"]["too_few"] is True and rows["P1"]["v1_basis"] == 1 and rows["P2"]["v1_basis"] == 0
     assert rows["P2"]["applied_total"] == 0
 
 

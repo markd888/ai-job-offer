@@ -104,10 +104,10 @@ def outcome_by_tier(roles: Iterable[dict[str, Any]]) -> dict[str, Any]:
                                      "v1_basis": 0})
         o = outcome(r)
         row[o] += 1
-        if o not in ("not_applied",):
+        if o != "not_applied":
             row["applied_total"] += 1
-        if basis == "v1_tier":
-            row["v1_basis"] += 1
+            if basis == "v1_tier":
+                row["v1_basis"] += 1
     order = {t: i for i, t in enumerate((*PREDICTION_TIERS, "unscored"))}
     out = sorted(rows.values(), key=lambda x: order[x["tier"]])
     for row in out:
