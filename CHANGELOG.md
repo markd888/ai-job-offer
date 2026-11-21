@@ -46,6 +46,56 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.8.6] — 2026-11-21
+
+ATS check becomes a compatibility and parsing simulator (#38). It shows what a
+parser would make of your CV and how the CV matches the posting, and it says
+what it can't tell you.
+
+### Added
+
+- **DOCX CVs.** Read with the standard library (no new dependency): body,
+  tables row by row, headers, footers and text boxes kept apart; the report
+  lists what the extraction can't see.
+- **Integrity warnings.** Near-empty text, lines extracted twice, mojibake and
+  control characters (including bullets that extract as U+007F), missing
+  experience/education/skills sections, and pypdf vs pdftotext disagreeing.
+  Warnings never change the exit code.
+- **Parsing simulation.** Contacts, sections, employment entries with dates,
+  education, skills, languages and certifications. Every field carries its
+  source text and confidence, and may be empty
+  (`schemas/ats-parse.schema.md`).
+- **Field-by-field fidelity against the CV markdown**: EXTRACTED / MISSING /
+  AMBIGUOUS / CONFLICTING / NOT_IN_SOURCE.
+- **Job description matching.** Requirements (from Claude via
+  `--requirements`, or split from `--jd`) are put in five categories:
+  REQUIRED, PREFERRED, RESPONSIBILITY, DOMAIN and TOOLS_AND_TECHNOLOGIES.
+  - Each gets SUPPORTED / PARTIALLY_SUPPORTED / NOT_FOUND / AMBIGUOUS.
+  - Every positive status quotes the CV line it rests on.
+  - A term that is only in the skills list is at most partial.
+  - Profile-only support is flagged with `--profile`.
+- **Layout observations.** From text positions: two columns on the same rows,
+  running headers and footers, icon fonts, where the contact block sits. From
+  DOCX: tables, text boxes, contacts in a header. Each one cites what was seen.
+- **Seven-section report** under a five-component table (integrity, parsing
+  completeness, extraction fidelity, requirement coverage, layout). There is
+  no overall score. A Limitations section says the report predicts no ATS
+  ranking or hiring decision. `--json` writes the structured result.
+- `docs/ats-check-example.md`: a full report on a synthetic CV.
+- Ten synthetic fixture cases, built by `tests/ats_fixtures.py`.
+
+### Unchanged
+
+- Flags and exit codes `/apply` relies on. Exit 1 still means a hard check
+  failed (pages, contacts, glyphs, order, fidelity). `ats-check-<date>.md`
+  keeps its name, so `/sent` archives it as before.
+- A keyword or requirement the master CV doesn't support is never added.
+
+### Release process (#46)
+
+- GitHub Releases are created from the CHANGELOG section on every `v*` tag
+  (`.github/workflows/release.yml`). The README version badge reads releases.
+
 ## [0.8.5] — 2026-11-21
 
 The rest of 0.8.4. The `v0.8.4` tag shipped only the scoring core; this

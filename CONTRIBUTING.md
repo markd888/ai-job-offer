@@ -226,4 +226,4 @@ Write shared guidance conditionally, or keep it in a skill-private reference.
 
 1. The version bump in `plugin/.claude-plugin/plugin.json` and the CHANGELOG section land in the **same PR** as the release.
 2. Before asking for a merge, check that the remote branch holds every commit: `git fetch && git log --oneline origin/main..origin/<branch>`, and that `gh pr view <n> --json commits` counts the same.
-3. After the merge: tag `vX.Y.Z` on `main`, then update the plugin.
+3. After the merge: tag `vX.Y.Z` on `main` and push the tag. The `release` workflow creates the GitHub Release from that version's CHANGELOG section, so the section must exist. Then update the plugin.
