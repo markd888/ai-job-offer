@@ -12,7 +12,7 @@ An ATS ranks the PDF's embedded text, not the page you see. Most rejections come
 ## Inputs
 
 - Role folder: `userdata/companies/<Co>/` or `userdata/companies/<Co>/<role-slug>/` — the one holding `meta.md`. If the company has several roles and the user didn't say which, ask once.
-- In that folder: the newest `*CV*.pdf` and `cv-*.md`, `research-brief.md`, and the posting (`submitted-*/posting.md` if archived; otherwise fetch the `link:` from `meta.md`, or ask the user to paste it).
+- In that folder: the newest `*CV*.pdf` (or a `.docx` CV the user brought — the checker reads it too and lists what it can't see) and `cv-*.md`, `research-brief.md`, and the posting (`submitted-*/posting.md` if archived; otherwise fetch the `link:` from `meta.md`, or ask the user to paste it).
 
 ## Steps
 
