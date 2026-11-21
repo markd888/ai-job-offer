@@ -7,6 +7,7 @@ numbers.
 
 Usage:
   python3 -I funnel.py --userdata ./userdata [--json]
+  python3 -I funnel.py --userdata ./userdata --by-tier [--json]   predicted tier vs outcome
 
 A role counts once it was applied to; how far it got is the deeper of
 max_stage and rejection_stage (status interviewing means at least screening,
@@ -48,6 +49,85 @@ def stage_reached(role: dict[str, Any]) -> str | None:
     return ("applied", "screening", "interview", "final")[deepest]
 
 
+OUTCOMES = ("not_applied", "applied", "no_response", "hr_rejected", "hr_passed",
+            "technical_rejected", "technical_passed", "final_round", "offer", "withdrawn")
+PREDICTION_TIERS = ("P0", "P1", "P2")
+MIN_PER_TIER = 5
+
+
+def outcome(role: dict[str, Any]) -> str:
+    """Application outcome derived from existing fields — never stored.
+
+    Mapping (score.schema.md / #37): new|to_apply → not_applied; not_interested
+    → withdrawn if it was applied to, else not_applied; offer → offer; a
+    rejection at a stage → <stage>_rejected (application with no reply →
+    no_response); otherwise the deepest stage reached."""
+    status = role.get("status") or ""
+    if status == "offer":
+        return "offer"
+    if status == "not_interested":
+        return "withdrawn" if role.get("date_applied") else "not_applied"
+    if status in ("new", "to_apply", ""):
+        return "not_applied"
+    if status == "rejected":
+        rs = role.get("rejection_stage") or "application"
+        if rs == "application":
+            return "applied" if role.get("last_inbound") else "no_response"
+        if rs == "screening":
+            return "hr_rejected"
+        if rs == "interview":
+            return "technical_rejected"
+        return "final_round"  # rejected at final
+    reached = stage_reached(role)
+    return {"screening": "hr_passed", "interview": "technical_passed",
+            "final": "final_round"}.get(reached or "", "applied")
+
+
+def prediction_of(role: dict[str, Any]) -> tuple[str, str]:
+    """(tier, basis). v2 roles keep their first prediction in predicted_tier; a v1
+    role only has its current tier, which a manual adjustment may have replaced."""
+    if role.get("predicted_tier") in PREDICTION_TIERS:
+        return role["predicted_tier"], "predicted"
+    if role.get("tier") in PREDICTION_TIERS:
+        return role["tier"], "v1_tier"
+    return "unscored", "none"
+
+
+def outcome_by_tier(roles: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    """Counts of derived outcomes per predicted tier. Counts only — no rates, no
+    probabilities. Tiers with fewer than MIN_PER_TIER applied roles are marked
+    too_few, so nobody reads a pattern into three data points."""
+    rows: dict[str, dict[str, Any]] = {}
+    for r in roles:
+        tier, basis = prediction_of(r)
+        row = rows.setdefault(tier, {"tier": tier, **{o: 0 for o in OUTCOMES}, "applied_total": 0,
+                                     "v1_basis": 0})
+        o = outcome(r)
+        row[o] += 1
+        if o not in ("not_applied",):
+            row["applied_total"] += 1
+        if basis == "v1_tier":
+            row["v1_basis"] += 1
+    order = {t: i for i, t in enumerate((*PREDICTION_TIERS, "unscored"))}
+    out = sorted(rows.values(), key=lambda x: order[x["tier"]])
+    for row in out:
+        row["too_few"] = row["applied_total"] < MIN_PER_TIER
+    return {"rows": out, "min_per_tier": MIN_PER_TIER}
+
+
+def render_by_tier(result: dict[str, Any]) -> str:
+    rows = [r for r in result["rows"] if r["applied_total"]]
+    if not rows:
+        return "No applications yet, so nothing to compare predictions with."
+    lines = ["Predicted tier vs what happened (counts of roles applied to):"]
+    for r in rows:
+        parts = ", ".join(f"{r[o]} {o.replace('_', ' ')}" for o in OUTCOMES[1:] if r[o])
+        note = f" — under {result['min_per_tier']} applications, too few to conclude" if r["too_few"] else ""
+        v1 = f" ({r['v1_basis']} scored before v2)" if r["v1_basis"] else ""
+        lines.append(f"- {r['tier']}: {r['applied_total']} applied{v1} → {parts}{note}")
+    return "\n".join(lines)
+
+
 def channel_of(role: dict[str, Any]) -> str:
     ch = (role.get("channel") or "").strip()
     return ch if ch in CHANNELS else "unknown"
@@ -81,7 +161,8 @@ def funnel_by_channel(roles: Iterable[dict[str, Any]]) -> dict[str, Any]:
 
 # ----- reading userdata ------------------------------------------------------
 
-_FIELDS = ("status", "channel", "date_applied", "max_stage", "rejection_stage")
+_FIELDS = ("status", "channel", "date_applied", "max_stage", "rejection_stage",
+           "last_inbound", "tier", "predicted_tier")
 
 
 def _field(text: str, key: str) -> str:
@@ -124,10 +205,16 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--userdata", type=Path, default=Path("userdata"))
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--by-tier", action="store_true", help="predicted tier vs derived outcome")
     a = ap.parse_args()
     if not (a.userdata / "companies").is_dir():
         sys.exit(f"No companies/ under {a.userdata}")
-    result = funnel_by_channel(read_roles(a.userdata))
+    roles = read_roles(a.userdata)
+    if a.by_tier:
+        result = outcome_by_tier(roles)
+        print(json.dumps(result, indent=2) if a.json else render_by_tier(result))
+        return 0
+    result = funnel_by_channel(roles)
     print(json.dumps(result, indent=2) if a.json else render(result))
     return 0
 

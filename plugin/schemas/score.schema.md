@@ -122,3 +122,34 @@ never edited. A second run the same day writes `score-<date>-v2.json`, and so on
 v1 keys (`score`, and `tier` on unscored-by-v2 roles) are left as they are.
 Consumers must branch on `scoring_version` before comparing scores: v1 is 3–15,
 v2 is 0–100.
+
+## Outcomes and the prediction check
+
+Outcomes are **derived**, never stored — `funnel.py` `outcome()` reads
+`status`, `rejection_stage`, `max_stage`, `date_applied`, `last_inbound`:
+
+| Outcome | From |
+|---|---|
+| `not_applied` | `new` / `to_apply`, or `not_interested` without `date_applied` |
+| `withdrawn` | `not_interested` with `date_applied` |
+| `applied` | `applied`; or rejected at application after a reply (`last_inbound`) |
+| `no_response` | rejected at application, no `last_inbound` |
+| `hr_rejected` / `hr_passed` | rejected at / reached `screening` |
+| `technical_rejected` / `technical_passed` | rejected at / reached `interview` |
+| `final_round` | reached or rejected at `final` |
+| `offer` | `offer` |
+
+`python3 -I funnel.py --userdata userdata --by-tier` counts outcomes per
+predicted tier (`predicted_tier`; for v1 roles, the current `tier`, flagged
+as "scored before v2"). Counts only — no rates, no probabilities; a tier with
+fewer than 5 applications is marked "too few to conclude".
+
+## Validation (`scripts/validate_userdata.py`)
+
+- meta.md: `tier`, `predicted_tier`, `tier_override` ∈ P0/P1/P2/unscored;
+  `scoring_version` ∈ 1/2; `eligibility`, `evidence_confidence` in their enums;
+  `fit_score` / `initial_fit_score` 0–100; `tier_override` needs
+  `override_reason` and `override_date`.
+- profile.md: `fit_weights` / `fit_thresholds` are optional; when present they
+  must pass `validate_config` (known dimensions, non-negative weights, 0–100
+  thresholds, `p0 ≥ p1`). `tier_weights` / `tier_thresholds` stay required for now.
