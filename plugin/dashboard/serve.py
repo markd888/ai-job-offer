@@ -303,6 +303,13 @@ _OPTIONAL_FIELDS = (
     "max_stage",        # deepest stage reached (application|screening|interview|final) — funnel + process goal
     "rejection_note",   # if status: rejected — short quoted recruiter feedback
     "date_not_interested",  # if status: not_interested
+    # Scoring v2 (plugin/schemas/score.schema.md). v1 roles have only tier + score.
+    "scoring_version",
+    "fit_score",            # 0–100; never compare with the v1 3–15 `score`
+    "eligibility",          # eligible | needs_review | blocked
+    "evidence_confidence",  # high | medium | low
+    "predicted_tier",
+    "tier_override",
 )
 
 
