@@ -1,7 +1,7 @@
 # ai-job-offer
 
 [![harness-checks](https://github.com/markd888/ai-job-offer/actions/workflows/harness-checks.yml/badge.svg)](https://github.com/markd888/ai-job-offer/actions/workflows/harness-checks.yml)
-[![version](https://img.shields.io/github/v/tag/markd888/ai-job-offer?label=version&sort=semver)](CHANGELOG.md)
+[![version](https://img.shields.io/github/v/release/markd888/ai-job-offer?label=version&sort=semver)](CHANGELOG.md)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **A local-first job-search workflow for senior product managers, built as a Claude Code plugin.**
@@ -153,7 +153,7 @@ All commands are prefixed `/job-offer:`. Full descriptions are in [`plugin/READM
 | Discover | `/job-search` | Weekly sweep of ATS job boards (and Freehire if connected); scores and files new roles. |
 | Evaluate | `/evaluate-position <url>` | Requirements check, evidence-backed fit, company rated apart, tier, posting liveness, research brief. |
 | Apply | `/apply <Company>` | Tailors the master CV: up to five questions, one draft, a one-page PDF. |
-| | `/ats-check <Company>` | Checks the PDF's text layer: page count, contacts, glyphs, section order, extraction fidelity, keyword coverage. |
+| | `/ats-check <Company>` | Reads the CV (PDF or DOCX) the way a parser does: integrity, what each field parses into, fidelity against your CV, the posting's requirements with quoted evidence, layout risks. States what it can't predict. |
 | | `/cover-letter <Company>` | 150–250 words answering the posting's top needs, each claim traced to the CV. |
 | | `/sent <Company>` | Records status, date, channel and referrer; freezes what you sent. |
 | | `/follow-up [Company]` | Drafts a nudge for quiet applications, or a thank-you after a round. |

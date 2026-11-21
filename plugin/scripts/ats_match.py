@@ -73,7 +73,7 @@ product products manager management managing work closely partner partners stake
 functional across own owning drive driving lead leading build building help define defining
 communication communicator communicate written verbal collaboration collaborative teamwork team player
 interpersonal problem solving solver detail oriented organised organized self starter motivated proactive
-curious curiosity attitude mindset end ownership accountable accountability adaptable flexible""".split())
+curious curiosity attitude mindset end clear concise effective fluent ownership accountable accountability adaptable flexible""".split())
 
 HEADING_CATEGORY = [
     (re.compile(r"nice to have|preferred|bonus|plus|desirable|would be great|желательно|будет плюсом", re.I), "PREFERRED"),
