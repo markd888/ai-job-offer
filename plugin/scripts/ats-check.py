@@ -49,6 +49,7 @@ def _sibling(name: str):
 
 AX = _sibling("ats_extract")
 AM = _sibling("ats_match")
+AI = _sibling("ats_integrity")
 norm, words, md_plain, covered, jd_terms = AM.norm, AM.words, AM.md_plain, AM.covered, AM.jd_terms
 _INFO: dict = {}
 
@@ -136,6 +137,14 @@ def main() -> int:
         sample = ", ".join(sorted(set(lost))[:12])
         checks.append(("fidelity", ratio >= 0.95, f"{ratio:.0%} of CV words extracted" + (f"; lost e.g. {sample}" if lost else "")))
 
+    second = None
+    if _INFO.get("format") == "pdf" and engine == "pypdf" and a.pdf.is_file() and AX.shutil.which("pdftotext"):
+        try:
+            second = (AX.extract_pdf(a.pdf, engine="pdftotext")[0], "pdftotext")
+        except Exception:  # a second opinion is optional; never let it break the check
+            second = None
+    warnings = AI.check(text, [h.strip() for h in re.findall(r"^##\s+(.+)$", md, re.M)], second)
+
     kw = [k.strip() for k in a.keywords.split(",") if k.strip()]
     kw_hit = [k for k in kw if covered(k, text_n)]
     kw_miss = [k for k in kw if k not in kw_hit]
@@ -155,6 +164,9 @@ def main() -> int:
                   "Add a missing keyword only where the master CV or profile supports it; otherwise it stays a gap."]
     if sugg:
         lines += ["", "## Frequent posting terms not in the CV (suggestions)", "", ", ".join(sugg)]
+    if warnings:
+        lines += ["", "## Warnings (don't fail the check)", ""]
+        lines += [f"- **{w['check']}** — {w['detail']}" for w in warnings]
     parts = _INFO.get("parts") or {}
     if _INFO.get("format") == "docx":
         where = [f"{k.replace('_', ' ')}: {len(v)} line(s)" for k, v in parts.items() if v and k != "body"]
