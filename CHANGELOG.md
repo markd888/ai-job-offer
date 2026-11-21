@@ -46,7 +46,11 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
-## [0.8.4] — 2026-11-21
+## [0.8.5] — 2026-11-21
+
+The rest of 0.8.4. The `v0.8.4` tag shipped only the scoring core; this
+release carries everything else from #37, unchanged from what was planned
+for 0.8.4.
 
 Evidence-based scoring (#37): a role's rating now says *why* — which
 requirements it meets, what in your CV backs the fit, and how strong the
@@ -96,6 +100,15 @@ whether it was right.
   scoring reference maps each to its v2 place.
 - Nothing is rewritten in bulk. A role is v2 only once it's (re)scored; its
   old `score` and `tier` stay readable until then.
+
+## [0.8.4] — 2026-11-21
+
+Tagged incomplete. Only the scoring core reached the release branch:
+`scripts/score.py` (`compute` / `record` / `override`),
+`scripts/scoring_schema.py` and `schemas/score.schema.md`. Skills, the
+dashboard, `funnel --by-tier`, the validator, the golden set and the docs
+were left on an unpushed branch. Nothing used the new core yet, so scoring
+kept working the old way. All of it ships in [0.8.5].
 
 ## [0.8.3] — 2026-11-20
 
