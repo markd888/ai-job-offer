@@ -12,20 +12,20 @@
         "TRANSFERABLE"
       ],
       "domain": [
-        "WEAK",
-        "TRANSFERABLE"
+        "TRANSFERABLE",
+        "WEAK"
       ]
     },
     "fit_range": [
-      50,
-      64
+      65,
+      79
     ],
     "attractiveness": [
       "medium"
     ],
-    "tier": "P2",
+    "tier": "P1",
     "tier_change_reason": null,
-    "provenance": "author-derived-v2",
-    "edge_note": "enterprise filter does NOT fire: there is a PLG signal. Activation work matches, but analytics SaaS at Senior level keeps fit below P1"
+    "provenance": "author-derived-v2.1",
+    "edge_note": "enterprise filter does NOT fire (PLG signal); self-serve activation is a direct match and PLG SaaS is a target industry, so P1"
   }
 }

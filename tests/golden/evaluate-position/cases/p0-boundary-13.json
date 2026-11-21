@@ -23,19 +23,22 @@
     "must_unknown": [],
     "evidence": {
       "role_responsibility": [
+        "TRANSFERABLE"
+      ],
+      "domain": [
         "EXPLICIT",
         "TRANSFERABLE"
       ]
     },
     "fit_range": [
-      80,
-      88
+      66,
+      79
     ],
     "attractiveness": [
       "medium"
     ],
-    "tier": "P0",
-    "tier_change_reason": null,
-    "provenance": "author-derived-v2"
+    "tier": "P1",
+    "tier_change_reason": "v1 sat exactly on the P0 boundary (13); v2 scores SMB lending ops as transferable from consumer pricing/underwriting, which keeps fit in P1; 'runway not locked in' is medium, not a red flag",
+    "provenance": "author-derived-v2.1"
   }
 }

@@ -23,24 +23,22 @@
     "must_unknown": [],
     "evidence": {
       "role_responsibility": [
-        "EXPLICIT",
+        "WEAK",
         "TRANSFERABLE"
       ],
       "seniority_ownership": [
-        "WEAK",
         "TRANSFERABLE"
       ]
     },
     "fit_range": [
-      66,
-      80
+      50,
+      64
     ],
     "attractiveness": [
       "high"
     ],
-    "tier": "P0",
-    "tier_change_reason": null,
-    "provenance": "author-derived-v2",
-    "edge_note": "v1 shape bonus is now attractiveness: founder-led Series A self-serve lifts a Senior-level fit one tier"
+    "tier": "P2",
+    "tier_change_reason": "v1 reached P0 only through the +1 shape bonus on a 12; the JD calls disputes and chargebacks 'new ground', so v2 fit is below P1, and a strong company no longer lifts a P2 fit",
+    "provenance": "author-derived-v2.1"
   }
 }

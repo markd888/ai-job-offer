@@ -35,6 +35,18 @@ Status: `PASS` (the JD shows it's met), `FAIL` (the JD shows it isn't),
 information**), `NOT_APPLICABLE` (the filter can't concern this role).
 `jd_quote` is the posting text, or `"not stated"`.
 
+**Which filters are UNKNOWN.** A hard filter is `NOT_APPLICABLE` when the
+role's own shape rules it out — a Senior or Lead PM posting is not GM scope, a
+London-hybrid posting needs no relocation. It is `UNKNOWN` only when the JD
+genuinely leaves it open (a Head of Product who will "build the team" with no
+size given; no location stated at all).
+
+**What counts as mandatory.** Eligibility is for conditions: language,
+location, work authorisation, a minimum of years, a clearance, on-site days —
+and a skill only when the JD uses hard words for it (`required`, `must`,
+`essential`, `minimum`). "Core to the role", "strongly preferred", "deep
+experience in X" are skills: score them in `skills_experience`, don't list them.
+
 `location_fit` from v1 becomes eligibility when the user has a location hard
 filter (e.g. `no relocation`); otherwise it's a preference — mention it under
 attractiveness `factors`, not in fit.
@@ -43,13 +55,28 @@ Anti-goals go in `warnings` with the verbatim anti-goal text. They never block.
 
 ## 2. Five dimensions, 0–100 each
 
-| Key | What it answers | Rough guide |
-|---|---|---|
-| `role_responsibility` | Does the job's day-to-day match work the user has done? | 90+ same remit; 70 most of it; 50 half; <40 different job |
-| `skills_experience` | The required skills and years | 90+ all required met; 70 most; 50 core met, several gaps |
-| `domain` | The industry / problem space | 90+ a `target_industries` entry the CV shows; 60 adjacent; 30 new |
-| `seniority_ownership` | Level, scope, reports, decision rights vs `target_titles` and the CV | 90+ same level and scope; 60 one step off; 30 two steps |
-| `competitive_advantage` | What makes this user stand out for *this* posting (Moat, rare combos) | 90+ moat named in the JD; 50 generic fit |
+Pick the evidence class first, then score inside its band. The band is what
+keeps transferable experience from scoring like direct experience:
+
+| Class | Score band |
+|---|---|
+| `EXPLICIT` | 75–100 |
+| `TRANSFERABLE` | 55–75 |
+| `WEAK` | 30–55 |
+| `MISSING` | 40–60, `confidence: low` |
+| `CONTRADICTED` | 0–35 |
+
+| Key | What it answers |
+|---|---|
+| `role_responsibility` | Does the job's day-to-day match work the user has done? Same remit in another product area is `TRANSFERABLE`. |
+| `skills_experience` | The required skills and years. |
+| `domain` | The industry / problem space. A `target_industries` entry the CV shows → `EXPLICIT`; a neighbour → `TRANSFERABLE`; outside the targets → `WEAK` or `MISSING`. |
+| `seniority_ownership` | Level, scope, reports, decision rights against `target_titles`. Same level → `EXPLICIT`; one level below the lowest target title → `TRANSFERABLE` at 55–65; two or more below → `CONTRADICTED`. |
+| `competitive_advantage` | What makes this user stand out for *this* posting (Moat, rare combos). |
+
+**A role two or more levels below the target titles** (a mid-level PM post for
+a Lead/Head search) also caps `role_responsibility` at 50: owning one squad's
+backlog is not the same remit as owning the product, even when the topic matches.
 
 Per dimension fill `requirement` (the JD line it answers), `explanation` (one
 sentence), `evidence`, `evidence_class`, `confidence`.
@@ -63,8 +90,8 @@ sentence), `evidence`, `evidence_class`, `confidence`.
 - `TRANSFERABLE` — the same skill in a different context; say which.
 - `WEAK` — indirect or thin.
 - `MISSING` — nothing found. No quotes. This is uncertainty, **not** a gap:
-  score it mid-range (40–60) with `confidence: low`, and add the question to
-  the brief's Open questions.
+  score it in its band with `confidence: low`, and add the question to the
+  brief's Open questions.
 - `CONTRADICTED` — the CV shows the opposite (e.g. JD needs people
   management, CV shows IC roles only). Quote what contradicts it. The only
   confirmed gap.
@@ -78,8 +105,11 @@ penalty descriptions are attractiveness `factors`.
 ## 3. Attractiveness
 
 `level`: `high` (strong growth, recent funding, profitable and scaling, or the
-v1 shape bonus), `medium` (funded or profitable, unclear trajectory),
-`low` (red flags, the v1 shape penalty), `unknown` (nothing to go on).
+v1 shape bonus), `medium` (funded or profitable, unclear trajectory — "runway
+not locked in", "still proving the loop" are medium, not red flags),
+`low` (red flags: layoffs, a failed round, missed payroll; or the v1 shape
+penalty with nothing positive to offset it), `unknown` (nothing to go on).
+When strong growth and the v1 shape penalty both apply, they cancel: `medium`.
 `factors`: short phrases. `sources`: where each came from (`posting`,
 `company site`, `Freehire`, `user`). Don't invent funding or headcount.
 
