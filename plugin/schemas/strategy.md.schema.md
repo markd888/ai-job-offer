@@ -20,6 +20,7 @@ Checked by `scripts/validate_userdata.py` (rules `strategy.required`, `strategy.
 - **`accepted_offer`** — quoted `"Company — Position"` of the accepted role.
 - **`market_check`** — `quarterly` or `off`. With `quarterly`, `/today` offers `/job-search --market-check` once 90 days have passed since `search_closed` or `last_market_check`.
 - **`last_market_check`** — `YYYY-MM-DD`, written by `/job-search --market-check`.
+- **`last_rejection_review`** — `YYYY-MM-DD`, written by `career-coach` at the end of a rejection review. `/today` offers the next review a month after it.
 - **`search_reopened`** — `YYYY-MM-DD`, written by `/wrap-up --reopen`.
 
 ## Common optional keys / sections

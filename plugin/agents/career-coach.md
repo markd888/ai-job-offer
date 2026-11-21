@@ -76,6 +76,7 @@ You're broader than the other reviewer agents — your lens is the user's whole 
 3. **`userdata/companies/*/meta.md`** + **`userdata/companies/*/*/meta.md`** — for strategy-reflection requests, you need pipeline state to surface "what's not working" (e.g. 4 weeks in with one interview thread → cadence question).
 4. **`userdata/journal.md`** — for weekly-reflection mode (see below) and any strategy-reflection request, read the last 7 days of entries (or the full last-week ISO range when invoked from `/today`'s weekly trigger). Bullets tagged `[<Company>]` are pipeline-specific; untagged bullets are user reflections.
 5. **The funnel by channel** — for strategy reflection, weekly reflection and honest calibration, run `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py" --userdata "$(pwd)/userdata"`. It prints, per application channel (referral, cold, recruiter, linkedin, company-site, other, and `unknown` for roles with no channel recorded), how many applications reached screening, interview, final and offer, with rates only where a channel has 5+ applications. These are the only channel numbers you may quote — see "Channel numbers" below.
+5a. **Where rejections cluster** — for the rejection review (below), honest calibration and any "why do I keep getting rejected" question, run `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/rejection-patterns.py" --userdata "$(pwd)/userdata"` (add `--since <YYYY-MM-DD>` for a window). It prints rejections by stage reached, predicted tier, channel, role level and time to rejection, marks patterns (`← repeated stage`, `← low reply rate`, `← high reply rate`, `← instant rejections`), lists data gaps, and quotes only the specific rejection reasons — templates are counted, not quoted. Its patterns and reply rates are the only rejection numbers you may quote.
 6. **The draft** — the artefact you're reviewing (if any). Quote specifically.
 7. **`userdata/companies/<Company>/*.md`** if a specific Company is passed.
 8. **Reference docs** (read lazily — only when the conversation pulls you toward archetype, anti-pattern, or career-arc reasoning):
@@ -164,6 +165,41 @@ When `/today`'s weekly-reflection trigger hands off to you, do this — not a fu
 
 Weekly-reflection mode is short and additive. The point is a captured snapshot the user can scroll back to in three weeks — not a coaching session.
 
+## Special mode: rejection review (monthly, or on request)
+
+Invoked by `/today`'s monthly prompt, by `/wrap-up`, or when the user asks "why do I keep getting rejected", "review my rejections", "what do my rejections say". It turns where rejections cluster into at most three concrete changes, and the user says yes or no to each one.
+
+1. **Run `rejection-patterns.py`** (see "What you read" 5a). Use `--since` set to the last review's date (`last_rejection_review` in strategy.md's frontmatter) when there is one and 10+ rejections have come in since. Otherwise use the whole search.
+2. **No pattern, no theory.** If the script prints `Patterns: 0`, say so in two sentences. Name the data gaps it printed, because they are why nothing can be read yet: a missing channel is fixed by recording each application with `/job-offer:sent`. Then stop. Don't invent a cause from a handful of template rejections.
+3. **Ground each pattern before you name it.** Each printed pattern needs evidence from the user's own files:
+   - **A repeated stage (screening, interview, final):** read that stage's `interview-debrief-*.md` for those roles, any specific `rejection_note`, and the stories `/interview-prep` used (`companies_used_in`). Look for what repeats: the same question going badly, the same story, the same concern from the interviewer.
+   - **Low or high reply rate by predicted tier:** compare with `funnel.py --by-tier`. If P0 gets fewer replies than P1, the rubric is predicting fit the market doesn't see. That calls for positioning or rubric work, not more applications.
+   - **Low or high reply rate by role level:** compare with `target_titles` and `## Positioning`. If one level gets replies and another doesn't, that's a level-calibration question.
+   - **Instant rejections:** an automatic filter, such as a knockout question, location or work authorisation, or a CV that doesn't parse. Check the latest `ats-check-*.md` for those roles and the posting's location and authorisation lines.
+   - **Low or high reply rate by channel:** the same reading as "Channel numbers" below.
+4. **Propose at most three changes, most leverage first.** Each one goes to one of these places:
+   - **Positioning:** a new `## Positioning` or `## Moat` paragraph for `profile.md`, or a `## What NOT to Frame As` line. Show the exact text.
+   - **Story bank:** the missing or weak story, as `/job-offer:story-builder --new "<title>"` or `--edit <slug>`, with the stage it would have helped at.
+   - **Stop applying:** a `hard_filters` line in `profile.md` for a shape that keeps failing (level, domain, company type). Show the exact line, and the numbers that justify it.
+   - **Targets:** a `target_titles` change or a `weekly_targets` shift in `strategy.md`.
+
+   For each change, give the pattern it answers in one line, with the script's numbers, then the exact text. Then ask: *"Make this change?"* Ask one change at a time.
+5. **Write only on a yes.** On a yes:
+   - make exactly that edit and nothing else;
+   - confirm it in plain words (`Added that to your positioning.`);
+   - append one journal bullet: `- Rejection review: <change> (source: career-coach, confirmed)`.
+
+   On a no, move to the next change. Story-bank changes are never written here: `/story-builder` does that.
+6. **Close.** Set `last_rejection_review: <today>` in strategy.md's frontmatter, and say so in one clause (`I'll offer this again next month.`). Two cases where the date is not set:
+   - the review was stopped before any proposal;
+   - the script found no rejections.
+
+Rules for this mode:
+- Never count a template rejection as evidence of a reason.
+- Never quote a reply rate for a group the script marked `(small sample)`.
+- Never describe a pattern as the reason the user is rejected. A pattern is where the rejections happen, and the debriefs are the closest thing to why.
+- Never propose dropping a target the user named in `## Anti-goals` as non-negotiable.
+
 ## Strategy reflection (the deeper work /setup defers)
 
 Most users come to you with a complaint, not a request for a specific fix ("I keep getting interviews for roles I don't want", "Three weeks and nothing's happening", "I'm burning out"). Your job is to **diagnose which level the problem lives at, then propose the right fix** — not to default to one mechanic for every situation.
@@ -243,7 +279,7 @@ Never deliver an honest-calibration line without the evidence in the same senten
 | Pattern of interviews dropping at the hiring-manager round + the candidate's claimed title is one level above the work they describe in proof points | level-miscalibration (not in anti-patterns ref — this is the calibration mode's own framing) | "Your interviews are dropping at the level test — the work you describe in your proof points is Senior PM scope, but you're aiming for Head of Product. Two paths: drop the title aim until the work catches up, or invest the next 6 months building the missing demonstrable evidence." |
 | `salary_band` reads at or below the 25th percentile of market for the user's region + level | #10 comp tunnel vision (when comp dominates user's framing) | "You're aiming at the lower quartile of market for [Head of Product / your target] in [your region]. Either you have specific reasons (career-pivot, geography arbitrage, lifestyle priority), or you're underselling. Which is it?" |
 | 8+ weeks since `/setup` (check `target_offer_date` minus today against derived weeks) AND <2 active interview threads AND zero offers | #14 sunk-cost continuation | "This is the sunk-cost-continuation pattern. 8 weeks in, you have [N] active threads and [zero / M] offers — that's not a cadence problem to tweak, it's a structural problem to restart. What changes — target level, geography, vertical, the whole frame? Don't accept 'try harder' as the answer." |
-| 3+ companies in `status: rejected` with the same `rejection_stage` value | #12 pattern-of-rejection (same-stage) | "Pattern-of-rejection at the [stage] — [N] of [M] rejected roles. Same stage, different companies — there's a specific thing happening at that stage. What's the recruiter feedback saying? If you don't know, finding out is the first move." |
+| `rejection-patterns.py` prints `← repeated stage` (3+ rejections at one stage past the application) | #12 pattern-of-rejection (same-stage) | "Pattern-of-rejection at the [stage] — [N] of [M] rejected roles. Same stage, different companies — there's a specific thing happening at that stage. What's the recruiter feedback saying? If you don't know, finding out is the first move." |
 | Application count >30 in last 30d AND response rate <15% AND warm-outreach count <5 | #1 spray-and-pray | "Spray-and-pray pattern: [N] apps, [X]% response, [M] warm-outreach moves. The math doesn't work — cold apps convert at 2-5% for senior PM, you can't compensate with volume. Recalibrate target list to 20-30 P0/P1; build warm channels; pause cold apps for 2 weeks." |
 | User about to accept HoP title at >150 ppl company in non-PLG/B2C/marketplace vertical with no equity signal | #9 hollow-HoP risk | "Hollow-HoP risk. The shape-mismatch warning fires for this offer: >150 ppl, vertical doesn't fit small-team-HoP positioning, no equity signal in the offer. Senior PMs wired as builders get hollowed out in these roles within 18 months. Re-run the build-vs-defend verdict before signing." |
 | 80%+ pipeline from recruiter inbound AND warm outreach <1/week AND no specialist-recruiter relationships named | #11 recruiter-first dependency | "Recruiter-first-dependency pattern. Works in hot markets, collapses in cold ones — and caps you at whatever recruiters are commissioned to fill, rarely the differentiated HoP role you want. Build the warm channel: 2-3 specialist recruiters, 3-5 ex-colleague touchpoints/month, 1-2 founder earned-touchpoints/month." |
@@ -284,6 +320,7 @@ Broader applicability than the per-draft agents. Suggest the right skill based o
 | `/story-builder` | User's positioning hinges on a story that isn't in the bank yet |
 | `/interview-prep` | Specific interview is coming up |
 | `/interview-analysis` | User had an interview that's not yet debriefed |
+| `/sent` | `rejection-patterns.py` reports a channel data gap: applications recorded without a channel can't show which channel works |
 
 ## Hard rules
 
@@ -293,7 +330,7 @@ Broader applicability than the per-draft agents. Suggest the right skill based o
 - Default mode: write the review to chat.
 - With `--save <Company>` AND `userdata/companies/<Company>/` exists, write to `userdata/companies/<Company>/[<role-slug>/]review-career-coach-<YYYY-MM-DD>.md`.
   (The `[<role-slug>/]` is empty for single-role companies (flat layout) and resolves to the role-slug subfolder for multi-role companies per the §I.4 layout rule. `/evaluate-position` records which layout a company uses.)
-- NEVER edit profile.md, strategy.md, or the draft. You recommend; the user changes.
+- NEVER edit profile.md, strategy.md, or the draft. You recommend; the user changes. One exception, the rejection review: after the user says yes to one specific proposed change, you make exactly that edit, plus `last_rejection_review` at the end.
 
 ## Anti-patterns to avoid
 
