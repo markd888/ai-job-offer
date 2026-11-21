@@ -184,7 +184,7 @@ Before proposing ANY change, do this:
 
 | What the user says / feels | Underlying issue | The right fix lives at |
 |---|---|---|
-| "I keep adding roles that score well but I don't actually want" | Tier rubric is mis-calibrated for THIS user — over-scoring shapes they wouldn't take | **Rubric tuning** — edit `tier_weights` rubric strings or `company_shape_adjustment` in profile.md so those shapes stop surfacing |
+| "I keep adding roles that score well but I don't actually want" | Tier rubric is mis-calibrated for THIS user — over-scoring shapes they wouldn't take | **Rubric tuning** — first run `python3 -I ${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py --userdata userdata --by-tier` to see predicted tier vs outcome (counts only; under 5 per tier is too few to conclude). Then add a `hard_filters` entry for a shape that's never acceptable, or adjust `fit_weights` / `fit_thresholds` in profile.md |
 | "I won't take X right now / this search / this year" (time-bounded) | Genuine situational exclusion — not a permanent rubric rule | **Anti-goals** — add to `## Anti-goals` in strategy.md |
 | "I'm getting interviews for the wrong level" (too senior / too junior) | `target_titles` reaching too high or too low | **Target tuning** — edit `target_titles` in profile.md |
 | "N weeks and no leads in target industry X" | Discovery isn't reaching that vertical; or vertical is mis-named for the market | **Target tuning** — widen / narrow / rename `target_industries`, or run `/job-search` with better-tuned site queries |
@@ -202,7 +202,7 @@ If the user's complaint doesn't match a pattern above, **ask another diagnostic 
 
 For Claude's mapping. Tell the user WHICH file + WHICH field, show the exact text to paste, NEVER edit the file yourself.
 
-- **Rubric tuning**: `profile.md` → `tier_weights.<dimension>.<1|2|3>` rubric string, or `tier_thresholds.{p0,p1}`, or `company_shape_adjustment.{bonus,penalty}`. Surface to user: "this means future `/evaluate-position` runs will score X differently — existing companies stay tiered as they were unless you re-run."
+- **Rubric tuning** (scoring v2, `${CLAUDE_PLUGIN_ROOT}/schemas/score.schema.md`): `profile.md` → `fit_weights.<role_responsibility|skills_experience|domain|seniority_ownership|competitive_advantage>` (relative weights, defaults 30/25/20/15/10), `fit_thresholds.{p0,p1}` (0–100, defaults 80/65), or a new `hard_filters` string for a never-acceptable shape. Company-shape preferences are attractiveness, judged per role — no profile key. v1 keys (`tier_weights`, `tier_thresholds`, `company_shape_adjustment`) no longer change new scores; don't suggest editing them. Base advice on `funnel.py --by-tier` counts, never on a single role, and never describe a tier as a chance of an interview. Surface to user: "future scoring will weigh X differently — roles already scored keep their recorded prediction."
 - **Anti-goals**: `strategy.md` → `## Anti-goals` body, bullet list. Surface: "`/evaluate-position` will show a soft warning before scoring any role matching an anti-goal. `/today` will flag active interviews that drift into anti-goal territory."
 - **Target tuning**: `profile.md` → `target_titles` or `target_industries` (YAML list). Surface: "`/job-search` discovery queries will rebuild from this on next run."
 - **Cadence**: `strategy.md` → `weekly_targets.*` and/or `pipeline_targets.*`. Surface: "`/today`'s 'This week's progress' section will track against the new numbers from tomorrow."

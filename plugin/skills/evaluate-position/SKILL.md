@@ -1,9 +1,9 @@
 ---
 name: evaluate-position
-description: This skill should be used when the user asks to "/evaluate-position", "evaluate this role", "score this job", "should I apply for this", "rate this posting", "tier this company", or pastes / links a job description and wants a tier score + research brief written. Reads userdata/profile.md (for the tier rubric), takes a URL or pasted JD as input, scores against tier_weights + tier_thresholds + company_shape_adjustment, writes userdata/companies/<Co>/meta.md and a ~200-word research-brief.md, handles the 1→2 role folder migration, and enforces the (company, position) dedup rule.
+description: This skill should be used when the user asks to "/evaluate-position", "evaluate this role", "score this job", "should I apply for this", "rate this posting", "tier this company", or pastes / links a job description and wants a tier score + research brief written. Reads userdata/profile.md (for the tier rubric), takes a URL or pasted JD as input, checks eligibility, scores fit against CV evidence and company attractiveness via scripts/score.py, writes userdata/companies/<Co>/meta.md and a ~200-word research-brief.md, handles the 1→2 role folder migration, and enforces the (company, position) dedup rule.
 ---
 
-# /evaluate-position — score a job posting against the tier rubric
+# /evaluate-position — score a job posting against the user's CV
 
 Single-role discovery. Takes one posting (URL or pasted JD), produces a tier score and a research brief, files them under `userdata/companies/<Co>/` per the §I.4 folder layout. Idempotent against re-evaluation of the same role; never duplicates an existing `(company, position)` pair.
 
@@ -15,7 +15,9 @@ Single-role discovery. Takes one posting (URL or pasted JD), produces a tier sco
   - A URL (the user typed `/evaluate-position https://example.com/jobs/123` or similar). Use the WebFetch tool to retrieve the page content. If WebFetch fails or returns boilerplate (login wall, JS-only render), tell the user and ask them to paste the JD instead.
   - Pasted JD text (the user pasted the posting body). Use as-is.
   - Nothing — prompt: `Paste the job description, or give me a URL to fetch.`
-- `userdata/profile.md` — read frontmatter for `tier_weights`, `tier_thresholds`, `company_shape_adjustment`, `target_industries`, `target_titles`, `hard_filters`, and the `## Positioning` body. Skill cannot run without profile.md — if missing, tell the user to run `/setup` first.
+- `userdata/profile.md` — read frontmatter for `target_industries`, `target_titles`, `hard_filters` (and optional `fit_weights` / `fit_thresholds`, which `score.py` reads itself), and the `## Positioning`, `## Proof Points`, `## Moat` sections.
+- `userdata/cv.md` (or `cv.txt`) — the evidence source for fit. If absent, fall back to profile.md and say so in the brief.
+- `userdata/strategy.md` `## Anti-goals`, if present. Skill cannot run without profile.md — if missing, tell the user to run `/setup` first.
 - All existing `userdata/companies/*/meta.md` AND `userdata/companies/*/*/meta.md` — needed for dedup detection and folder-layout decisions.
 
 ## Extract from the JD
@@ -31,50 +33,18 @@ Parse and pin down, in order:
 
 If any of items 1-2 cannot be determined, ask the user before proceeding — do NOT guess on the identifying fields.
 
-## Hard-filter gate (before scoring)
+## Scoring (v2 — eligibility, evidence, attractiveness)
 
-Walk `hard_filters` from profile.md against the extracted signals. If any filter matches, do NOT score — instead write a one-paragraph rejection note to chat, ask the user `Score anyway and file as P2 / monitor / drop` and proceed per their answer. Hard filters are explicit user pre-commitments; bypassing them silently defeats the point.
+Read `${CLAUDE_PLUGIN_ROOT}/references/evaluate-position-scoring.md` now and follow it. In short:
 
-If `drop`: don't write any files; print "Dropped — matched filter: <filter>."
+1. **Eligibility first.** Every `hard_filters` string and every mandatory JD requirement gets `PASS` / `FAIL` / `UNKNOWN` / `NOT_APPLICABLE` with the JD quote. Missing information is `UNKNOWN`, never `FAIL`. A `FAIL` can't be outweighed by fit. Anti-goals from `strategy.md` are warnings, never blocks.
+2. **Fit with evidence.** Five dimensions, each with the JD requirement, a quote from `cv.md` / `profile.md`, and an evidence class. "The CV doesn't show it" (`MISSING`) is not "the CV shows the opposite" (`CONTRADICTED`).
+3. **Company attractiveness** separately, with sources.
+4. **`score.py` does the numbers and the tier.** Don't compute or restate weights, thresholds or tier rules yourself.
 
-## Anti-goals soft warning (after hard-filter gate, before scoring)
+Show the user the plain-words breakdown, ask `File it as is, change how I rated it, or drop it?`, and handle blocked / needs-review / overrides exactly as the reference says. An override goes through `score.py override`, so the system's original prediction is kept.
 
-ALSO read `userdata/strategy.md` if present and walk its `## Anti-goals` bullet list against the extracted signals. Anti-goals are time-bounded situational exclusions that EXTEND `hard_filters` (per the strategy.template.md guidance) — they're advisory, not blocking. Different treatment from hard_filters:
-
-- If any anti-goal matches, print a one-line soft warning before scoring: `Heads-up: matches anti-goal "<verbatim text>". Score and file anyway?` Wait for explicit user confirmation (`yes` / `skip` / `update anti-goal`). Defaults to score-anyway if the user just continues — but the warning was surfaced.
-- If the user picks `update anti-goal`, suggest they edit `userdata/strategy.md` `## Anti-goals` directly or ask `job-offer:career-coach` to help — then exit this run without writing files.
-- Multiple anti-goals can match — surface all of them in one warning message before asking.
-
-This catches the case where a hard_filter would have blocked the role but the user only stated the rule in strategy.md (time-bounded "during this search") rather than profile.md (permanent rule). Strategy anti-goals catch the recently-added preferences; hard_filters catch the always-true preferences. Both deserve respect.
-
-If `strategy.md` is missing entirely, skip this step silently.
-
-## Tier scoring
-
-Score each of the five dimensions 1, 2, or 3 using the rubric from profile.md's `tier_weights`. Use the rubric STRINGS literally — they're the user's words for what each level means. Don't substitute your own judgement of "what 3 should mean."
-
-The five dimensions (each must be scored):
-- `role_fit`
-- `domain_fit`
-- `business_health`
-- `location_fit`
-- `competitive_edge`
-
-Sum the five into a raw score (3-15 range).
-
-Apply `company_shape_adjustment` (single ±1 to `role_fit` only, capped at 1-3):
-- If the company matches the `bonus` description, `role_fit += 1` (max 3).
-- If the company matches the `penalty` description, `role_fit -= 1` (min 1).
-- The two cannot both apply; if both seem to, prefer the one with the stronger evidence.
-
-Recompute the sum after the adjustment. That's the final `score`.
-
-Apply `tier_thresholds`:
-- `score >= p0` (default 13) → `tier: P0`
-- `p1 <= score < p0` (default 11-12) → `tier: P1`
-- `score < p1` (default <11) → `tier: P2`
-
-Show the scoring breakdown to the user before writing files: a 5-row table of `dimension | score | rubric-string-matched | one-line justification`. Ask `Use this score, adjust manually, or rescore with my override?` Accept their override on any dimension — never strong-arm the user; the rubric is a tool, not a verdict.
+v1 rubric keys (`tier_weights`, `tier_thresholds`, `company_shape_adjustment`) stay in old profiles and are not used for new scores; the reference maps each to its v2 place.
 
 ## Posting check
 
@@ -120,7 +90,7 @@ When a match is found:
 
 1. Read the existing `meta.md`. Show its current `status`, `tier`, `score`, `date_added`.
 2. Ask the user: `This is already tracked — overwrite (re-score), refresh research brief only, or cancel?`
-3. `overwrite` → re-score fully, write the new score / tier into `meta.md`, preserve existing `status` and date fields, regenerate `research-brief.md`.
+3. `overwrite` → re-score fully through `score.py record`: it writes a new dated `score-*.json` (the earlier one is never touched), updates `tier` / `fit_score`, keeps `predicted_tier`, `initial_fit_score` and any `tier_override`. Preserve existing `status` and date fields; regenerate `research-brief.md`. A v1 role's `score` stays as it was.
 4. `refresh research brief only` → regenerate `research-brief.md`; don't touch `meta.md` at all.
 5. `cancel` → no writes.
 
@@ -134,14 +104,14 @@ When a match is found:
 ---
 company: <Company>
 status: new
-tier: <P0|P1|P2>
-score: <int 3-15>
 position: <exact position title from JD>
 link: <URL if provided, otherwise blank>
 date_added: <YYYY-MM-DD today>
 monitoring: false
 ---
 ```
+
+Then `score.py record` adds `scoring_version`, `tier`, `fit_score`, `eligibility`, `evidence_confidence`, `predicted_tier` and `initial_fit_score` (schema: `${CLAUDE_PLUGIN_ROOT}/schemas/score.schema.md`). Never write those keys by hand.
 
 Optional keys to include when known:
 - `location`: free-string (e.g. `London, hybrid 2d/wk`)
@@ -173,8 +143,8 @@ reference. Sections are tight bullets, not prose, so the brief stays scannable:
 "Strong P0." / "P1 with upside." / "P2 — surface fit is exact, org shape is
 the problem.">**
 
-- **<Category>:** <one-line bullet anchored to a tier_weights dimension or
-  positioning angle. Typical categories: Domain / Skills carry over /
+- **<Category>:** <one-line bullet anchored to a scoring dimension, the
+  evidence it rests on, or a positioning angle. Typical categories: Domain / Skills carry over /
   Role-shape / Size + stage / Geography / Positioning fit.>
 - **<Category>:** <same. Aim for 3-5 bullets.>
 - **<Honest gap / risk / verdict>:** <last bullet acknowledges what's
@@ -216,7 +186,10 @@ If a hard-filter bypass was used: `Note: bypassed hard filter "<filter>" at your
 
 ## What /evaluate-position never does
 
-- Never invents tier-rubric values. Reads them from profile.md only.
+- Never computes or restates weights, thresholds or tier rules — `score.py` owns them.
+- Never quotes evidence that isn't in `cv.md` / `profile.md`, and never treats a missing quote as a confirmed gap.
+- Never overwrites `predicted_tier`, `initial_fit_score` or an earlier `score-*.json`.
+- Never presents the fit as a probability of an interview or offer.
 - Never writes outside `userdata/companies/<Company>/`. No edits to profile, strategy, journal, or outputs.
 - Never overwrites `not_interested` or `rejected` status during re-evaluation.
 - Never moves user-authored files during 1→2 migration. Only skill-authored files (meta.md, research-brief.md, interview-prep-*.md, interview-debrief-*.md, review-*.md) get moved into the new slug subfolder.
@@ -227,8 +200,8 @@ If a hard-filter bypass was used: `Note: bypassed hard filter "<filter>" at your
 
 Synthetic test: paste a JD for "Klarna — Senior PM, Consumer Credit" against `userdata/examples/maya/` as the install root.
 
-- Hard-filter check: none of Maya's hard_filters match (Klarna is not >500ppl crypto with no PLG signal; not >8 reports; in Europe). Proceed.
-- Score: domain_fit 3 (consumer credit, fintech), role_fit 2 (Senior PM matches level), business_health 3 (well-funded, growing), location_fit 2 (assume EMEA remote), competitive_edge 3 (direct domain) = 13. company_shape_adjustment: Klarna is ~5000 ppl, outside the 20-80 sweet spot → no bonus; not penalty either (it IS in target industries). Final 13 = P0.
+- Eligibility: each of Maya's hard_filters is PASS or NOT_APPLICABLE.
+- Score: eligibility `no relocation` → PASS (EMEA remote), no JD-mandatory items → eligible. Fit dimensions quote Maya's CV (consumer-credit and pricing work → `EXPLICIT`); attractiveness `high` (well-funded, growing). `score.py compute` returns the tier — expect P0.
 - Folder layout: `userdata/examples/maya/companies/Klarna/` doesn't exist → flat layout. Write `Klarna/meta.md` + `Klarna/research-brief.md`.
 
 Synthetic test for 1→2 migration: paste a JD for "Plaid — Lead PM, Risk Platform". Plaid folder already has flat layout with `Senior PM, Consumer Credit`. Different position → migrate existing files into `Plaid/senior-pm-consumer-credit/`, create `Plaid/lead-pm-risk-platform/` with the new files.
