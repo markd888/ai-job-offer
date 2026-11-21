@@ -249,7 +249,7 @@ This project started as a fork of [pm-job-search](https://github.com/archugunov/
 
 Bug reports, fixes and ideas are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers running the plugin from a clone, the test suite, and the privacy rule: no personal data in the repo, enforced by a CI scan.
 
-When you [open an issue](https://github.com/markd888/ai-job-offer/issues), include the skill you ran, what you expected and what happened — and leave out your own CV, profile or company notes; the tracker is public.
+[Open an issue](https://github.com/markd888/ai-job-offer/issues/new/choose) with the bug or feature form: they ask for the skill you ran, the plugin version, and what you expected and got, and remind you to leave out your own CV, profile or company notes — the tracker is public. For a vulnerability, report privately instead; [SECURITY.md](SECURITY.md) explains how, and what the plugin can touch.
 
 ## License
 

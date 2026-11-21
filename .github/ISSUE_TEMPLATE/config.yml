@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/markd888/ai-job-offer/security/advisories/new
+    about: Privately — see SECURITY.md. Please don't open a public issue.

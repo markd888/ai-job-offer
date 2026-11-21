@@ -1,6 +1,6 @@
 # Contributing to job-offer
 
-Thanks for taking a look. This plugin is small enough that contribution is mostly: file an issue, propose a fix, send a PR.
+Thanks for taking a look. This plugin is small enough that contribution is mostly: file an issue (the forms under *New issue*), propose a fix, send a PR. Found a vulnerability? Report it privately — see [SECURITY.md](SECURITY.md). Never paste real job-search data (CV, profile, companies, people) into an issue or PR.
 
 ## What this plugin is for
 
