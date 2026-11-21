@@ -46,6 +46,57 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.8.4] — 2026-11-21
+
+Evidence-based scoring (#37): a role's rating now says *why* — which
+requirements it meets, what in your CV backs the fit, and how strong the
+company looks — and the plugin keeps its first prediction so you can later see
+whether it was right.
+
+### Added
+
+- **Eligibility gate.** Every hard filter and every mandatory JD requirement is
+  PASS / FAIL / UNKNOWN / NOT_APPLICABLE with the quote it rests on. A FAIL
+  can't be outweighed by a good fit; a requirement the posting is silent on is
+  UNKNOWN ("check requirements"), never a FAIL.
+- **Fit 0–100 with evidence.** Five dimensions — role & responsibility, skills &
+  experience, domain, seniority & ownership, competitive advantage (30/25/20/15/10)
+  — each tied to a JD requirement and a quote from your CV. "The CV doesn't show
+  it" (missing) is kept apart from "the CV shows the opposite" (contradicted).
+- **Company attractiveness, separately.** A strong company lifts a P1 fit to P0;
+  a weak one drops any tier by one; a strong company never lifts a weak fit.
+- **`scripts/score.py`** (`compute` / `record` / `override`) owns every number and
+  rule; `schemas/score.schema.md` documents them. Each scoring writes an
+  immutable `score-<date>.json`; `meta.md` gets `predicted_tier` and
+  `initial_fit_score` once, plus `fit_score`, `eligibility`, `evidence_confidence`.
+  A manual tier change is recorded with its reason and never erases the prediction.
+- **Prediction vs outcome.** `funnel.py --by-tier` counts what happened to the
+  roles in each predicted tier, derived from fields the pipeline already has.
+  Counts only; under 5 per tier says "too few to conclude".
+- **Golden set: 32 cases** with v2 labels (the 12 v1 cases kept as a regression
+  subset), a v2 grader, and a CI check that every label is self-consistent.
+- Dashboard: "Requirement not met" / "Check requirements" / "Thin evidence" next
+  to the tier, a plain-words tooltip, and sorting that never compares the old
+  3–15 score with the new 0–100.
+
+### Changed
+
+- `/evaluate-position` and `/job-search` Phase 2 use the same procedure
+  (`references/evaluate-position-scoring.md`). `/job-search` no longer guesses a
+  tier from a title.
+- career-coach tunes `fit_weights` / `fit_thresholds` from prediction-vs-outcome
+  counts; TONE.md: a fit rating is never a chance of an interview or offer.
+- The validator checks the new `meta.md` and `profile.md` keys.
+
+### Compatibility
+
+- Old profiles keep working: `fit_weights` / `fit_thresholds` are optional with
+  defaults (P0 ≥ 80, P1 ≥ 65). `tier_weights`, `tier_thresholds` and
+  `company_shape_adjustment` stay valid but no longer change new scores — the
+  scoring reference maps each to its v2 place.
+- Nothing is rewritten in bulk. A role is v2 only once it's (re)scored; its
+  old `score` and `tier` stay readable until then.
+
 ## [0.8.3] — 2026-11-20
 
 Install count fix: opt-ins now reach the counter.

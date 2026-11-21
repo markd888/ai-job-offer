@@ -97,7 +97,7 @@ The same folder shows the rest of a working install: [the role's `meta.md`](user
 | Stage | What happens | Commands |
 |---|---|---|
 | **Discover** | Weekly sweep of public ATS job boards (Ashby, Greenhouse, Lever) and optional Freehire; companies you track are rechecked, roles you've already seen are skipped. | `/job-search` |
-| **Evaluate** | A posting is checked against your hard filters and anti-goals, scored on five dimensions of your rubric, tiered P0–P2, and checked for signs it's stale or dead. | `/evaluate-position` |
+| **Evaluate** | A posting's requirements are checked (met, not met, or unknown), the fit is rated against your CV with quoted evidence, the company is rated separately, the role is tiered P0–P2 and checked for signs it's stale. The first prediction is kept so you can later compare it with what happened. | `/evaluate-position` |
 | **Apply** | Your master CV is tailored to the role, built into a one-page PDF and read back the way a parser reads it; a short cover letter if needed; a frozen copy of what you sent. | `/apply`, `/ats-check`, `/cover-letter`, `/sent` |
 | **Follow up** | Applications quiet for 10+ days get a short nudge (at most two); referral asks and thank-yous are tracked per person. | `/follow-up`, `/outreach` |
 | **Interview** | Stories adapted to the round, case drills, mock interviews, and a debrief from your transcript. | `/interview-prep`, `/story-builder`, `/case-practice`, `/interview-analysis` |
@@ -118,7 +118,7 @@ userdata/
 ├── journal.md               dated log of everything you confirmed
 ├── stories/                 STAR-story bank
 ├── people/                  referrers, recruiters, hiring managers and every ask
-├── companies/<Company>/     meta.md, research brief, tailored CVs, ATS reports,
+├── companies/<Company>/     meta.md, scoring files, research brief, tailored CVs, ATS reports,
 │                            the frozen copy of what you sent, prep and debriefs
 └── outputs/                 daily briefs, applications index, retrospective
 ```
@@ -151,7 +151,7 @@ All commands are prefixed `/job-offer:`. Full descriptions are in [`plugin/READM
 | Daily | `/today` | What changed, then the brief: top three actions, pipeline, follow-ups due. |
 | | `/dashboard` | The pipeline in a browser; change status and add notes inline. |
 | Discover | `/job-search` | Weekly sweep of ATS job boards (and Freehire if connected); scores and files new roles. |
-| Evaluate | `/evaluate-position <url>` | Hard filters, anti-goals, rubric score, tier, posting liveness, research brief. |
+| Evaluate | `/evaluate-position <url>` | Requirements check, evidence-backed fit, company rated apart, tier, posting liveness, research brief. |
 | Apply | `/apply <Company>` | Tailors the master CV: up to five questions, one draft, a one-page PDF. |
 | | `/ats-check <Company>` | Checks the PDF's text layer: page count, contacts, glyphs, section order, extraction fidelity, keyword coverage. |
 | | `/cover-letter <Company>` | 150–250 words answering the posting's top needs, each claim traced to the CV. |
