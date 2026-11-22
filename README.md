@@ -100,7 +100,7 @@ The same folder shows the rest of a working install: [the role's `meta.md`](user
 | **Evaluate** | A posting's requirements are checked (met, not met, or unknown), the fit is rated against your CV with quoted evidence, the company is rated separately, the role is tiered P0–P2 and checked for signs it's stale. The first prediction is kept so you can later compare it with what happened. | `/evaluate-position` |
 | **Apply** | Your master CV is tailored to the role, built into a one-page PDF and read back the way a parser reads it; a short cover letter if needed; a frozen copy of what you sent. | `/apply`, `/ats-check`, `/cover-letter`, `/sent` |
 | **Follow up** | Applications quiet for 10+ days get a short nudge (at most two); referral asks and thank-yous are tracked per person. | `/follow-up`, `/outreach` |
-| **Interview** | Stories adapted to the round, case drills, mock interviews, and a debrief from your transcript. | `/interview-prep`, `/story-builder`, `/case-practice`, `/interview-analysis` |
+| **Interview** | Stories adapted to the round, take-homes held to the brief's limits, case drills, mock interviews, and a debrief from your transcript. | `/interview-prep`, `/take-home`, `/story-builder`, `/case-practice`, `/interview-analysis` |
 | **Decide** | A verdict on one offer or two, with negotiation moves; after you accept, withdrawals, thank-yous and a retro. | `/evaluate-offer`, `/wrap-up` |
 | **Improve** | A weekly reflection, the funnel by channel, a monthly rejection review, and a coach that proposes changes (positioning, stories, roles to stop applying to) when the strategy needs one. | `/today`, `/dashboard`, `career-coach` |
 
@@ -141,7 +141,7 @@ Nothing is sent to an employer, recruiter or contact by the plugin. The install 
 All commands are prefixed `/job-offer:`. Full descriptions are in [`plugin/README.md`](plugin/README.md).
 
 <details>
-<summary><b>19 skills</b> — by stage</summary>
+<summary><b>20 skills</b> — by stage</summary>
 
 | Stage | Skill | What it does |
 |---|---|---|
@@ -160,6 +160,7 @@ All commands are prefixed `/job-offer:`. Full descriptions are in [`plugin/READM
 | | `/outreach <person or Company>` | Referral asks, intros and thank-yous; one record per person. |
 | Interview | `/story-builder` | STAR-story bank; `--gap-check` finds missing senior-PM story types. |
 | | `/interview-prep <Company>` | Adapts 3–5 stories to the round, from recruiter screen to final loop. |
+| | `/take-home <Company>` | Reads the brief's limits (word cap, how many requirements, assumptions, AI policy, deadline or time box), keeps an assumptions log, checks your draft against them, runs the reviewer panel and keeps a copy of what you sent. Writes none of it when the brief rules out AI tools. |
 | | `/case-practice [Company]` | Rapid-recognition case drill against an 80% readiness gate. |
 | | `/interview-analysis` | Debrief from a transcript (pasted, file or Granola), quoted. |
 | Decide | `/evaluate-offer` | Comp shape, archetype fit, anti-patterns and 3–5 negotiation moves. |
@@ -242,7 +243,7 @@ Move to the full plugin later and `/setup` reads `job-sweep/profile.md`, so you 
 
 ## Project status
 
-Active, single-maintainer, versioned with [semantic versioning](https://semver.org/); release notes in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/markd888/ai-job-offer/releases). Latest: **0.8.8** — rejection patterns feed back into positioning: a monthly review in `career-coach`, prompted by `/today`. Before it: evidence-based scoring (0.8.5), the ATS compatibility and parsing simulator (0.8.6), `SECURITY.md` and issue forms (0.8.7). Next: [0.9.0 — take-home assignments](https://github.com/markd888/ai-job-offer/milestone/2).
+Active, single-maintainer, versioned with [semantic versioning](https://semver.org/); release notes in [CHANGELOG.md](CHANGELOG.md) and on [GitHub Releases](https://github.com/markd888/ai-job-offer/releases). Latest: **0.9.0** — `/take-home`: take-home assignments held to the brief's limits and AI policy, with a reviewer panel. Before it: evidence-based scoring (0.8.5), the ATS compatibility and parsing simulator (0.8.6), `SECURITY.md` and issue forms (0.8.7), rejection patterns feeding back into positioning (0.8.8). No release is planned next; ideas and bugs go to [issues](https://github.com/markd888/ai-job-offer/issues/new/choose).
 
 This project started as a fork of [pm-job-search](https://github.com/archugunov/pm-job-search) 0.6.0 by [@archugunov](https://github.com/archugunov). Since then it added PDF output and the ATS check, cover letters, `/sent` with a frozen copy of each application, follow-ups and referral tracking, the funnel by channel, `/wrap-up`, Freehire discovery and a reworked dashboard.
 
