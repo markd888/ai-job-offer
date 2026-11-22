@@ -12,7 +12,7 @@ It takes you from finding roles to deciding on an offer: it scores each posting 
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/how-it-works-dark.svg">
-  <img alt="How job-offer works: five phases — 1 Set up (/setup), 2 Find & score (/job-search, /evaluate-position), 3 Apply (/apply, /ats-check, /cover-letter, /sent), 4 Interview (/interview-prep, /case-practice, simulator, /interview-analysis), 5 Decide (/evaluate-offer, /wrap-up) — with /today, /follow-up, /outreach, /dashboard and career-coach running alongside every day." src="docs/how-it-works-light.svg">
+  <img alt="How job-offer works: five phases — 1 Set up (/setup), 2 Find & score (/job-search, /evaluate-position), 3 Apply (/apply, /ats-check, /cover-letter, /sent), 4 Interview (/interview-prep, /take-home, /case-practice, simulator, /interview-analysis), 5 Decide (/evaluate-offer, /wrap-up) — with /today, /follow-up, /outreach, /dashboard and career-coach running alongside every day." src="docs/how-it-works-light.svg">
 </picture>
 
 ## Why it works this way
