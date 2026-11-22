@@ -126,7 +126,7 @@ def test_cli_check_and_freeze(tmp_path):
 
 
 def test_section_limits_and_time_box():
-    draft = ("## Recommendation\nKeep psp_b. Fix retry routing first. Then re-measure.\n\n"
+    draft = ("## Recommendation\nKeep provider B. Fix retry routing first. Then re-measure.\n\n"
              "## Findings\n- Approval rate 0.8 vs 0.6, e.g. for BR.\n")
     lim = {"section_limits": {"Recommendation": {"max_sentences": 2, "max_words": 60}}, "time_box_minutes": 15,
            "ai_policy": "allowed"}
