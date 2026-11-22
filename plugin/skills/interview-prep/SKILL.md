@@ -41,7 +41,7 @@ The doc adapts to the round's character. If `--stage` is omitted, infer from `me
 | `hiring-manager` / `1st-round` | 3 stories aligned to the position's core remit, plus 5 thoughtful questions. |
 | `panel` / `working-session` | 4-5 stories with deep STAR, plus a take-home-style framing for the working portion. |
 | `cpo-round` / `final-loop` | 3-5 stories + the three founder-vetting questions (from `/today` heads-up section). Explicit prep for strategy / business-model questions. |
-| `take-home` | Skip the story prep entirely. Produce a working-doc skeleton instead with the prompt parsed (see "Take-home variant" below). |
+| `take-home` | Skip the story prep entirely and hand over to `/take-home` (see "Take-home variant" below). |
 
 **Founder-as-HM override (applies to `hiring-manager` / `1st-round` only).** At small founder-led companies the HM round IS the founder round — the same questions matter even though the stage label suggests early-pipeline. Detect by reading `meta.md`:
 
@@ -120,32 +120,9 @@ If a section has no content (e.g. no prior debriefs, no anti-patterns hit), omit
 
 ## Take-home variant
 
-When `--stage take-home` (or the user describes a take-home prompt in chat):
+When `--stage take-home` (or the user describes a take-home prompt in chat): skip story selection and hand over to `/job-offer:take-home <Company>`. It reads the brief's limits, keeps the assumptions log, drafts within the brief's AI policy, checks the draft and runs the reviewer panel. Say it in one line, `Take-homes have their own flow — handing over to /take-home.`, and pass along whatever brief the user already gave. Write no prep doc for this stage.
 
-Skip story selection. Produce a working-doc skeleton at `userdata/companies/<Co>/take-home-<date>.md` (note: different filename pattern — take-home is a working doc, not a prep doc). Structure:
-
-```markdown
-# Take-home — <Company> / <Position>
-**Date:** <date>  **Prompt:** <one-line summary of what they asked for>
-
-## Brief recap
-<2-3 sentence summary of the prompt, what they're trying to learn.>
-
-## Frame
-<3-4 sentences on the *approach* — what problem are you actually solving,
-what's out of scope, what's the rubric you'll be graded on.>
-
-## Outline
-- <Section heading 1>
-- <Section heading 2>
-- ...
-
-## Open questions for the user before drafting
-- <Question — what's the implicit constraint?>
-- <Question — what's the time budget?>
-```
-
-Then offer: `Want me to draft the full doc, or are you taking it from here?` Take-home drafting is a separate workflow — the prep skill seeds the outline.
+For the round *after* a take-home (where they discuss it), prep as usual and read the frozen copy in `submitted-take-home-*/` and its `panel-*.md`. Add a short section, "Defending the take-home": the three choices most likely to be probed (a cut requirement, the riskiest assumption, the metric), with the line from the submission behind each.
 
 ## Universal bank updates (the only writes outside `companies/<Co>/`)
 

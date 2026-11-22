@@ -123,3 +123,18 @@ def test_cli_check_and_freeze(tmp_path):
     assert "take-home submitted (take-home-draft.md)" in meta and "status: interviewing" in meta
     again = run("take-home.py", "freeze", role, draft, "--date", "2026-11-22")
     assert again.returncode != 0 and "--force" in again.stderr
+
+
+def test_section_limits_and_time_box():
+    draft = ("## Recommendation\nKeep psp_b. Fix retry routing first. Then re-measure.\n\n"
+             "## Findings\n- Approval rate 0.8 vs 0.6, e.g. for BR.\n")
+    lim = {"section_limits": {"Recommendation": {"max_sentences": 2, "max_words": 60}}, "time_box_minutes": 15,
+           "ai_policy": "allowed"}
+    res = th.check(draft, lim)
+    s = statuses(res)
+    assert s["Recommendation: sentences"] == "fail" and s["Recommendation: words"] == "pass"
+    assert s["time box"] == "info"
+    ok = draft.replace(" Then re-measure.", "")
+    assert th.check(ok, lim)["exit_code"] == 0
+    assert th.sentences("Rate 0.81 vs 0.65, e.g. on retries.") == 1
+    assert statuses(th.check(draft, {"section_limits": {"Summary": {"max_words": 5}}}))["Summary: limit"] == "fail"

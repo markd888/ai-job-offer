@@ -38,7 +38,9 @@ Read the whole brief. Pull out only what it states, in its own words:
 | Assumptions | `assumptions: "marked"` when it asks to state or mark them | "state your assumptions", "mark assumptions" |
 | AI tools | `ai_policy`: `allowed`, `disclose` (allowed, say how), `forbidden`, or `unknown` | "you may use AI, note where", "no AI tools" |
 | Over-documentation | `penalise_over_documentation: true` | "we penalise long documents", "keep it short" |
+| A limit on one section | `section_limits: {"<section>": {"max_sentences": n, "max_words": n}}` | "your recommendation in two sentences" |
 | Deadline | `deadline` (ISO date) | "within 5 days", "by Friday", converted to a date |
+| Timed exercise | `time_box_minutes` (there's no deadline to set) | "15 minutes", "60-minute live case" |
 
 Then show the user a short recap in plain words, not JSON:
 
@@ -49,7 +51,9 @@ Ask only what the brief leaves open and the work depends on. Ask at most three q
 - **Time budget,** when the brief gives none: `How much time do you want to put in? They'll read the depth as a signal.`
 - **Format,** when the brief allows several (doc, slides, Loom).
 
-Write `brief.md` and `limits.json`. When the role has a meta.md, set `next_event` to `take-home due <deadline>` with `metafile.py`'s `set_fields`, so `/today` shows it. Say so in one clause: `I'll remind you before it's due.`
+**Timed or live exercises** (a time box, "think out loud"): the real limit is the clock. Keep the outline to what fits, say which deliverable to answer first, and skip the panel unless the user asks for it.
+
+Write `brief.md` and `limits.json`. When the role has a meta.md and a deadline, set `next_event` to `take-home due <deadline>` with `metafile.py`'s `set_fields`, so `/today` shows it. Say so in one clause: `I'll remind you before it's due.`
 
 ## Step 2: Frame and outline
 

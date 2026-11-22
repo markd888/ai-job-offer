@@ -14,7 +14,12 @@ missing key means the brief set no such limit:
   {"max_words": 1500, "max_requirements": 5, "requirements_heading": "Requirements",
    "required_sections": ["Problem", "Assumptions", "Requirements", "Metrics"],
    "assumptions": "marked", "ai_policy": "allowed|disclose|forbidden|unknown",
-   "penalise_over_documentation": true, "deadline": "2026-11-28"}
+   "penalise_over_documentation": true, "deadline": "2026-11-28",
+   "time_box_minutes": 15,
+   "section_limits": {"Recommendation": {"max_sentences": 2, "max_words": 60}}}
+
+section_limits caps one section (the brief's own name for it). time_box_minutes
+is a live or timed exercise: it is reported, not checked.
 
 check exits 1 when a hard limit fails: over the word cap, too many requirements,
 a required section missing, an assumption marker with no entry (or the other way
@@ -82,6 +87,18 @@ def sections(text: str) -> list[tuple[int, str, str]]:
         elif out:
             out[-1][2].append(line)
     return [(lvl, h, "\n".join(b)) for lvl, h, b in out]
+
+
+def sentences(text: str) -> int:
+    """Sentences in prose; list items and table rows count one each."""
+    text = re.sub(r"\b(e\.g|i\.e|vs|etc|approx)\.", r"\1", text, flags=re.I)
+    text = re.sub(r"(\d)\.(\d)", r"\1,\2", text)
+    n = 0
+    for line in text.split("\n"):
+        line = re.sub(r"^\s*(?:[-*+]|\d+[.)])\s+", "", line).strip()
+        if line and not re.fullmatch(r"\|?[-:| ]+\|?", line):
+            n += max(1, len(re.findall(r"[.!?](?:\s|$)", line)))
+    return n
 
 
 def _norm(h: str) -> str:
@@ -156,6 +173,19 @@ def check(text: str, limits: dict) -> dict:
             if not logged:
                 add("assumptions used", False, "the log is empty — no assumption is marked", hard=False)
 
+    for name, cap_s in (limits.get("section_limits") or {}).items():
+        sec = find_section(secs, name)
+        if sec is None:
+            add(f"{name}: limit", False, "section not found", hard=True)
+            continue
+        text_s = re.sub(r"\[(A\d+|CONFIRM:[^\]]*)\]", "", sec[2]).strip()
+        if cap_s.get("max_words"):
+            n_s = words(text_s)
+            add(f"{name}: words", n_s <= cap_s["max_words"], f"{n_s} of {cap_s['max_words']}")
+        if cap_s.get("max_sentences"):
+            n_s = sentences(text_s)
+            add(f"{name}: sentences", n_s <= cap_s["max_sentences"], f"{n_s} of {cap_s['max_sentences']}")
+
     policy = limits.get("ai_policy", "unknown")
     if policy not in AI_POLICIES:
         policy = "unknown"
@@ -180,6 +210,10 @@ def check(text: str, limits: dict) -> dict:
             if unasked:
                 add("unasked sections", False, "not in the brief's structure: " + ", ".join(unasked), hard=False)
 
+    if limits.get("time_box_minutes"):
+        add("time box", True, f"{limits['time_box_minutes']} minutes — a timed exercise; depth should match", hard=False)
+        results[-1]["status"] = "info"
+
     dl = limits.get("deadline")
     if dl:
         try:
@@ -193,7 +227,7 @@ def check(text: str, limits: dict) -> dict:
 
 
 def render(res: dict) -> str:
-    icon = {"pass": "✅", "fail": "❌", "warn": "⚠️"}
+    icon = {"pass": "✅", "fail": "❌", "warn": "⚠️", "info": "ℹ️"}
     lines = ["| Check | Result | Detail |", "|---|---|---|"]
     lines += [f"| {r['check']} | {icon[r['status']]} | {r['detail']} |" for r in res["results"]]
     fails = [r["check"] for r in res["results"] if r["status"] == "fail"]
