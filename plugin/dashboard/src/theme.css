@@ -935,7 +935,9 @@ body {
   cursor: default;
 }
 .jst-row-head:hover { background: transparent; }
-.jst-row-main { display: block; min-width: 0; text-align: left; }
+.jst-row-main { display: flex; align-items: center; gap: var(--jst-s2); min-width: 0; text-align: left; }
+.jst-row-text { display: block; flex: 1 1 auto; min-width: 0; }
+.jst-row-main > .jst-tier-note { flex: none; margin-left: auto; }
 .jst-col-last { text-align: right; }
 .jst-age { font-size: var(--jst-fs-sm); color: var(--jst-muted); }
 .jst-age-stale { color: var(--jst-warn-fg); }

@@ -20,7 +20,7 @@ import type { Position } from "../types";
 import { STATUS_KEYS, statusColor, statusLabel } from "../statusColors";
 import { useScrollEdges } from "../useScrollEdges";
 import { StatusSelect } from "./StatusSelect";
-import { TierBadge, isScored } from "./TierBadge";
+import { ScoringNote, TierBadge, isScored } from "./TierBadge";
 import { compareRoles, tierRank } from "./scoring";
 
 interface Props {
@@ -192,7 +192,7 @@ function PositionRow({ p, onOpen, onChange }: PositionRowProps) {
 
   return (
     <div className="jst-row" onClick={() => onOpen(p)}>
-      <TierBadge tier={p.tier} p={p} />
+      <TierBadge tier={p.tier} p={p} withNote={false} />
       <UnstyledButton
         onClick={(e) => {
           e.stopPropagation();
@@ -201,11 +201,14 @@ function PositionRow({ p, onOpen, onChange }: PositionRowProps) {
         className="jst-row-main"
         aria-label={`Open ${p.company} — ${p.position || "pending"}`}
       >
-        <p className="jst-co">
-          {p.company}
-          {needsFollowUp && <span className="jst-tag">Follow up</span>}
-        </p>
-        <p className="jst-role" title={p.position || undefined}>{p.position || "(pending)"}</p>
+        <span className="jst-row-text">
+          <p className="jst-co">
+            {p.company}
+            {needsFollowUp && <span className="jst-tag">Follow up</span>}
+          </p>
+          <p className="jst-role" title={p.position || undefined}>{p.position || "(pending)"}</p>
+        </span>
+        {isScored(p.tier) && <ScoringNote p={p} />}
       </UnstyledButton>
       <div className="jst-actions" onClick={(e) => e.stopPropagation()}>
         <OpenPostingIcon link={p.link} company={p.company} />
