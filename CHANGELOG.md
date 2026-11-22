@@ -46,6 +46,12 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.9.2] — 2026-11-22
+
+### Fixed
+
+- Dashboard: in the applications table, the scoring note ("Check requirements", "Requirement not met", "Thin evidence") now sits at the right end of the row, next to the posting and note icons. Before, it was squeezed into the narrow tier column and ran over the company and role names (#54).
+
 ## [0.9.1] — 2026-11-22
 
 ### Fixed

@@ -8,7 +8,13 @@ export function isScored(tier: string | undefined): boolean {
   return !!tier && SCORED.has(tier);
 }
 
-export function TierBadge({ tier, p }: { tier: string | undefined; p?: Position }) {
+/** The scoring note on its own, for layouts that place it away from the badge. */
+export function ScoringNote({ p }: { p: Position }) {
+  const note = scoringNote(p);
+  return note ? <span className={`jst-tier-note jst-tier-note-${note.tone}`}>{note.label}</span> : null;
+}
+
+export function TierBadge({ tier, p, withNote = true }: { tier: string | undefined; p?: Position; withNote?: boolean }) {
   if (!isScored(tier)) {
     return (
       <Tooltip label="Tier unset — run /job-offer:evaluate-position to score this role" withArrow position="right">
@@ -18,7 +24,7 @@ export function TierBadge({ tier, p }: { tier: string | undefined; p?: Position 
   }
   const badge = <span className={`jst-tier jst-tier-${tier}`}>{tier}</span>;
   const tip = p ? scoringTooltip(p) : null;
-  const note = p ? scoringNote(p) : null;
+  const note = p && withNote ? scoringNote(p) : null;
   return (
     <span className="jst-tier-wrap">
       {tip ? <Tooltip label={tip} withArrow position="right" multiline w={240}>{badge}</Tooltip> : badge}
