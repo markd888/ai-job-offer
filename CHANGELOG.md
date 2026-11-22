@@ -46,6 +46,29 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-11-22
+
+Take-home assignments (#10).
+
+### Added
+
+- `/take-home <Company>`. It reads the brief into `limits.json`: a word cap, how many requirements, required sections, limits on single sections, whether assumptions must be marked, the AI-tooling policy, a penalty for over-documentation, and the deadline or time box.
+  - Keeps a numbered assumptions log (`[A1]`…), marked where each assumption is used.
+  - Outlines in the brief's own structure and drafts within its AI policy.
+    - **No submission text when the brief forbids AI tools**, or before you decide on a brief that doesn't say.
+    - When the brief asks for disclosure, adds an "AI use" section.
+  - Runs the reviewer agents as a panel. The summary lists what to fix first, where the reviewers disagree, and what was kept because it would break a limit.
+  - On a yes, freezes what you sent into `submitted-take-home-<date>/`.
+  - Puts the deadline in `next_event`, so `/today` shows it.
+- `scripts/take-home.py`:
+  - `check` exits 1 on a hard limit: the word cap, the requirement count, a missing section, a section limit, an assumption marker with no log entry or a log entry with no marker, or a missing AI-use note. Everything else is a warning.
+  - `freeze` writes a hashed manifest and one History line. It never changes status.
+
+### Changed
+
+- `/interview-prep --stage take-home` hands over to `/take-home`.
+- For the round after a take-home, `/interview-prep` adds a "Defending the take-home" section, built from the frozen copy.
+
 ## [0.8.8] — 2026-11-21
 
 Rejection patterns feed back into positioning (#11).
