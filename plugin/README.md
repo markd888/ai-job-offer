@@ -58,7 +58,7 @@ cd <your-workspace>
 # ask job-offer:career-coach anytime — stuck, got an offer, or want to sharpen your positioning / outreach.
 ```
 
-## The workflow — 19 skills
+## The workflow — 20 skills
 
 **Reference:**
 
@@ -92,7 +92,8 @@ cd <your-workspace>
 | Skill | What it does |
 |---|---|
 | `/job-offer:story-builder` | Maintain your universal STAR-story bank. Each story carries 3-5 pre-loaded angles for different question types. |
-| `/job-offer:interview-prep <Company>` | Adapt 3-5 stories from the bank for a specific upcoming round. `--stage` shapes the prep (recruiter / hiring-manager / panel / cpo-round / final-loop / take-home). Late-stage rounds include three founder-vetting questions. Take-home variant produces a working-doc skeleton. |
+| `/job-offer:interview-prep <Company>` | Adapt 3-5 stories from the bank for a specific upcoming round. `--stage` shapes the prep (recruiter / hiring-manager / panel / cpo-round / final-loop / take-home). Late-stage rounds include three founder-vetting questions. For the take-home itself, use `/job-offer:take-home`. |
+| `/job-offer:take-home <Company>` | Take-home assignments held to the brief: parses its limits (word cap, number of requirements, required sections, assumptions, AI-tooling policy, over-documentation penalty, deadline) into `limits.json`, keeps an assumptions log, outlines and drafts within the AI policy (no drafting when the brief forbids AI tools), checks the draft with `scripts/take-home.py`, runs the reviewer agents as a panel, and freezes what was submitted into `submitted-take-home-<date>/`. |
 | `/job-offer:case-practice [Company]` | Rapid-recognition case drill. Multiple-choice scenarios across the MC-able case types (product sense, metric movement, metric tree, prioritisation, behavioural-signal); each pick scored with the specific failure mode it demonstrates, tracked against an 80% readiness gate. Optional `<Company>` themes the products and weights the mix toward that company's likely rounds. |
 | `/job-offer:interview-analysis` | Post-interview debrief from a pasted transcript or `--from-file`. Anchors findings to transcript quotes: what landed, what didn't, interviewer signals, deltas vs the prep, recommended updates. Auto-pulls from Granola when wired. |
 | `/job-offer:evaluate-offer` | Sense-check an offer (or compare two) against your profile + anti-goals + the senior-PM archetype/anti-pattern references. Verdict, comp shape, role-shape re-check, archetype fit, named-anti-pattern scan, weighted decision factors, downside scenario, 3-5 specific negotiation moves to ask for. Always pairs with a "what would I regret in 2 years?" handoff to the coach. |

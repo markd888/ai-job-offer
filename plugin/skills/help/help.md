@@ -15,7 +15,7 @@ Senior PM, lead PM, or head of product running an active search. A different rol
 | 1 | Setup | `/job-offer:setup` |
 | 2 | Discover & score | `/job-offer:job-search` · `/job-offer:evaluate-position <url>` |
 | 3 | Apply | `/job-offer:apply <Company>` · `/job-offer:ats-check <Company>` · `/job-offer:cover-letter <Company>` · `/job-offer:outreach <person or Company>` · `/job-offer:sent <Company>` · `/job-offer:follow-up` |
-| 4 | Interview | `/job-offer:story-builder` · `/job-offer:interview-prep <Company>` · `/job-offer:case-practice` · `job-offer:interviewer-simulator` · `/job-offer:interview-analysis` |
+| 4 | Interview | `/job-offer:story-builder` · `/job-offer:interview-prep <Company>` · `/job-offer:take-home <Company>` · `/job-offer:case-practice` · `job-offer:interviewer-simulator` · `/job-offer:interview-analysis` |
 | 5 | Decide & close | `/job-offer:evaluate-offer` · `/job-offer:wrap-up` |
 
 ## Running alongside
@@ -27,7 +27,7 @@ Senior PM, lead PM, or head of product running an active search. A different rol
 | `/job-offer:dashboard` | When you want a visual scan of the pipeline. |
 | `/job-offer:integrations` | At setup, or after installing a new MCP server. |
 
-## Skills (19)
+## Skills (20)
 
 Reference
 
@@ -63,6 +63,7 @@ Interview cluster
 |---|---|---|
 | `/story-builder` | Maintains the universal STAR-story bank. | You remember a story worth capturing, or you want a `--gap-check` of missing senior-PM story types. |
 | `/interview-prep <Company>` | Adapts 3–5 stories for a specific round. `--stage` shapes the prep. | You have an interview coming up. |
+| `/take-home <Company>` | Reads the brief's limits (word cap, how many requirements, assumptions, AI policy, deadline), keeps an assumptions log, checks your draft against them, runs the reviewer panel, and saves a copy of what you sent. Won't write the text when the brief rules out AI. | You got a take-home assignment. |
 | `/case-practice [Company]` | MC rapid-recognition drill for product cases. Scores each pick by the failure mode it shows, tracks an 80% readiness gate, writes a session log. | You have a case / product-sense round coming up and want to drill recognition. |
 | `/interview-analysis` | Debriefs a transcript (pasted, file, or auto-Granola). Quotes the transcript, flags what landed, names deltas vs prep. | A round just finished. |
 
