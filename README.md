@@ -4,7 +4,7 @@
 [![version](https://img.shields.io/github/v/release/markd888/ai-job-offer?label=version&sort=semver)](CHANGELOG.md)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**A local-first job-search workflow for senior product managers, built as a Claude Code plugin.**
+**A local-first job-search workflow for product managers, built as a Claude Code plugin.**
 
 It takes you from finding roles to deciding on an offer: it scores each posting against your own rubric, tailors your CV without inventing facts, keeps applications from going quiet, prepares you for each interview round and tells you plainly when the search itself isn't working. Your search lives in markdown files on your machine. Nothing is sent to an employer on your behalf.
 
