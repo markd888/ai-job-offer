@@ -46,6 +46,12 @@ without adopting the pipeline tracker.
 
 ## [Unreleased]
 
+## [0.9.1] — 2026-11-22
+
+### Fixed
+
+- Dashboard: on a wide screen the right column (Funnel, This week, Coming up, Heads-up) starts beside the interview cards, lined up with them. Before, it started below them, so two interview cards left an empty top-right corner. When there are no interviews, the column starts at the top. Below 1120px the layout is unchanged.
+
 ## [0.9.0] — 2026-11-22
 
 Take-home assignments (#10).

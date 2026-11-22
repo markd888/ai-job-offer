@@ -206,15 +206,16 @@ body {
   color: var(--jst-ink-2);
 }
 
-/* Interviews span the page; below them the work column sits next to the rail.
-   The last row takes any spare height so a long rail never opens a hole
-   between Today's focus and Pipeline. */
+/* The rail runs the full height beside the work column, from the interview
+   cards down: two interview cards leave no empty top-right corner. The last
+   row takes any spare height so a long rail never opens a hole between
+   Today's focus and Pipeline. */
 .jst-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--jst-rail-w);
   grid-template-rows: auto auto 1fr;
   grid-template-areas:
-    "active active"
+    "active rail"
     "focus rail"
     "pipeline rail";
   gap: var(--jst-gap);
@@ -222,6 +223,11 @@ body {
 .jst-area-active { grid-area: active; min-width: 0; }
 .jst-area-focus { grid-area: focus; min-width: 0; }
 .jst-area-rail { grid-area: rail; min-width: 0; }
+/* Line the rail up with the interview cards, not their heading. With no
+   interviews there's no heading, and the rail starts at the top. */
+.jst-grid:has(.jst-area-active .jst-section-head) .jst-area-rail {
+  margin-top: calc(var(--jst-hit) + var(--jst-s3));
+}
 /* Pipeline and the rail end on the same line: whichever is shorter stretches.
    A short list closes with a quiet end-of-list line in the spare space, and a
    long list scrolls past a rail whose content stays in view. */
@@ -240,6 +246,7 @@ body {
       "rail"
       "pipeline";
   }
+  .jst-grid:has(.jst-area-active .jst-section-head) .jst-area-rail { margin-top: 0; }
 }
 
 /* ---------- Shared pieces ---------- */
